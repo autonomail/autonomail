@@ -1,13 +1,14 @@
 'use strict';
 
-angular.module('darkmailClientApp', [])
-  .config(function ($routeProvider) {
-    $routeProvider
-      .when('/', {
-        templateUrl: 'views/main.html',
+angular.module('App', ['ui.router'])
+  .config(function ($stateProvider, $urlRouterProvider) {
+
+    $urlRouterProvider.otherwise("/");
+
+    $stateProvider
+      .state('home', {
+        url: "/",
+        templateUrl: "views/home.html",
         controller: 'MainCtrl'
-      })
-      .otherwise({
-        redirectTo: '/'
       });
   });
