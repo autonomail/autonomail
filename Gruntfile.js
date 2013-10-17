@@ -156,6 +156,17 @@ module.exports = function (grunt) {
         }]
       }
     },
+    ngtemplates:  {
+      dist:        {
+        cwd:      '<%= yeoman.app %>',
+        src:      'views/*.html',
+        dest:     '<%= yeoman.app %>/scripts/templates.js',
+        options:  {
+          module: 'App',
+          htmlmin: '<%= htmlmin.dist %>'
+        }
+      }
+    },
     compass: {
       options: {
         sassDir: '<%= yeoman.app %>/styles',
@@ -243,7 +254,7 @@ module.exports = function (grunt) {
     htmlmin: {
       dist: {
         options: {
-          /*removeCommentsFromCDATA: true,
+          removeCommentsFromCDATA: true,
           // https://github.com/yeoman/grunt-usemin/issues/44
           //collapseWhitespace: true,
           collapseBooleanAttributes: true,
@@ -251,12 +262,12 @@ module.exports = function (grunt) {
           removeRedundantAttributes: true,
           useShortDoctype: true,
           removeEmptyAttributes: true,
-          removeOptionalTags: true*/
+          removeOptionalTags: true
         },
         files: [{
           expand: true,
           cwd: '<%= yeoman.app %>',
-          src: ['*.html', 'views/*.html'],
+          src: ['index.html'],
           dest: '<%= yeoman.dist %>'
         }]
       }
@@ -309,7 +320,8 @@ module.exports = function (grunt) {
         'copy:styles',
         'imagemin',
         'svgmin',
-        'htmlmin'
+        'htmlmin',
+        'ngtemplates:dist',
       ]
     },
     karma: {
