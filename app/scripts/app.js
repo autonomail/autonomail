@@ -1,8 +1,10 @@
 'use strict';
 
-angular.module('App', ['ui.router'])
-  .config(function ($stateProvider, $urlRouterProvider) {
+(function(angular) {
 
+  var app = angular.module('App', ['ui.router']);
+
+  app.config(function ($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise("/");
 
     $stateProvider
@@ -12,3 +14,6 @@ angular.module('App', ['ui.router'])
         controller: 'MainCtrl'
       });
   });
+
+}(angular));
+

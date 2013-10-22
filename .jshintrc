@@ -18,6 +18,7 @@
   "strict": true,
   "trailing": true,
   "smarttabs": true,
+  "devel": false, // disallow console.log, alert, etc.
   "globals": {
     "angular": false
   }

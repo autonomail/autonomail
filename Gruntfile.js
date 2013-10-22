@@ -45,12 +45,15 @@ module.exports = function (grunt) {
         files: ['<%= yeoman.app %>/styles/{,*/}*.css'],
         tasks: ['copy:styles', 'autoprefixer']
       },
+      templates: {
+        files: ['<%= yeoman.app %>/{,*/}*.html'],
+        tasks: ['ngtemplates']
+      },
       livereload: {
         options: {
           livereload: LIVERELOAD_PORT
         },
         files: [
-          '<%= yeoman.app %>/{,*/}*.html',
           '.tmp/styles/{,*/}*.css',
           '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
@@ -157,7 +160,7 @@ module.exports = function (grunt) {
       }
     },
     ngtemplates:  {
-      dist:        {
+      all:        {
         cwd:      '<%= yeoman.app %>',
         src:      'views/*.html',
         dest:     '<%= yeoman.app %>/scripts/templates.js',
@@ -306,6 +309,7 @@ module.exports = function (grunt) {
     concurrent: {
       server: [
         'coffee:dist',
+        'ngtemplates',
         'compass:server',
         'copy:styles'
       ],
@@ -316,12 +320,12 @@ module.exports = function (grunt) {
       ],
       dist: [
         'coffee',
+        'ngtemplates',
         'compass:dist',
         'copy:styles',
         'imagemin',
         'svgmin',
-        'htmlmin',
-        'ngtemplates:dist',
+        'htmlmin'
       ]
     },
     karma: {
