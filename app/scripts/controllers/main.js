@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.controller('MainCtrl', function ($scope, prng) {
+  app.controller('MainCtrl', function ($scope) {
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
@@ -12,5 +12,5 @@
     $scope.randomStr = 'test';
   });
 
-}(angular.module('App')));
+}(angular.module('App.controllers', [])));
 

@@ -132,7 +132,8 @@ module.exports = function (grunt) {
       },
       all: [
         'Gruntfile.js',
-        '<%= yeoman.app %>/scripts/{,*/}*.js'
+        '<%= yeoman.app %>/scripts/{,*/}*.js',
+        '!<%= yeoman.app %>/scripts/templates.js'
       ]
     },
     coffee: {
@@ -196,18 +197,6 @@ module.exports = function (grunt) {
     /*concat: {
       dist: {}
     },*/
-//    rev: {
-//      dist: {
-//        files: {
-//          src: [
-//            '<%= yeoman.dist %>/scripts/{,*/}*.js',
-//            '<%= yeoman.dist %>/styles/{,*/}*.css',
-//            '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-//            '<%= yeoman.dist %>/styles/fonts/*'
-//          ]
-//        }
-//      }
-//    },
     useminPrepare: {
       html: '<%= yeoman.app %>/index.html',
       options: {
@@ -334,11 +323,6 @@ module.exports = function (grunt) {
         singleRun: true
       }
     },
-//    cdnify: {
-//      dist: {
-//        html: ['<%= yeoman.dist %>/*.html']
-//      }
-//    },
     ngmin: {
       dist: {
         files: [{
@@ -357,6 +341,25 @@ module.exports = function (grunt) {
           ]
         }
       }
+    },
+
+    shell: {
+      options: {
+        failOnError: true,
+        stdout: true,
+        stderr: true
+      },
+      buildSJCL: {
+        command: [
+          './configure --compress=none --without-ecc --without-ocb2 --without-codecHex --without-codecBase64 --without-ccm --with-random --with-hmac --with-pbkdf2 --with-sha256 --with-sha512',
+          'make'
+        ].join(' && '),
+        options: {
+          execOptions: {
+            cwd: '<%= yeoman.app %>/bower_components/sjcl'
+          }
+        }
+      }
     }
   });
 
@@ -366,6 +369,7 @@ module.exports = function (grunt) {
     }
 
     grunt.task.run([
+      'shell',
       'clean:server',
       'concurrent:server',
       'autoprefixer',
@@ -376,6 +380,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', [
+    'shell',
     'clean:server',
     'concurrent:test',
     'autoprefixer',
@@ -384,17 +389,16 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('build', [
+    'shell',
     'clean:dist',
     'useminPrepare',
     'concurrent:dist',
     'autoprefixer',
     'concat',
     'copy:dist',
-//    'cdnify',
     'ngmin',
     'cssmin',
     'uglify',
-//    'rev',
     'usemin'
   ]);
 
