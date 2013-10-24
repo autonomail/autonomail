@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.controller('MainCtrl', function ($scope, Random) {
+  app.controller('MainCtrl', function ($log, $scope, Random) {
     $scope.awesomeThings = [
       'HTML5 Boilerplate',
       'AngularJS',
@@ -11,8 +11,12 @@
 
     $scope.randomStr = 'test';
 
-    $scope.openModal = function() {
-      Random.getRandomBytes();
+    $scope.getRandomBytes = function() {
+      Random.getRandomBytes().then(function(bytes) {
+        $scope.randomStr = bytes;
+      }, function(err) {
+        $log.error(err);
+      });
     }
   });
 
