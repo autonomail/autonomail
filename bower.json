@@ -7,6 +7,8 @@
     "bootstrap-sass": "~2.3.1",
     "angular-resource": "1.2.0-rc.3",
     "angular-sanitize": "1.2.0-rc.3",
+    "angular-ui-router": "~0.2.0",
+    "angular-ui-utils": "~0.0.4",
     "parallel.js": "https://raw.github.com/adambom/parallel.js/master/lib/parallel.js",
     "angular-bootstrap": "~0.6.0",
     "sjcl": "git@github.com:hiddentao/sjcl.git"
@@ -14,8 +16,7 @@
   "devDependencies": {
     "angular-mocks": "1.2.0-rc.3",
     "angular-scenario": "1.2.0-rc.3",
-    "angular-ui-router": "~0.2.0",
-    "angular-ui-utils": "~0.0.4",
-    "chai": "~1.8.1"
+    "chai": "~1.8.1",
+    "sinon-chai": "~2.4.0"
   }
 }

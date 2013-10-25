@@ -19,7 +19,7 @@
       });
   });
 
-  app.run(function(Random) {
+  app.run(function(Random, $q) {
     Random.startEntropyCollection();
   });
 

@@ -11,13 +11,21 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      /* vendor libs */
       'app/bower_components/angular/angular.js',
+      'app/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'app/bower_components/angular-ui-router/release/angular-ui-router.js',
       'app/bower_components/angular-mocks/angular-mocks.js',
-      'app/bower_components/chai/chai.js',
+      'app/bower_components/sjcl/sjcl.js',
+      /* app src */
       'app/scripts/*.js',
       'app/scripts/**/*.js',
+      /* test config */
+      'test/sinon-1.7.3.js',
+      'app/bower_components/chai/chai.js',
+      'app/bower_components/sinon-chai/lib/sinon-chai.js',
       'test/config.js',
+      /* test src */
       'test/mock/**/*.js',
       'test/spec/**/*.js'
     ],
