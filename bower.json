@@ -11,7 +11,8 @@
     "angular-ui-utils": "~0.0.4",
     "parallel.js": "https://raw.github.com/adambom/parallel.js/master/lib/parallel.js",
     "angular-bootstrap": "~0.6.0",
-    "sjcl": "git@github.com:hiddentao/sjcl.git"
+    "sjcl": "git@github.com:hiddentao/sjcl.git",
+    "momentjs": "~2.4.0"
   },
   "devDependencies": {
     "angular-mocks": "1.2.0-rc.3",

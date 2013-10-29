@@ -13,9 +13,9 @@
   };
 
 
-  app.factory('Random', function(BaseServiceClass, $log, $q, $timeout, $modal) {
+  app.factory('Random', function(RuntimeError, $log, $q, $timeout, $modal) {
 
-    return new (BaseServiceClass.extend({
+    return new (Class.extend({
       /**
        * Begin entropy collection.
        */
@@ -53,8 +53,8 @@
           modalInstance.result.then(function() {
             // generate
             deferred.resolve(self._getRandomBytes());
-          }, function(reason) {
-            deferred.reject(new Error('Error using RNG entropy modal: ', reason.toString()));
+          }, function(err) {
+            deferred.reject(new RuntimeError('RNG entropy modal failed', err));
           });
 
         } else {
@@ -87,33 +87,35 @@
   });
 
 
-  app.controller('EntropyModalCtrl', function($scope, $modalInstance, $timeout) {
+  app.controller('EntropyModalCtrl', function($scope, RuntimeError, $modalInstance, $timeout) {
     // once opened
     $modalInstance.opened.then(function() {
-      var openedAt = new Date();
-
       var poller;
+
+      // record when we opened
+      $modalInstance.openedAt = moment();
 
       (poller = function() {
         // keep checking
-        if (!randomNumGenerator.isReadyToGenerate) {
+        if (!randomNumGenerator.isReadyToGenerate()) {
           $timeout(poller, 1000);
         }
         // if entropy is enough then we're done
         else {
           // show for atleast 3 seconds so that the user can read the text (we're fairly certain we won't need to show this
           // modal that often so this is ok to do).
-          var secondsElapsed = new Date().getTime() - openedAt.getTime();
-          var waitFor = (secondsElapsed < 3 ? 3 : 0);
+          var millisecondsElapsed = moment().diff($modalInstance.openedAt);
+          var waitFor = (millisecondsElapsed < 3000 ? 3000 - millisecondsElapsed : 0);
 
           $timeout(function() {
             $modalInstance.close();
           }, waitFor);
         }
       })();
-    }, function() {
-      $modalInstance.dismiss(new Error('Error showing RNG entropy modal'));
+    }, function(err) {
+      $modalInstance.dismiss(new RuntimeError('Unable to open RNG entropy modal', err));
     });
   });
+
 
 }(angular.module('App.crypto', ['App.common', 'ui.bootstrap'])));

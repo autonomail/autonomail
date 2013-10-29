@@ -12,6 +12,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       /* vendor libs */
+      'app/bower_components/momentjs/moment.js',
       'app/bower_components/angular/angular.js',
       'app/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'app/bower_components/angular-ui-router/release/angular-ui-router.js',
@@ -26,8 +27,8 @@ module.exports = function(config) {
       'app/bower_components/sinon-chai/lib/sinon-chai.js',
       'test/config.js',
       /* test src */
-      'test/mock/**/*.js',
-      'test/spec/**/*.js'
+      'test/mock/**/*.coffee',
+      'test/spec/**/*.coffee'
     ],
 
     // list of files / patterns to exclude
