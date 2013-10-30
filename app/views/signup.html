@@ -29,9 +29,9 @@
                    ng-minlength="8"
                    ng-maxlength="64"
                    required
-                   ui-validate="{ match: '$value === user.password'}"
+                   ui-validate="{ match: validatePasswordConfirmation() }"
                 >
-            <span ng-show='signupForm.confirm.$error.validator'>Passwords do not match!</span>
+            <span>{{ signupForm.confirm.$error | json }}</span>
           </div>
           <div class="terms checkbox">
             <label>

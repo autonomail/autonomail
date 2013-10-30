@@ -15,7 +15,11 @@
       return $scope.signupForm.$dirty && $scope.signupForm.$valid;
     };
 
+    $scope.validatePasswordConfirmation = function() {
+      return $scope.user.confirm === $scope.user.password;
+    };
+
   });
 
-}(angular.module('App.controllers', [])));
+}(angular.module('App.signup', ['ui.validate'])));
 

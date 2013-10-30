@@ -5,7 +5,7 @@
   var app = angular.module('App', [
     'ui.router',
     'App.common',
-    'App.controllers',
+    'App.signup',
     'App.crypto'
   ]);
 
