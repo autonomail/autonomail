@@ -1,0 +1,52 @@
+#page-home {
+  padding: 1em;
+
+  h2 {
+    margin-bottom: 1em;
+  }
+
+  #signup-form {
+    display: block;
+
+    .form-group {
+      margin: 1em 0;
+    }
+
+    .form-control {
+      display: inline-block;
+      width: 50%;
+      font-size: 150%;
+      padding: 24px 12px;
+    }
+
+    .terms, .submit {
+      display: inline-block;
+      width: 50%;
+    }
+
+    .submit {
+      margin-top: 1em;
+      text-align: center;
+
+      button[type=submit] {
+        display: inline-block;
+      }
+    }
+  }
+
+  #signup-username + .post-label  {
+    font-size: 150%;
+    font-style: italic;
+
+    span:nth-child(1) {
+      color: #ccc;
+      margin: 0 0.1em;
+    }
+    span:nth-child(2) {
+      color: #666;
+    }
+  }
+}
+
+
+

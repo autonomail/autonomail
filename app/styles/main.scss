@@ -1,32 +1,47 @@
-$iconSpritePath: "../images/glyphicons-halflings.png";
-$iconWhiteSpritePath: "../images/glyphicons-halflings-white.png";
+$imagePath: "../images";
+$iconSpritePath: $imagePath + "/glyphicons-halflings.png";
+$iconWhiteSpritePath: $imagePath"/glyphicons-halflings-white.png";
 
-@import "bootstrap-sass/lib/bootstrap";
+@import "sass-bootstrap/lib/bootstrap";
 
-/* Put your CSS here */
-html, body {
-  margin: 20px;
-}
 
 body {
-    background: #fafafa;
+    background: #000;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #333;
+    color: #fff;
 }
 
-.hero-unit {
-    margin: 50px auto 0 auto;
-    width: 300px;
-    font-size: 18px;
-    font-weight: 200;
-    line-height: 30px;
-    background-color: #eee;
-    border-radius: 6px;
-    padding: 60px;
+
+
+/* site header */
+
+#site-header {
+  h1 {
+    max-height: 4em;
+    margin-left: 1em;
+    padding-left: 1.3em;
+    background: image-url('logo.png', false, false) no-repeat left center;
+    background-size: contain;
+    font-size: 160%;
+
+    span:nth-child(2) {
+      color: #666;
+    }
+    span:nth-child(3) {
+      color: #999;
+    }
+  }
 }
 
-.hero-unit h1 {
-    font-size: 60px;
-    line-height: 1;
-    letter-spacing: -1px;
+
+/* main content */
+
+#content {
+  background-color: #fff;
+  color: #000;
 }
+
+
+
+/* additional stuff */
+@import "views/home";

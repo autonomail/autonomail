@@ -15,8 +15,7 @@
     $stateProvider
       .state('home', {
         url: '/',
-        templateUrl: 'views/home.html',
-        controller: 'MainCtrl'
+        templateUrl: 'views/home.html'
       });
   });
 
