@@ -3,6 +3,7 @@ $iconSpritePath: $imagePath + "/glyphicons-halflings.png";
 $iconWhiteSpritePath: $imagePath"/glyphicons-halflings-white.png";
 
 @import "sass-bootstrap/lib/bootstrap";
+@import "compass/css3";
 
 
 body {
@@ -42,6 +43,16 @@ body {
 }
 
 
+/* form validation */
 
-/* additional stuff */
-@import "views/home";
+.form-control {
+  &.ng-invalid.ng-dirty {
+    border: 1px solid #f00;
+    @include single-box-shadow(#f00);
+  }
+}
+
+
+/* specific pages, widgets and sections */
+
+@import "views/signup";

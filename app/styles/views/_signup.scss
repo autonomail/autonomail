@@ -1,11 +1,11 @@
-#page-home {
+#page-signup {
   padding: 1em;
 
   h2 {
     margin-bottom: 1em;
   }
 
-  #signup-form {
+  form {
     display: block;
 
     .form-group {
@@ -34,7 +34,7 @@
     }
   }
 
-  #signup-username + .post-label  {
+  #signupForm-username + .post-label  {
     font-size: 150%;
     font-style: italic;
 

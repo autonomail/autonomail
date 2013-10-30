@@ -13,9 +13,9 @@
     $urlRouterProvider.otherwise('/');
 
     $stateProvider
-      .state('home', {
+      .state('signup', {
         url: '/',
-        templateUrl: 'views/home.html'
+        templateUrl: 'views/signup.html'
       });
   });
 
