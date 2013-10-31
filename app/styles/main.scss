@@ -4,6 +4,8 @@ $iconWhiteSpritePath: $imagePath"/glyphicons-halflings-white.png";
 
 @import "sass-bootstrap/lib/bootstrap";
 @import "compass/css3";
+@import "./_mixins";
+
 
 
 body {
