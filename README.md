@@ -1,3 +1,3 @@
-Darkmail client application.
+Autonomail client application.
 
 
