@@ -1,0 +1,59 @@
+<form role="form" name="signupForm" ng-controller="SignupFormCtrl">
+  <div class="form-group">
+    <label class="sr-only" for="signupForm_username">Username</label>
+    <input type="text" class="form-control" name="username" id="signupForm_username" placeholder="Username"
+           ng-model="user.name"
+           ng-minlength="4"
+           ng-maxlength="32"
+           required
+           ui-validate="{available: 'validateNameAvailable($value)'}"
+        >
+    <span ng-hide="signupForm.username.$dirty && signupForm.username.$invalid" class="post-label"><span>@</span><span>autonomail.com</span></span>
+            <span ng-show="signupForm.username.$dirty && signupForm.username.$invalid" class="validation_errors alert alert-danger">
+              <span ng-show="signupForm.username.$error.required">Please fill this in</span>
+              <span ng-show="signupForm.username.$error.minlength">Atleast 4 characters required</span>
+              <span ng-show="signupForm.username.$error.maxlength">No more than 32 characters allowed</span>
+              <span ng-show="signupForm.username.$error.available">Sorry, this username is not available</span>
+            </span>
+  </div>
+  <div class="form-group">
+    <label class="sr-only" for="signupForm_password">Password</label>
+    <input type="password" class="form-control" name="password" id="signupForm_password" placeholder="Password"
+           ng-model="user.password"
+           ng-minlength="8"
+           ng-maxlength="64"
+           required
+           ui-validate="{contents: 'validatePasswordContents($value)'}"
+        >
+            <span ng-show="signupForm.password.$dirty && signupForm.password.$invalid" class="validation_errors alert alert-danger">
+              <span ng-show="signupForm.password.$error.required">Please fill this in</span>
+              <span ng-show="signupForm.password.$error.minlength">Atleast 8 characters required</span>
+              <span ng-show="signupForm.password.$error.maxlength">No more than 64 characters allowed</span>
+              <span ng-show="signupForm.password.$error.contents">Must include both numbers and letters</span>
+            </span>
+  </div>
+  <div class="form-group">
+    <label class="sr-only" for="signupForm_confirm">Confirm password</label>
+    <input type="password" class="form-control" name="confirm" id="signupForm_confirm" placeholder="Confirm password"
+           ng-model="user.confirm"
+           ui-validate="{match: 'validatePasswordConfirmation($value)'}"
+        >
+            <span ng-show="signupForm.confirm.$dirty && signupForm.confirm.$invalid" class="validation_errors alert alert-danger">
+              <span ng-show="signupForm.confirm.$error.match">Must match the password</span>
+            </span>
+  </div>
+  <div class="terms checkbox">
+    <label>
+      <input type="checkbox" name="agree" id="signupForm_agree"
+             ng-model="user.agree"
+             required
+          > I agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>.
+    </label>
+  </div>
+  <div class="submit">
+    <button type="submit" class="btn btn-primary"
+            ng-disabled="!canSubmit()"
+            ng-click="submit()"
+        >Submit</button>
+  </div>
+</form>

@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.factory('SimulatedServer', function($q, ServerInterface) {
+  app.factory('SimulatedServer', function($q, RuntimeError, ServerInterface) {
 
     /**
      * See the ServerInterface class specification for documentation regarding the functions here.
@@ -13,7 +13,7 @@
         if ('username' !== username) { // fails if you choose 'username'
           defer.resolve();
         } else {
-          defer.reject();
+          defer.reject(new RuntimeError('Username not available: ' + username));
         }
         return defer.promise;
       },

@@ -53,6 +53,13 @@ describe 'Controller: SignupFormCtrl', ->
     expect($scope.canSubmit()).to.be.false
 
 
+  describe 'when validating the password contents', ->
+    it 'expects both numbers and letter', ->
+      expect($scope.validatePasswordContents('test')).to.be.false
+      expect($scope.validatePasswordContents('123')).to.be.false
+      expect($scope.validatePasswordContents('test123')).to.be.true
+
+
   it 'validate the password confirmation entry', ->
     $scope.user.password = 'test';
     expect($scope.validatePasswordConfirmation('test2')).to.be.false

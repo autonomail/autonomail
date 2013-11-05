@@ -37,4 +37,4 @@
   });
 
 
-}(angular.module('App.server', ['App.common'])));
+}(angular.module('App.server', [])));
