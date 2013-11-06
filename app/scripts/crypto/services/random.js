@@ -43,7 +43,7 @@
         if (!randomNumGenerator.isReadyToGenerate()) {
           // show a modal
           var modalInstance = $modal.open({
-            templateUrl: 'views/modals/entropy.html',
+            templateUrl: 'app/modals/entropy.html',
             controller: 'EntropyModalCtrl',
             keyboard: false,
             backdrop: 'static'
@@ -73,16 +73,8 @@
        */
       _getRandomBytes: function() {
         return randomNumGenerator.randomWords(8);
-      },
-
-
-      /**
-       * Get String representation of this service.
-       * @returns {string}
-       */
-      toString: function() {
-        return 'Cryptographically secure randomness generator';
       }
+
     }));
   });
 
@@ -118,4 +110,4 @@
   });
 
 
-}(angular.module('App.crypto', ['App.common', 'ui.bootstrap'])));
+}(angular.module('App.crypto', ['App.common', 'ui.bootstrap.modal'])));

@@ -17,6 +17,15 @@
       saveSignupFormData: function(formData) {
         signupFormData = formData;
         $log.debug('Saved signup form data: ', formData);
+      },
+
+
+      /**
+       * Get submitted signup form data.
+       * @return {Object}
+       */
+      getSavedSignupFormData: function(formData) {
+        return signupFormData;
       }
     }));
 

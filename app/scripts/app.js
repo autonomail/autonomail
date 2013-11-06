@@ -16,16 +16,16 @@
     $stateProvider
       .state('signup', {
         url: '/signup',
-        templateUrl: 'views/signup/index.html',
+        templateUrl: 'app/signup/index.html',
         controller: function($state) {
           $state.go('signup.form');
         }
       })
       .state('signup.form', {
-        templateUrl: 'views/signup/form.html'
+        templateUrl: 'app/signup/form.html'
       })
       .state('signup.process', {
-        templateUrl: 'views/signup/process.html'
+        templateUrl: 'app/signup/process.html'
       })
     ;
 

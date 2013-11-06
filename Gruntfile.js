@@ -47,7 +47,7 @@ module.exports = function (grunt) {
       },
       templates: {
         files: ['<%= yeoman.app %>/{,*/}*.html'],
-        tasks: ['ngtemplates']
+        tasks: ['ngtemplates:bootstrap_overrides', 'ngtemplates:app']
       },
       livereload: {
         options: {
@@ -161,10 +161,28 @@ module.exports = function (grunt) {
       }
     },
     ngtemplates:  {
-      all:        {
-        cwd:      '<%= yeoman.app %>',
-        src:      'views/*.html',
-        dest:     '<%= yeoman.app %>/scripts/templates.js',
+      bootstrap:        {
+        cwd:      '<%= yeoman.app %>/bower_components/angular-bootstrap',
+        src:      'template/{modal,progressbar,alert}/*.html',
+        dest:     '<%= yeoman.app %>/scripts/bootstrap-templates.js',
+        options:  {
+          module: 'App',
+          htmlmin: '<%= htmlmin.dist %>'
+        }
+      },
+      bootstrap_overrides:        {
+        cwd:      '<%= yeoman.app %>/views/angular-bootstrap',
+        src:      '**/*.html',
+        dest:     '<%= yeoman.app %>/scripts/bootstrap-templates-overrides.js',
+        options:  {
+          module: 'App',
+          htmlmin: '<%= htmlmin.dist %>'
+        }
+      },
+      app:        {
+        cwd:      '<%= yeoman.app %>/views',
+        src:      'app/**/*.html',
+        dest:     '<%= yeoman.app %>/scripts/app-templates.js',
         options:  {
           module: 'App',
           htmlmin: '<%= htmlmin.dist %>'
