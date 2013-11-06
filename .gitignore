@@ -3,7 +3,7 @@ dist
 .tmp
 .sass-cache
 app/bower_components
-app/scripts/templates.js
+app/**/*.generated.js
 
 # IntelliJ
 .idea

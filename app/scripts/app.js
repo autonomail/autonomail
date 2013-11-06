@@ -10,7 +10,7 @@
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, WebWorkerProvider) {
     $urlRouterProvider.otherwise('/signup');
 
     $stateProvider
@@ -28,6 +28,9 @@
         templateUrl: 'app/signup/process.html'
       })
     ;
+
+    // web workers
+    WebWorkerProvider.addImportScript('/scripts/webworker-imports.generated.js');
 
     // simulate the back-end for now.
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);

@@ -34,7 +34,7 @@
     };
 
     // inherit from Error
-    RuntimeError.prototype = new Error();
+    RuntimeError.prototype = Object.create(Error);
     RuntimeError.prototype.constructor = RuntimeError;
 
 

@@ -47,7 +47,11 @@ module.exports = function (grunt) {
       },
       templates: {
         files: ['<%= yeoman.app %>/{,*/}*.html'],
-        tasks: ['ngtemplates:bootstrap_overrides', 'ngtemplates:app']
+        tasks: ['ngtemplates:customBootstrap', 'ngtemplates:app']
+      },
+      webworker: {
+        files: ['<%= yeoman.app %>/scripts/{,*/}webworker/*.js'],
+        tasks: ['webworker']
       },
       livereload: {
         options: {
@@ -133,7 +137,8 @@ module.exports = function (grunt) {
       all: [
         'Gruntfile.js',
         '<%= yeoman.app %>/scripts/{,*/}*.js',
-        '!<%= yeoman.app %>/scripts/templates.js'
+        '!<%= yeoman.app %>/scripts/common/class.js',
+        '!<%= yeoman.app %>/scripts/*.generated.js'
       ]
     },
     coffee: {
@@ -164,16 +169,16 @@ module.exports = function (grunt) {
       bootstrap:        {
         cwd:      '<%= yeoman.app %>/bower_components/angular-bootstrap',
         src:      'template/{modal,progressbar,alert}/*.html',
-        dest:     '<%= yeoman.app %>/scripts/bootstrap-templates.js',
+        dest:     '<%= yeoman.app %>/scripts/bootstrap-templates.generated.js',
         options:  {
           module: 'App',
           htmlmin: '<%= htmlmin.dist %>'
         }
       },
-      bootstrap_overrides:        {
+      customBootstrap:        {
         cwd:      '<%= yeoman.app %>/views/angular-bootstrap',
         src:      '**/*.html',
-        dest:     '<%= yeoman.app %>/scripts/bootstrap-templates-overrides.js',
+        dest:     '<%= yeoman.app %>/scripts/custom-bootstrap-templates.generated.js',
         options:  {
           module: 'App',
           htmlmin: '<%= htmlmin.dist %>'
@@ -182,7 +187,7 @@ module.exports = function (grunt) {
       app:        {
         cwd:      '<%= yeoman.app %>/views',
         src:      'app/**/*.html',
-        dest:     '<%= yeoman.app %>/scripts/app-templates.js',
+        dest:     '<%= yeoman.app %>/scripts/app-templates.generated.js',
         options:  {
           module: 'App',
           htmlmin: '<%= htmlmin.dist %>'
@@ -212,9 +217,24 @@ module.exports = function (grunt) {
     },
     // not used since Uglify task does concat,
     // but still available if needed
-    /*concat: {
-      dist: {}
-    },*/
+    concat: {
+      options: {
+        separator: ';'
+      },
+      webworkerMain: {
+        src: [
+          '<%= yeoman.app %>/bower_components/parallel.js/lib/eval.js',
+        ],
+        dest: '<%= yeoman.app %>/scripts/webworker.generated.js'
+      },
+      webworkerImports: {
+        src: [
+          '<%= yeoman.app %>/bower_components/sjcl/sjcl.js',
+          '<%= yeoman.app %>/scripts/*/webworker/*.js'
+        ],
+        dest: '<%= yeoman.app %>/scripts/webworker-imports.generated.js'
+      }
+    },
     useminPrepare: {
       html: '<%= yeoman.app %>/index.html',
       options: {
@@ -369,7 +389,7 @@ module.exports = function (grunt) {
       },
       buildSJCL: {
         command: [
-          './configure --compress=none --without-ecc --without-ocb2 --without-codecHex --without-codecBase64 --without-ccm --with-random --with-hmac --with-pbkdf2 --with-sha256 --with-sha512',
+          './configure --compress=none --without-ecc --without-ocb2 --with-codecHex --without-codecBase64 --without-ccm --with-random --with-hmac --with-pbkdf2 --with-sha256 --with-sha512',
           'make'
         ].join(' && '),
         options: {
@@ -381,6 +401,13 @@ module.exports = function (grunt) {
     }
   });
 
+
+  grunt.registerTask('webworker', [
+    'concat:webworkerMain',
+    'concat:webworkerImports'
+  ]);
+
+
   grunt.registerTask('server', function (target) {
     if (target === 'dist') {
       return grunt.task.run(['build', 'open', 'connect:dist:keepalive']);
@@ -388,6 +415,7 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'shell',
+      'webworker',
       'clean:server',
       'concurrent:server',
       'autoprefixer',
@@ -399,6 +427,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', [
     'shell',
+    'webworker',
     'clean:server',
     'concurrent:test',
     'autoprefixer',

@@ -3,6 +3,9 @@
  */
 
 (function(angular) {
+  'use strict';
+
+
   var origMethod = angular.module;
 
   var alreadyRegistered = {};
