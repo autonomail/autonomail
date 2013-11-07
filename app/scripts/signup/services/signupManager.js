@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.factory('SignupManager', function($log) {
+  app.factory('SignupManager', function($log, AuthCredentials) {
 
     var signupFormData = {};
 
@@ -15,8 +15,15 @@
        * @param formData {Object}
        */
       saveSignupFormData: function(formData) {
+        $log.debug('Saving signup form data: ', formData);
         signupFormData = formData;
-        $log.debug('Saved signup form data: ', formData);
+
+        signupFormData.email = signupFormData.name + '@' + signupFormData.domain;
+
+        AuthCredentials.set(formData.email, {
+          username: formData.name,
+          password: formData.password
+        });
       },
 
 
@@ -32,4 +39,4 @@
   });
 
 
-}(angular.module('App.signup')));
+}(angular.module('App.signup', ['App.data'])));

@@ -1,5 +1,5 @@
 /**
- * Server base class.
+ * Server base interface.
  *
  * This specifies the API for use by client code to communicate with the server. All concrete child classes must
  * fully implement this interface.

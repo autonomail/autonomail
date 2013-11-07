@@ -5,12 +5,13 @@
   var app = angular.module('App', [
     'ui.router',
     'App.common',
-    'App.server',
     'App.crypto',
+    'App.data',
+    'App.server',
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, WebWorkerProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider) {
     $urlRouterProvider.otherwise('/signup');
 
     $stateProvider
@@ -32,8 +33,8 @@
     // web workers
     WebWorkerProvider.addImportScript('/scripts/webworker-imports.generated.js');
 
-    // simulate the back-end for now.
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);
+    StorageProvider.setBackend(StorageProvider.BACKEND_TYPES.LOCAL_STORAGE);
   });
 
   app.run(function(Random) {

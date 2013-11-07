@@ -5,6 +5,7 @@
   app.controller('SignupFormCtrl', function ($log, $scope, $state, Server, SignupManager) {
 
     $scope.user = {
+      domain: 'autonomail.com',
       name: 'username1',
       password: 'password1',
       confirm: 'password1',
