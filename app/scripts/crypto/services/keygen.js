@@ -46,7 +46,8 @@
               }
 
               return {
-                key: sjcl.codec.hex.fromBits(key),
+                authKey: sjcl.codec.hex.fromBits(key.slice(0, key.length / 2)),
+                secureDatKey: sjcl.codec.hex.fromBits(key.slice(key.length / 2)),
                 salt: sjcl.codec.hex.fromBits(data.salt),
                 iterations: iterations
               };
