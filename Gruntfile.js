@@ -233,6 +233,12 @@ module.exports = function (grunt) {
           '<%= yeoman.app %>/scripts/*/webworker/*.js'
         ],
         dest: '<%= yeoman.app %>/scripts/webworker-imports.generated.js'
+      },
+      gpg: {
+        src: [
+          '<%= yeoman.app %>/bower_components/unix-toolbox.js-gnupg/gpg2-worker.js'
+        ],
+        dest: '<%= yeoman.app %>/scripts/gpg2-worker.generated.js'
       }
     },
     useminPrepare: {
@@ -404,7 +410,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('webworker', [
     'concat:webworkerMain',
-    'concat:webworkerImports'
+    'concat:webworkerImports',
+    'concat:gpg'
   ]);
 
 

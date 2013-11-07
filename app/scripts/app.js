@@ -11,7 +11,7 @@
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider) {
     $urlRouterProvider.otherwise('/signup');
 
     $stateProvider
@@ -32,6 +32,7 @@
 
     // web workers
     WebWorkerProvider.addImportScript('/scripts/webworker-imports.generated.js');
+    GPGProvider.setWorkerScript('/scripts/gpg2-worker.generated.js');
 
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);
     StorageProvider.setBackend(StorageProvider.BACKEND_TYPES.LOCAL_STORAGE);

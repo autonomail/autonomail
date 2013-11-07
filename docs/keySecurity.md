@@ -12,7 +12,6 @@ This derived 512-bit key is split into two 256-bit keys:
 * The second 256-bits is used as the password to authenticate the user against the Autonomail server
 
 
-
 ## Key storage
 
 We use window.localStorage to store the encryption keys and apsswords. The user is prompted to back up a

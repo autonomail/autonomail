@@ -62,6 +62,16 @@
         ;
 
         return defer.promise;
+      },
+
+
+      /**
+       * Create a new PGP key-pair.
+       *
+       * @param emailAddress {string} the id to create the keys for.
+       */
+      createPGPKeyPair: function(emailAddress) {
+        return 'test';
       }
 
     }));
