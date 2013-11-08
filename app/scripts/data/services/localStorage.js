@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.factory('LocalStorage', function($q, RuntimeError, StorageLayerInterface) {
+  app.factory('LocalStorage', function($q, $log, RuntimeError, StorageLayerInterface) {
 
     return new (StorageLayerInterface.extend({
 
@@ -11,8 +11,9 @@
 
         var value = null;
         try {
-          value = JSON.parse(window.localStorage.getItem(key));
-          defer.resolve(value);
+          value = window.localStorage.getItem(key);
+          $log.debug('localStorage[' + key + '] -> ', value);
+          defer.resolve(JSON.parse(value));
         } catch (err) {
           defer.reject(new RuntimeError('Could not get localStorage key: ' + key, err));
         }
@@ -25,6 +26,7 @@
         var defer = $q.defer();
 
         try {
+          $log.debug('localStorage[' + key + '] <- ', value);
           window.localStorage.setItem(key, JSON.stringify(value));
           defer.resolve(value);
         } catch (err) {

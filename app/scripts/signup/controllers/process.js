@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.controller('SignupProcessCtrl', function ($log, $scope, $timeout, SignupManager, SecureData) {
+  app.controller('SignupProcessCtrl', function ($log, $scope, $timeout, SignupManager, SecureData, Encrypt) {
 
     $scope.progressBar = {
       value: 0,
@@ -12,17 +12,22 @@
     $scope.error = null;
 
     $scope.startProcess = function() {
-      var signupFormData = SignupManager.getSavedSignupFormData();
+      var signupFormData = SignupManager.getSavedSignupFormData(),
+        emailAddress = signupFormData.email;
 
-      SecureData.get(signupFormData.email)
-        .then(function registerWithServer(data) {
-          // TODO
+      SecureData.get(emailAddress)
+        .then(function generatePGPKeys(data) {
+          if (data.pgp) {
+            return true;
+          } else {
+            return Encrypt.createPGPKeys(emailAddress)
+              .then(function savePGPKeys(keyPair) {
+                return SecureData.set(emailAddress, 'pgp', keyPair);
+              });
+          }
         })
-        .then(function storageReady() {
-          // TODO
-        })
-        .then(function generatedPgpKeys() {
-          // TODO
+        .then(function allDone() {
+          $log.info('All setup!');
         })
         .catch(function promiseErr(err) {
           $log.error(err);
@@ -33,5 +38,5 @@
     $scope.startProcess();
   });
 
-}(angular.module('App.signup', ['App.server', 'App.data', 'ui.bootstrap.progressbar'])));
+}(angular.module('App.signup', ['App.server', 'App.data', 'App.crypto', 'ui.bootstrap.progressbar'])));
 

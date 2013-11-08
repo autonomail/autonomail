@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.factory('Keygen', function($log, $q, RuntimeError, Random, WebWorker) {
+  app.factory('Encrypt', function($log, $q, RuntimeError, Random, WebWorker) {
 
     /**
      * When deriving a key from a user password, keep iterating until the given amount of time has elapsed.
@@ -90,8 +90,25 @@
           iterations: algorithmParams.iterations,
           requiredStrengthMs: algorithmParams.requiredStrengthMs
         });
-      }
+      },
 
+
+      /**
+       * Create PGP key pair for given user.
+       *
+       * @param emailAddress {string} user id.
+       * @return {Promise} resolves to {public: hex string, private: hex string}
+       */
+      createPGPKeys: function(emailAddress) {
+        var defer = $q.defer();
+
+        defer.resolve({
+          public: 'ABC',
+          private: 'DEF'
+        });
+
+        return defer.promise;
+      }
 
     }));
   });

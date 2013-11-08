@@ -26,7 +26,7 @@
             break;
           default:
             backend = null;
-        };
+        }
 
         $log.info('Client storage back-end: ' + backend);
 
