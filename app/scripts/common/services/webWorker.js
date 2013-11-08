@@ -21,11 +21,13 @@
         return new (Class.extend({
           /**
            * Run the given function in a worker thread.
+           * @param name {string} name of thread.
            * @param fn {Function} function to run.
+           * @param data {Object} data to pass to web worker function.
            * @return {Promise} will resolve to the function output.
            */
-          run: function(fn, data) {
-            $log.debug('Running 1 new web worker for data:', data);
+          run: function(name, fn, data) {
+            $log.debug('Running "' + name + '" web worker for:', data);
             return this._createNewWorker(data).spawn(fn);
           },
 

@@ -13,7 +13,7 @@
 
     return new (Class.extend({
       /**
-       * Create secure data for the given email address.
+       * Create secure skeleton data for the given email address.
        *
        * This will fetch the user's auth credentials and use them to derive a secure key for encrypting the data with.
        *
@@ -22,17 +22,21 @@
        * @return {Promise} will resolve to true.
        * @private
        */
-      _createSecureData: function(emailAddress) {
+      _createData: function(emailAddress) {
         var defer = $q.defer();
 
         var auth = AuthCredentials.get(emailAddress);
+
+        $log.debug('Creating data store for: ' + emailAddress);
 
         if (!auth) {
           defer.reject(new RuntimeError('No auth credentials found for: ' + emailAddress));
         } else {
 
-          Keygen.deriveNewKeyFromPassword(auth.password)
+          Keygen.deriveNewKey(auth.password)
             .then(function setStorageItem(keyData) {
+              cachedMasterKey[emailAddress] = masterKey;
+
               return Storage.set(emailAddress, {
                 salt: keyData.salt,
                 iterations: keyData.iterations,
@@ -53,14 +57,14 @@
 
 
       /**
-       * Load secure skeleton data for the given email address.
+       * Load secure data for the given email address.
        *
        * @param emailAddress {string} the email id.
        *
        * @return {Promise} will resolve to stored data.
        * @private
        */
-      _loadSecureData: function(emailAddress) {
+      _loadData: function(emailAddress) {
         return Storage.get(emailAddress);
       },
 
@@ -68,7 +72,7 @@
       /**
        * Retrieve secure data master encryption key for given user.
        * @param emailAddress {string} user id.
-       * @param params {Object} keygen parameters.
+       * @param storedData {Object} stored data for given user id.
        * @return {Promise} resolves to the master key
        * @private
        */
@@ -76,12 +80,9 @@
         var auth = AuthCredentials.get(emailAddress);
 
         if (!auth) {
-          var defer = $q.defer();
-          defer.reject(RuntimeError('No auth credentials found for: ' + emailAddress));
-          return defer.promise;
+          return $q.reject(new RuntimeError('No auth credentials found for: ' + emailAddress));
         } else {
-          return Keygen.deriveKeys({
-            password: auth.password,
+          return Keygen.deriveKey(auth.password, {
             salt: storedData.salt,
             iterations: storedData.iterations
           });
@@ -104,26 +105,35 @@
 
         var defer = $q.defer();
 
-        self._loadSecureData(emailAddress)
+        self._loadData(emailAddress)
           .then(function createStoredDataIfNeeded(data) {
-            // already got secure key store?
+            // already got secure key store
             if (data) {
               return data;
             }
             // need to create secure key store
             else {
-              return self._createSecureData(emailAddress);
+              return self._createData(emailAddress);
             }
           })
           .then(function getMasterKey(storedData) {
             if (cachedMasterKey[emailAddress]) {
               return cachedMasterKey[emailAddress];
             } else {
-              return self._calculateMasterKey(emailAddress, storedData);
+              return self._calculateMasterKey(emailAddress, storedData)
+                .then(function(masterKey) {
+                  cachedMasterKey[emailAddress] = {
+                    authKey: masterKey.authKey,
+                    secureDataKey: masterKey.secureDataKey
+                  };
+
+                  return cachedMasterKey[emailAddress];
+                });
             }
           })
-          .then(function decryptSecureBlog(masterKey) {
+          .then(function decryptKeyBlob(masterKey) {
             $log.debug('Master key: ', masterKey);
+            return 'test';
           })
           .then(defer.resolve)
           .catch(defer.reject);

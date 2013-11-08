@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.provider('GPG', function($log, $q, RuntimeError) {
+  app.provider('GPG', function() {
 
     var workerScriptUrl = null;
 
