@@ -28,7 +28,7 @@
         Random.getRandomBytes()
           .then(function deriveKey(salt) {
             return self.deriveKey(password, {
-              salt: salt,
+              salt: sjcl.codec.hex.fromBits(salt),
               requiredStrengthMs: REQUIRED_STRENGTH_MS
             });
           })
@@ -59,12 +59,13 @@
         return WebWorker.run('deriveKey', function(data) {
           var
             iterations = data.iterations || 10000,
+            saltBits = sjcl.codec.hex.toBits(data.salt),
             timeElapsedMs = 0,
             key = null;
 
           do {
             var startTime = new Date();
-            key = sjcl.misc.pbkdf2(data.password, data.salt, iterations, null, sjcl.misc.hmac512);
+            key = sjcl.misc.pbkdf2(data.password, saltBits, iterations, null, sjcl.misc.hmac512);
             timeElapsedMs = new Date().getTime() - startTime.getTime();
 
             if (!data.requiredStrengthMs) {
@@ -81,16 +82,80 @@
           return {
             authKey: sjcl.codec.hex.fromBits(key.slice(0, key.length / 2)),
             secureDataKey: sjcl.codec.hex.fromBits(key.slice(key.length / 2)),
-            salt: sjcl.codec.hex.fromBits(data.salt),
+            salt: data.salt,
             iterations: iterations
           };
         }, {
           password: password,
-          salt: sjcl.codec.hex.toBits(algorithmParams.salt),
+          salt: algorithmParams.salt,
           iterations: algorithmParams.iterations,
           requiredStrengthMs: algorithmParams.requiredStrengthMs
         });
       },
+
+
+      /**
+       * Perform AES 256-bit encryption on given data.
+       *
+       * @param key {string} 256-bit key as hex string.
+       * @param data {*} data to encrypt - will be automatically passed through JSON.stringify().
+       *
+       * @return {Promise} resolves to cipherText
+       */
+      encrypt: function(key, data) {
+        var plaintext = JSON.stringify(data),
+          password = sjcl.codec.hex.toBits(key);
+
+        if (8 !== password.length) {
+          return $q.reject(new RuntimeError('Encryption password must be 256 bits'));
+        }
+
+        return Random.getRandomBytes(16)
+          .then(function doEncryption(iv) {
+
+            return WebWorker.run('encrypt', function(data) {
+              return sjcl.encrypt_b64(data.password, data.plaintext, data.iv);
+            }, {
+              password: password,
+              plaintext: plaintext,
+              iv: iv
+            });
+
+          })
+        ;
+      },
+
+
+
+
+      /**
+       * Perform AES 256-bit decryption on given data.
+       *
+       * @param key {string} 256-bit key as hex string.
+       * @param ciphertext {*} data to decrypt - decrypted output will be automatically passed through JSON.parse() to get
+       * final JS object/string.
+       *
+       * @return {Promise} resolves to JS object/string (the plaintext).
+       */
+      decrypt: function(key, ciphertext) {
+        var password = sjcl.codec.hex.toBits(key);
+
+        if (8 !== password.length) {
+          return $q.reject(new RuntimeError('Decryption password must be 256 bits'));
+        }
+
+        return WebWorker.run('decrypt', function(data) {
+          return sjcl.decrypt_b64(data.password, data.ciphertext);
+        }, {
+            password: password,
+            ciphertext: ciphertext
+          }
+        )
+          .then(function parse(plaintext) {
+            return JSON.parse(plaintext);
+          });
+      },
+
 
 
       /**

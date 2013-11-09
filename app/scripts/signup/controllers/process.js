@@ -15,13 +15,14 @@
       var signupFormData = SignupManager.getSavedSignupFormData(),
         emailAddress = signupFormData.email;
 
-      SecureData.get(emailAddress)
-        .then(function generatePGPKeys(data) {
-          if (data.pgp) {
+      SecureData.get(emailAddress, 'pgp')
+        .then(function generatePGPKeys(pgpKeyPair) {
+          if (pgpKeyPair) {
             return true;
           } else {
             return Encrypt.createPGPKeys(emailAddress)
               .then(function savePGPKeys(keyPair) {
+                $log.info('Created PGP keypair for ' + emailAddress, keyPair);
                 return SecureData.set(emailAddress, 'pgp', keyPair);
               });
           }

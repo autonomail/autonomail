@@ -29,13 +29,18 @@
       /**
        * Get random bytes.
        *
+       * NOTE: One Word equals 32 bits or 4 bytes.
+       *
        * If there isn't enough entropy this will trigger a modal pop-up informing the user of so, and will only close
        * and resolve the Promise once enough entropy is available.
        *
+       * @param [numBytes] {Number} no. of bytes to get. Defaults to 32.
        * @return {Promise} resolved with an Array of values if successful.
        */
-      getRandomBytes: function() {
+      getRandomBytes: function(numBytes) {
         var self = this;
+
+        numBytes = numBytes || 32;
 
         var deferred = $q.defer();
 
@@ -52,14 +57,14 @@
           // once closed
           modalInstance.result.then(function() {
             // generate
-            deferred.resolve(self._getRandomBytes());
+            deferred.resolve(self._getRandomBytes(numBytes));
           }, function(err) {
             deferred.reject(new RuntimeError('RNG entropy modal failed', err));
           });
 
         } else {
           // since we already have enough entropy just do it!
-          deferred.resolve(self._getRandomBytes());
+          deferred.resolve(self._getRandomBytes(numBytes));
         }
 
         return deferred.promise;
@@ -67,12 +72,13 @@
 
 
       /**
-       * Get 256 random bits (or 32 bytes).
+       * Get random words.
+       *
        * @return {array}
        * @private
        */
-      _getRandomBytes: function() {
-        return randomNumGenerator.randomWords(8);
+      _getRandomBytes: function(numBytes) {
+        return randomNumGenerator.randomWords(numBytes / 4);
       }
 
     }));

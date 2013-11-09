@@ -11,9 +11,9 @@
 
         var value = null;
         try {
-          value = window.localStorage.getItem(key);
+          value = JSON.parse(window.localStorage.getItem(key));
           $log.debug('localStorage[' + key + '] -> ', value);
-          defer.resolve(JSON.parse(value));
+          defer.resolve(value);
         } catch (err) {
           defer.reject(new RuntimeError('Could not get localStorage key: ' + key, err));
         }
