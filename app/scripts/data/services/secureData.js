@@ -140,12 +140,14 @@
                 });
             })
             .then(function decryptSecureData(params) {
-              return Encrypt.decrypt(params.key, params.data)
+              return Encrypt.decrypt(params.key, params.data);
             })
             .then(function cacheDecryptedData(decryptedSecureData) {
               cachedSecureData[emailAddress] = decryptedSecureData;
               return decryptedSecureData;
             })
+            .then(defer.resolve)
+            .catch(defer.reject)
           ;
         }
 
@@ -167,7 +169,7 @@
        * @return {Promise} will resolve to the value.
        */
       get: function(emailAddress, key) {
-        return this._loadSecureData(emailAddress)
+        return this._loadSecureData(emailAddress)        
           .then(function getValue(secureData) {
             var value = secureData[key];
 
@@ -195,7 +197,7 @@
 
         $log.debug('Secure data [' + key + '] <- ', value);
 
-        self._loadSecureData(emailAddress)
+        return self._loadSecureData(emailAddress)
           .then(function setValue() {
             // first lets update the cache
             cachedSecureData[emailAddress][key] = value;

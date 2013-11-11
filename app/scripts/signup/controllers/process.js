@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.controller('SignupProcessCtrl', function ($log, $scope, $timeout, SignupManager, SecureData, Encrypt) {
+  app.controller('SignupProcessCtrl', function ($q, $log, $scope, $timeout, SignupManager, SecureData, Encrypt) {
 
     $scope.progressBar = {
       value: 0,
@@ -16,7 +16,7 @@
         emailAddress = signupFormData.email;
 
       SecureData.get(emailAddress, 'pgp')
-        .then(function generatePGPKeys(pgpKeyPair) {
+        .then(function ensurePGPKeys(pgpKeyPair) {
           if (pgpKeyPair) {
             return true;
           } else {
