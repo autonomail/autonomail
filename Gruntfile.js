@@ -395,7 +395,7 @@ module.exports = function (grunt) {
       },
       buildSJCL: {
         command: [
-          './configure --compress=none --with-convenience --without-ecc --without-ocb2 --with-codecHex --with-codecBase64 --with-ccm --without-gcm --with-random --with-hmac --with-pbkdf2 --with-sha256 --with-sha512',
+          './configure --compress=none --with-convenience --without-ecc --without-ocb2 --with-codecHex --with-codecBase64 --with-ccm --with-gcm --with-random --with-hmac --with-pbkdf2 --with-sha256 --with-sha512',
           'make'
         ].join(' && '),
         options: {

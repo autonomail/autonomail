@@ -8,7 +8,7 @@
      * When deriving a key from a user password, keep iterating until the given amount of time has elapsed.
      * @type {number} milliseconds
      */
-    var REQUIRED_STRENGTH_MS = 2000;
+    var REQUIRED_STRENGTH_MS = 1000;
 
 
     return new (Class.extend({
@@ -64,20 +64,20 @@
             key = null;
 
           do {
+            // check time taken for previous calculation
+            if (key) {
+              if (0 === timeElapsedMs) {    // just in case it's super fast
+                iterations *= 2;
+              } else {
+                iterations = parseInt(iterations * data.requiredStrengthMs / timeElapsedMs, 10) + 1;
+              }
+            }
+
             var startTime = new Date();
             key = sjcl.misc.pbkdf2(data.password, saltBits, iterations, null, sjcl.misc.hmac512);
             timeElapsedMs = new Date().getTime() - startTime.getTime();
 
-            if (!data.requiredStrengthMs) {
-              break;
-            }
-
-            if (0 === timeElapsedMs) {    // just in case it's super fast
-              iterations *= 2;
-            } else {
-              iterations = parseInt(iterations * data.requiredStrengthMs / timeElapsedMs, 10) + 1;
-            }
-          } while (data.requiredStrengthMs > timeElapsedMs);
+          } while (data.requiredStrengthMs && data.requiredStrengthMs > timeElapsedMs);
 
           return {
             authKey: sjcl.codec.hex.fromBits(key.slice(0, key.length / 2)),
@@ -122,6 +122,9 @@
             });
 
           })
+          .then(function (cipherText) {
+            return cipherText;
+          });
         ;
       },
 

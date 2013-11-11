@@ -19,7 +19,8 @@ sjcl.misc.hmac512.prototype.constructor = sjcl.misc.hmac512;
 sjcl.encrypt_b64 = function(password, plaintext, iv) {
   return btoa(sjcl.encrypt(password, plaintext, {
     cipher: 'aes',
-    mode: 'ccm',
+    iter: 1000,
+    mode: 'gcm',
     iv: iv,
     ts: 128,
     ks: 256

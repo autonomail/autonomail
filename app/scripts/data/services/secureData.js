@@ -43,7 +43,7 @@
               storageData.iterations = keyData.iterations;
               cachedSecureDataKey[emailAddress] = keyData.secureDataKey;
 
-              return Encrypt.encrypt(cachedSecureDataKey[emailAddress], {});
+              return Encrypt.encrypt(keyData.secureDataKey, {});
             })
             .then(function setStorageItem(encryptedSecureData) {
               storageData.secureData = encryptedSecureData;
@@ -65,7 +65,7 @@
        * Get secure data encryption key for given user.
        * @param emailAddress {string} user id.
        * @param storedData {Object} stored data for given user id.
-       * @return {Promise} resolves to the master key
+       * @return {Promise} resolves to the encryption key.
        * @private
        */
       _getSecureDataKey: function(emailAddress, storedData) {
@@ -92,7 +92,7 @@
               .then(function cacheKeys(keyData) {
                 // cache the result for next time we need it
                 cachedSecureDataKey[emailAddress] = keyData.secureDataKey;
-                return cachedSecureDataKey[emailAddress];
+                return keyData.secureDataKey;
               });
           }
 
