@@ -39,3 +39,4 @@ sjcl.decrypt_b64 = function(password, ciphertext) {
   return sjcl.decrypt(password, atob(ciphertext));
 };
 
+

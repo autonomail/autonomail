@@ -18,16 +18,20 @@
       SecureData.get(emailAddress, 'pgp')
         .then(function ensurePGPKeys(pgpKeyPair) {
           if (pgpKeyPair) {
-            return true;
+            return pgpKeyPair;
           } else {
             return Encrypt.createPGPKeys(emailAddress)
               .then(function savePGPKeys(keyPair) {
                 $log.info('Created PGP keypair for ' + emailAddress, keyPair);
-                return SecureData.set(emailAddress, 'pgp', keyPair);
+                return SecureData.set(emailAddress, 'pgp', keyPair)
+                  .then(function getKeyPair() {
+                    return keyPair;
+                  });
               });
           }
         })
-        .then(function allDone() {
+        .then(function allDone(keyPair) {
+          $log.info('PGP keys: ', keyPair);
           $log.info('All setup!');
         })
         .catch(function promiseErr(err) {

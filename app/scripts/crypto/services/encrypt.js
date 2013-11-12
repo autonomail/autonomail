@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.factory('Encrypt', function($log, $q, RuntimeError, Random, WebWorker) {
+  app.factory('Encrypt', function($log, $q, RuntimeError, Random, WebWorker, GPG) {
 
     /**
      * When deriving a key from a user password, keep iterating until the given amount of time has elapsed.
@@ -168,14 +168,7 @@
        * @return {Promise} resolves to {public: hex string, private: hex string}
        */
       createPGPKeys: function(emailAddress) {
-        var defer = $q.defer();
-
-        defer.resolve({
-          public: 'ABC',
-          private: 'DEF'
-        });
-
-        return defer.promise;
+        return GPG.generateKeyPair(emailAddress);
       }
 
     }));

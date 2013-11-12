@@ -215,8 +215,6 @@ module.exports = function (grunt) {
         }
       }
     },
-    // not used since Uglify task does concat,
-    // but still available if needed
     concat: {
       options: {
         separator: ';'
@@ -230,7 +228,8 @@ module.exports = function (grunt) {
       webworkerImports: {
         src: [
           '<%= yeoman.app %>/bower_components/sjcl/sjcl.js',
-          '<%= yeoman.app %>/scripts/*/webworker/*.js'
+          '<%= yeoman.app %>/scripts/crypto/webworker/base64.js',
+          '<%= yeoman.app %>/scripts/crypto/webworker/sjcl-webworker-addons.js'
         ],
         dest: '<%= yeoman.app %>/scripts/webworker-imports.generated.js'
       },

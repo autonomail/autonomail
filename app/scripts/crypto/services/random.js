@@ -72,9 +72,9 @@
 
 
       /**
-       * Get random words.
+       * Get random bytes.
        *
-       * @return {array}
+       * @return {array} of words (4-byte elements)
        * @private
        */
       _getRandomBytes: function(numBytes) {
