@@ -50,6 +50,8 @@
                   var utf8str = sjcl.codec.utf8String.fromBitsRaw(words);
                   $log.debug('GPG: Adding ' + utf8str.length + ' bytes to EGD pool...');
                   self.files['/dev/egd-pool'] = utf8str;
+
+                  self.alreadySetup = true;
                   return true;
                 })
                 .then(defer.resolve)
@@ -84,8 +86,29 @@
           },
 
 
-          _enqueue: function() {
+          /**
+           * Create file with given contents in the virtual FS.
+           */
+          _fsWriteFile: function() {
+            // TODO: re-use existing worker
+          },
 
+
+          /**
+           * Get contents of given files in the virtual FS.
+           */
+          _fsGetFiles: function() {
+            // TODO: re-use existing worker
+          },
+
+
+          /**
+           * Run a GPG command.
+           */
+          _runGPG: function() {
+            // TODO: save files from existing worker
+            // TODO: create new worker
+            // this will create a new worker as necessary
           },
 
 
@@ -102,23 +125,20 @@
 
             var defer = $q.defer();
 
-            self.setup()
-              .then(function setupKeygenParameters(){
-                $log.debug('GPG: generating keypair for: '  + emailAddress);
+            $log.debug('GPG: generating keypair for: '  + emailAddress);
 
-                var keyInput = [              
-                  'Key-Type: RSA',
-                  'Key-Length: 1024',
-                  'Subkey-Type: RSA',
-                  'Subkey-Length: 1024',
-                  'Name-Email: ' + emailAddress,
-                  'Expire-Date: 0',
-                  'Passphrase: password',
-                  '%commit'
-                ];
+            var keyInput = [              
+              'Key-Type: RSA',
+              'Key-Length: 1024',
+              'Subkey-Type: RSA',
+              'Subkey-Length: 1024',
+              'Name-Email: ' + emailAddress,
+              'Expire-Date: 0',
+              'Passphrase: password',
+              '%commit'
+            ];
 
-                return self._addData(keyInput.join("\n"), '/input.txt');
-              })
+            return self._addData(keyInput.join("\n"), '/input.txt')
               .then(function generateKey() {
                 return self._run('--batch', '--gen-key', '/input.txt');
               })
