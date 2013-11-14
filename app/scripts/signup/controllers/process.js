@@ -20,7 +20,7 @@
           if (pgpKeyPair) {
             return pgpKeyPair;
           } else {
-            return Encrypt.createPGPKeys(emailAddress)
+            return Encrypt.createPGPKeys(emailAddress, 2048)
               .then(function savePGPKeys(keyPair) {
                 $log.info('Created PGP keypair for ' + emailAddress, keyPair);
                 return SecureData.set(emailAddress, 'pgp', keyPair)

@@ -264,11 +264,12 @@
            * Generate a new key-pair
            * 
            * @param emailAddress {string} user id.
+           * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
            *
            * References: 
            *  - https://alexcabal.com/creating-the-perfect-gpg-keypair/
            */
-          generateKeyPair: function(emailAddress) {
+          generateKeyPair: function(emailAddress, keyStrength) {
             var self = this;
 
             var defer = $q.defer();
@@ -280,11 +281,15 @@
 
             self._lock()
               .then(function createInput() {
+                if (2048 !== keyStrength && 4096 !== keyStrength) {
+                  throw new RuntimeError('GPG key bit size must be either 2048 or 4096');
+                }
+
                 var keyInput = [              
                   'Key-Type: RSA',
-                  'Key-Length: 2048',
+                  'Key-Length: ' + keyStrength,
                   'Subkey-Type: RSA',
-                  'Subkey-Length: 2048',
+                  'Subkey-Length: ' + keyStrength,
                   'Name-Email: ' + emailAddress,
                   'Expire-Date: 0',
                   'Passphrase: password',
