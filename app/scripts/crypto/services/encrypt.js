@@ -161,18 +161,6 @@
 
 
 
-      /**
-       * Create PGP key pair for given user.
-       *
-       * @param emailAddress {string} user id.
-       * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
-       *
-       * @return {Promise} resolves to {public: hex string, private: hex string}
-       */
-      createPGPKeys: function(emailAddress, keyStrength) {
-        return GPG.generateKeyPair(emailAddress, keyStrength);
-      }
-
     }));
   });
 

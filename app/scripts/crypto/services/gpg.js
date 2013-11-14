@@ -38,7 +38,11 @@
                 'default-preference-list SHA512 SHA384 SHA256 SHA224 AES256 AES192 AES CAST5 ZLIB ZIP Uncompressed',
                 'sig-notation issuer-fpr@notations.openpgp.fifthhorseman.net=%g',
                 'cert-digest-algo SHA512'
-              ].join("\n")
+              ].join("\n"),
+              // we need to create these files to ensure our getFiles() always succeed
+              '/home/emscripten/.gnupg/pubring.gpg': '',
+              '/home/emscripten/.gnupg/secring.gpg': '',
+              '/home/emscripten/.gnupg/random_seed': ''
             };
 
             // pending requests (see `_lock` and `_unlock` methods)
@@ -87,6 +91,7 @@
            *
            * @param [options] {Object} additonal options which affect how we configure the worker.
            * @param [options.wantToRunGPG] {Boolean} if true then worker is going to be used to run a GPG command. Default is false.
+           * @param [options.reset] {Boolean} if true then all cached workers will be flushed and recreated. Default is false.
            *
            * @return {Promise} resolves to GPGWorker instance.
            */
@@ -103,7 +108,7 @@
                 with the current worker.
              */
 
-            if (!self.worker || (self.worker.runCalled() && options.wantToRunGPG)) {
+            if (!self.worker || options.reset || (self.worker.runCalled() && options.wantToRunGPG)) {
               self._ensureEntropy()            
                 .then(function createWorker() {
                   self.worker = new GPGWorker(workerScriptUrl);
@@ -302,31 +307,8 @@
                 startTime = moment();
                 return self._gpg('--batch', '--gen-key', '/input.txt');
               })
-              .then(function exportPrivateKey() {
-                var timeTaken = moment().diff(startTime, 'seconds');
-                $log.debug('GPG: time taken to generate keys: ' + timeTaken + ' seconds');
-
-                return self._gpg('--export-secret-keys', '--armor', '--output', '/private.asc', emailAddress);                
-              })
-              .then(function savePrivateKeyAsc() {
-                return self._fsGetFiles('/private.asc')
-                  .then(function (ascFiles) {
-                    pgpKeys.private = ascFiles['/private.asc'];
-                  });
-              })
-              .then(function exportPublicKey() {
-                return self._gpg('--export', '--armor', '--output', '/public.asc', emailAddress);                
-              })
-              .then(function savePublicKeyAsc() {
-                return self._fsGetFiles('/public.asc')
-                  .then(function (ascFiles) {
-                    pgpKeys.public = ascFiles['/public.asc'];
-                  });
-              })
               .then(self._unlock)
-              .then(function allDone() {
-                defer.resolve(pgpKeys);                
-              })
+              .then(defer.resolve)
               .catch(function (err) {
                 // TODO: create a GPGError class so that we can detect the error type outside!
                 defer.reject(new RuntimeError('PGP keypair generation error', err));
@@ -334,8 +316,66 @@
             ;
 
             return defer.promise;
+          }, // generateKeyPair()
+
+
+
+          /**
+           * Backup all GPG data.
+           *
+           * @return {Promise} resolves to Object
+           */
+          backup: function() {
+            var self = this;
+
+            var defer = $q.defer();
+
+            defer.resolve({
+              'pubring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
+              'secring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
+              'trustdb.gpg': self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg']
+            });
+
+            return defer.promise;
           },
 
+
+
+
+          /**
+           * Restore all GPG data from a backup.
+           *
+           * @param data {Object} data previously obtained by calling backup().
+           *
+           * @return {Promise}
+           */
+          restore: function(data) {
+            var self = this;
+
+            var defer = $q.defer();
+
+            self._lock()
+              .then(function setupData() {
+                for (var f in data) {
+                  self.virtualFs['/home/emscripten/.gnupg/' + f] = data[f];
+                }
+              })
+              .then(function getFreshWorkerInstance() {
+                return self._getWorker({ reset: true });
+              })
+              .then(function checkGPG() {
+                return self._gpg('--list-keys');
+              })
+              .then(self._unlock)
+              .then(defer.resolve)
+              .catch(function(err) {
+                // TODO: create a GPGError class so that we can detect the error type outside!
+                defer.reject(new RuntimeError('GPG restore error', err));                
+              })
+            ;
+
+            return defer.promise;
+          }
 
         }));
       }
