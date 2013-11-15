@@ -1,0 +1,29 @@
+form {
+  display: block;
+
+  .form-group {
+    margin: 1em 0;
+  }
+
+  .form-control {
+    display: inline-block;
+    width: 50%;
+    font-size: 150%;
+    padding: 24px 12px;
+  }
+
+  .submit {
+    display: inline-block;
+    width: 50%;
+  }
+
+  .submit {
+    margin-top: 1em;
+    text-align: center;
+
+    button[type=submit] {
+      display: inline-block;
+    }
+  }
+
+}

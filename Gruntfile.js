@@ -46,7 +46,10 @@ module.exports = function (grunt) {
         tasks: ['copy:styles', 'autoprefixer']
       },
       templates: {
-        files: ['<%= yeoman.app %>/{,*/,*/angular-bootstrap/templates/*/}*.html'],
+        files: [
+          '<%= yeoman.app %>/*.html',
+          '<%= yeoman.app %>/views/{,*/}/{,*/}/{,*/}/*.html'
+        ],
         tasks: ['ngtemplates:customBootstrap', 'ngtemplates:app']
       },
       webworker: {

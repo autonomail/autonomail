@@ -2,9 +2,7 @@
 
 (function(app) {
 
-  app.controller('LoginFormCtrl', function ($log, $scope, $state, Server, UserMgr) {
-
-    var log
+  app.controller('LoginFormCtrl', function ($scope, $state, AuthCredentials, Server, UserMgr) {
 
     $scope.user = {
       domain: 'autonomail.com',
@@ -17,7 +15,7 @@
      * @returns {$dirty|*|$valid}
      */
     $scope.canSubmit = function() {
-      return $scope.signupForm.$valid;
+      return $scope.loginForm.$valid;
     };
 
 
@@ -27,15 +25,16 @@
     $scope.submit = function() {
       Server.login($scope.user)
         .then(function loginOk(){
-          UserMgr.setUser($scope.user);
+          var userId = AuthCredentials.set($scope.user);
+          UserMgr.setCurrentUser(userId);
           $state.go('inbox');
         })
         .catch(function (err) {
-          Log.errorAlert('Login failed: ' + err.toString());
+          $scope.error = '' + err;
         })
 
     };
   });
 
-}(angular.module('App.login', ['App.server'])));
+}(angular.module('App.login', ['App.server', 'App.user'])));
 

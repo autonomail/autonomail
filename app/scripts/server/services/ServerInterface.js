@@ -21,6 +21,29 @@
         return defer.promise;
       },
 
+      /**
+       * Register new user.
+       * @param user {object} user details.
+       * @return {Promise} resolved if ok; rejected otherwise.
+       */
+      register: function(user) {
+        var defer = $q.defer();
+        defer.reject(new RuntimeError('Not yet implemented'));
+        return defer.promise;
+      },
+
+
+      /**
+       * Login given user.
+       * @param user {object} user details.
+       * @return {Promise} resolved if ok; rejected otherwise.
+       */
+      login: function(user) {
+        var defer = $q.defer();
+        defer.reject(new RuntimeError('Not yet implemented'));
+        return defer.promise;
+      },
+
       toString: function() {
         throw new RuntimeError('Not yet implemented');
       }

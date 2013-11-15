@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.controller('SignupFormCtrl', function ($log, $scope, $state, Server, UserMgr) {
+  app.controller('SignupFormCtrl', function ($log, $scope, $state, AuthCredentials, Server, UserMgr) {
 
     $scope.user = {
       domain: 'autonomail.com',
@@ -69,11 +69,18 @@
      * Submit the form.
      */
     $scope.submit = function() {
-      UserMgr.setUser($scope.user);
-      $state.go('inbox');
+      Server.register($scope.user)
+        .then(function registeredOk() {
+          var userId = AuthCredentials.set($scope.user);
+          UserMgr.setCurrentUser(userId);
+          $state.go('inbox');
+        })
+        .catch(function (err) {
+          $scope.error = '' + err;
+        });
     };
 
   });
 
-}(angular.module('App.signup', ['App.server', 'ui.validate'])));
+}(angular.module('App.signup', ['App.server', 'App.user', 'ui.validate'])));
 

@@ -38,6 +38,11 @@
     RuntimeError.prototype.constructor = RuntimeError;
 
 
+    RuntimeError.prototype.toString = function() {
+      return Error.prototype.toString.call(this);
+    };
+
+
     return RuntimeError;
 
   });
