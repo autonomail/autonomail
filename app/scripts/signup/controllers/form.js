@@ -2,7 +2,7 @@
 
 (function(app) {
 
-  app.controller('SignupFormCtrl', function ($log, $scope, $state, Server, SignupManager) {
+  app.controller('SignupFormCtrl', function ($log, $scope, $state, Server, UserMgr) {
 
     $scope.user = {
       domain: 'autonomail.com',
@@ -69,8 +69,8 @@
      * Submit the form.
      */
     $scope.submit = function() {
-      SignupManager.saveSignupFormData($scope.user);
-      $state.go('signup.process');
+      UserMgr.setUser($scope.user);
+      $state.go('inbox');
     };
 
   });

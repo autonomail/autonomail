@@ -8,13 +8,19 @@
     'App.crypto',
     'App.data',
     'App.server',
+    'App.user',
+    'App.login',
     'App.signup'
   ]);
 
   app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider) {
-    $urlRouterProvider.otherwise('/signup');
+    $urlRouterProvider.otherwise('/login');
 
     $stateProvider
+      .state('login', {
+        url: '/login',
+        templateUrl: 'app/login/form.html'
+      })
       .state('signup', {
         url: '/signup',
         templateUrl: 'app/signup/index.html',
@@ -27,6 +33,10 @@
       })
       .state('signup.process', {
         templateUrl: 'app/signup/process.html'
+      })
+      .state('inbox', {
+        url: '/inbox',
+        templateUrl: 'app/inbox/index.html'
       })
     ;
 

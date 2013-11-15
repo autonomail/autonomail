@@ -13,14 +13,15 @@
   };
 
 
-  app.factory('Random', function(RuntimeError, $log, $q, $timeout, $modal) {
+  app.factory('Random', function(RuntimeError, Log, $q, $timeout, $modal) {
+    var log = Log.create('Random');
 
     return new (Class.extend({
       /**
        * Begin entropy collection.
        */
       startEntropyCollection: function() {
-        $log.log('Starting RNG entropy collection...');
+        log.info('Starting RNG entropy collection...');
         randomNumGenerator.setDefaultParanoia(10);
         randomNumGenerator.startCollectors();
       },
