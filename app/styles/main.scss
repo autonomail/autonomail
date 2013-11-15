@@ -56,6 +56,13 @@ body {
 }
 
 
+/* modals */
+
+.modal-content {
+  padding: 1em;
+  color: #000;
+}
+
 /* specific pages, widgets and sections */
 
 @import "views/signup";
