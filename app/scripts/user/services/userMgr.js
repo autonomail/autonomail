@@ -5,7 +5,7 @@
 (function(app) {
   'use strict';
 
-  app.factory('UserMgr', function(Log, $q, RuntimeError, SecureData, AuthCredentials, GPG) {
+  app.factory('UserMgr', function(Log, $q, RuntimeError, SecureData, AuthCredentials, GPG, $state) {
 
     var log = Log.create('UserMgr');
 
@@ -27,7 +27,8 @@
       /**
        * Ensures that the given user's secure data store and accompanying crypto keys have been setup.
        *
-       * @param [userId] {string} user id. If not given then current user's is used.
+       * @param [userId] {string} user id. If not given then current user's is used. If current user not set then
+       * the 'login' state is invoked.
        *
        * @return {Promise}
        */
@@ -36,7 +37,7 @@
 
         if (!userId) {
           if (!currentUser) {
-            defer.reject('Current user not set');
+            $state.go('login');
           } else {
             userId = currentUser;
           }
@@ -50,7 +51,7 @@
               } else {
                 var user = AuthCredentials.get(userId);
 
-                return GPG.generateKeyPair(user.email, user.password, 2048)
+                return GPG.generateKeyPair(user.email, user.password, 4096)
                   .then(function getPGPData() {
                     return GPG.backup();
                   })

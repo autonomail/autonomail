@@ -36,12 +36,7 @@
       })
       .state('inbox', {
         url: '/inbox',
-        templateUrl: 'app/inbox/index.html',
-        resolve: {
-          secureData: function(UserMgr) {
-            return UserMgr.ensureSecureDataHasBeenSetup();
-          }
-        }
+        templateUrl: 'app/inbox/index.html'
       })
     ;
 

@@ -50,7 +50,7 @@
       var levelStr = ('[' + level.toUpperCase() + ']     ').slice(0,8);
 
       var args = [levelStr + category + msg];
-      if (0 >= additionalContent.length) {
+      if (0 < additionalContent.length) {
         args = args.concat(additionalContent);
       }
 

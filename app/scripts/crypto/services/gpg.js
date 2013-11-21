@@ -282,10 +282,9 @@
 
             var defer = $q.defer();
 
-            log.debug('generating keypair for: '  + emailAddress);
+            log.debug('Generating ' + keyStrength + '-bit keypair for: '  + emailAddress);
 
-            var pgpKeys = {},
-              startTime = null;
+            var startTime = null;
 
             self._lock()
               .then(function createInput() {
@@ -294,13 +293,13 @@
                 }
 
                 var keyInput = [              
-                  'Key-Type:RSA',
-                  'Key-Length:' + keyStrength,
-                  'Subkey-Type:RSA',
-                  'Subkey-Length:' + keyStrength,
-                  'Name-Email:' + emailAddress,
-                  'Expire-Date:0',
-                  'Passphrase:' + password,
+                  'Key-Type: RSA',
+                  'Key-Length: ' + keyStrength,
+                  'Subkey-Type: RSA',
+                  'Subkey-Length: ' + keyStrength,
+                  'Name-Email: ' + emailAddress,
+                  'Expire-Date: 0',
+                  'Passphrase: ' + password,
                   '%commit'
                 ];
 
@@ -311,6 +310,10 @@
                 return self._gpg('--batch', '--gen-key', '/input.txt');
               })
               .then(self._unlock)
+              .then(function allDone(data) {
+                log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
+                return data;
+              })
               .then(defer.resolve)
               .catch(function (err) {
                 // TODO: create a GPGError class so that we can detect the error type outside!
