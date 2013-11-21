@@ -2,7 +2,9 @@
 
 (function(app) {
 
-  app.factory('SimulatedServer', function($q, RuntimeError, ServerInterface) {
+  app.factory('SimulatedServer', function(Log, $q, RuntimeError, ServerInterface) {
+
+    var log = Log.create('SimulatedServer');
 
     /**
      * See the ServerInterface class specification for documentation regarding the functions here.
@@ -19,7 +21,11 @@
        */
       _load: function() {
         this.db = JSON.parse(window.localStorage.getItem('simulatedServerDb') || '{}');
+        if (!this.db) {
+          this.db = {};
+        }
         this.db.users = this.db.users || {};
+        this.db.secureData = this.db.secureData || {};
       },
 
 
@@ -33,6 +39,8 @@
 
 
       checkUsernameAvailable: function(username) {
+        log.debug('Check username availability: ' + username);
+
         var self = this;
 
         var defer = $q.defer();
@@ -48,6 +56,8 @@
 
 
       register: function(user) {
+        log.debug('Register user', user);
+
         var self = this;
 
         var defer = $q.defer();
@@ -65,6 +75,8 @@
 
 
       login: function(user) {
+        log.debug('Login user', user);
+
         var self = this;
 
         var defer = $q.defer();
@@ -83,6 +95,40 @@
 
         return defer.promise;
       },
+
+
+
+      getSecureData: function(userId) {
+        log.debug('Get secure data: ' + userId);
+
+        var self = this;
+
+        var defer = $q.defer();
+
+        defer.resolve(self.db.secureData[userId] || null);
+
+        return defer.promise;
+      },
+
+
+
+      setSecureData: function(userId, data) {
+        log.debug('Set secure data: ' + userId, data);
+
+        var self = this;
+
+        var defer = $q.defer();
+
+        self.db.secureData[userId] = data;
+        self._save();
+        defer.resolve();
+
+
+        return defer.promise;
+      },
+
+
+
 
       toString: function() {
         return 'Simulated server';

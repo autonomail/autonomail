@@ -48,9 +48,9 @@
               if (pgpData) {
                 return GPG.restore(pgpData);
               } else {
-                var emailAddress = AuthCredentials.get(userId).email;
+                var user = AuthCredentials.get(userId);
 
-                return GPG.generateKeyPair(emailAddress, 2048)
+                return GPG.generateKeyPair(user.email, user.password, 2048)
                   .then(function getPGPData() {
                     return GPG.backup();
                   })

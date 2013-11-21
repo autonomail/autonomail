@@ -17,7 +17,9 @@
       },
 
 
-      $get: function($log, RuntimeError) {
+      $get: function(Log) {
+        var log = Log.create('WebWorker');
+        
         return new (Class.extend({
           /**
            * Run the given function in a worker thread.
@@ -27,7 +29,7 @@
            * @return {Promise} will resolve to the function output.
            */
           run: function(name, fn, data) {
-            $log.debug('Running "' + name + '" web worker for:', data);
+            log.debug('Running "' + name + '" web worker for:', data);
             return this._createNewWorker(data).spawn(fn);
           },
 

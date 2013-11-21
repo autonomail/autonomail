@@ -21,7 +21,9 @@
       },
 
 
-      $get: function($log, $q, RuntimeError, GPGWorker, Random) {
+      $get: function(Log, $q, RuntimeError, GPGWorker, Random) {
+        var log = Log.create('GPG');
+        
         return new (Class.extend({
 
           init: function() {
@@ -71,7 +73,7 @@
               Random.getRandomBytes(4096)
                 .then(function fillEGDPool(words) {
                   var utf8str = sjcl.codec.utf8String.fromBitsRaw(words);
-                  $log.debug('GPG: Adding ' + utf8str.length + ' bytes to EGD pool...');
+                  log.debug('Adding ' + utf8str.length + ' bytes to EGD pool...');
                   self.virtualFs['/dev/egd-pool'] = utf8str;
 
                   self.alreadySetup = true;
@@ -111,7 +113,7 @@
             if (!self.worker || options.reset || (self.worker.runCalled() && options.wantToRunGPG)) {
               self._ensureEntropy()            
                 .then(function createWorker() {
-                  self.worker = new GPGWorker(workerScriptUrl);
+                  self.worker = new GPGWorker(workerScriptUrl, log);
                 })
                 .then(function setupFS() {
                   self.worker.mkdir('/home');
@@ -242,10 +244,10 @@
             if (0 <= outputParamIndex) {
               var fileName = (outputParamIndex < args.length - 1) ? args[outputParamIndex+1] : 'the output file';
 
-              $log.warn('Ensure you save the contents of "' + fileName + '" prior to running the next GPG command');
+              log.warn('Ensure you save the contents of "' + fileName + '" prior to running the next GPG command');
             }
 
-            return self._getWorker({ wantToRunGPG: true })
+            return self._getWorker({ wantToRun: true })
               .then(function runCommand(newWorker) {
                 worker = newWorker;
                 return worker.run.apply(worker, args);
@@ -269,17 +271,18 @@
            * Generate a new key-pair
            * 
            * @param emailAddress {string} user id.
+           * @param password {string} user password.
            * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
            *
            * References: 
            *  - https://alexcabal.com/creating-the-perfect-gpg-keypair/
            */
-          generateKeyPair: function(emailAddress, keyStrength) {
+          generateKeyPair: function(emailAddress, password, keyStrength) {
             var self = this;
 
             var defer = $q.defer();
 
-            $log.debug('GPG: generating keypair for: '  + emailAddress);
+            log.debug('generating keypair for: '  + emailAddress);
 
             var pgpKeys = {},
               startTime = null;
@@ -291,13 +294,13 @@
                 }
 
                 var keyInput = [              
-                  'Key-Type: RSA',
-                  'Key-Length: ' + keyStrength,
-                  'Subkey-Type: RSA',
-                  'Subkey-Length: ' + keyStrength,
-                  'Name-Email: ' + emailAddress,
-                  'Expire-Date: 0',
-                  'Passphrase: password',
+                  'Key-Type:RSA',
+                  'Key-Length:' + keyStrength,
+                  'Subkey-Type:RSA',
+                  'Subkey-Length:' + keyStrength,
+                  'Name-Email:' + emailAddress,
+                  'Expire-Date:0',
+                  'Passphrase:' + password,
                   '%commit'
                 ];
 
@@ -384,12 +387,14 @@
 
 
 
-  app.factory('GPGWorker', function($log, $q, RuntimeError) {
+  app.factory('GPGWorker', function(Log, $q, RuntimeError) {
 
     return Class.extend({
 
-      init: function(workerScriptUrl) {
+      init: function(workerScriptUrl, log) {
         var self = this;
+
+        self.log = (log || Log).create('Worker');
 
         self.promiseCount = 0;
         self.promises = {};
@@ -412,7 +417,7 @@
           obj = JSON.parse(ev.data);
         }
         catch(e) {
-          return $log.error(new RuntimeError('GPG worker thread returned bad data', ev.data));
+          return self.log.error(new RuntimeError('GPG worker thread returned bad data', ev.data));
         }
 
         // got reference id?
@@ -435,9 +440,9 @@
 
         if(obj.cmd) {
           if('stdout' === obj.cmd) {
-            $log.debug(obj.contents);
+            self.log.debug(obj.contents);
           } else if('stderr' === obj.cmd) {
-            $log.error(obj.contents);
+            self.log.error(obj.contents);
           }
         }
       },
@@ -647,7 +652,7 @@
             args.unshift('--lock-never');
 
             var defer = self._newTrackableDeferred({
-              desc: 'GPG: ' + args.join(' ')
+              desc: '' + args.join(' ')
             });
 
             self.thread.postMessage(JSON.stringify({

@@ -17,7 +17,9 @@
         activeBackendType = backendType;
       },
 
-      $get: function($log, LocalStorage) {
+      $get: function(Log, LocalStorage) {
+        var log = Log.create('Storage');
+
         var backend = null;
 
         switch (activeBackendType) {
@@ -28,7 +30,7 @@
             backend = null;
         }
 
-        $log.info('Client storage back-end: ' + backend);
+        log.info('Client storage back-end: ' + backend);
 
         return backend;
       }

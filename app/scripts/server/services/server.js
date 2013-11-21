@@ -17,7 +17,9 @@
         activeBackendType = backendType;
       },
 
-      $get: function($log, SimulatedServer) {
+      $get: function(Log, SimulatedServer) {
+        var log = Log.create('Server');
+
         var backend = null;
 
         switch (activeBackendType) {
@@ -26,9 +28,9 @@
             break;
           default:
             backend = null;
-        };
+        }
 
-        $log.info('Server back-end: ' + backend);
+        log.info('Server back-end: ' + backend);
 
         return backend;
       }

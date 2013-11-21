@@ -44,6 +44,34 @@
         return defer.promise;
       },
 
+
+      /**
+       * Get secure data from server.
+       * @param userId {String} user id.
+       * @return {Promise} resolves to Object; rejected otherwise.
+       */
+      getSecureData: function(userId) {
+        var defer = $q.defer();
+        defer.reject(new RuntimeError('Not yet implemented'));
+        return defer.promise;
+      },
+
+
+
+      /**
+       * Send secure data to server.
+       * @param userId {String} user id.
+       * @param data {Object} secure data.
+       * @return {Promise} resolves if ok; rejected otherwise.
+       */
+      setSecureData: function(userId, data) {
+        var defer = $q.defer();
+        defer.reject(new RuntimeError('Not yet implemented'));
+        return defer.promise;
+      },
+
+
+
       toString: function() {
         throw new RuntimeError('Not yet implemented');
       }

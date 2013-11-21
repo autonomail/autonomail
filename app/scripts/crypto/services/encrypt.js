@@ -2,7 +2,8 @@
 
 (function(app) {
 
-  app.factory('Encrypt', function($log, $q, RuntimeError, Random, WebWorker, GPG) {
+  app.factory('Encrypt', function(Log, $q, RuntimeError, Random, WebWorker) {
+    var log = Log.create('Encrypt');
 
     /**
      * When deriving a key from a user password, keep iterating until the given amount of time has elapsed.
@@ -54,7 +55,7 @@
        * @return {Promise} resolves to a { authKey: 256-bit auth key as a hex string, secureDataKey: 256-bit secure data key as hex string, iterations: no. of PBKDF2 iterations used, salt: salt as hex string }
        */
       deriveKey: function(password, algorithmParams) {
-        $log.debug('Deriving key from: ', password, algorithmParams);
+        log.debug('Deriving key from: ', password, algorithmParams);
 
         return WebWorker.run('deriveKey', function(data) {
           var

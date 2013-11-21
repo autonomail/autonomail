@@ -5,7 +5,9 @@
 (function(app) {
   'use strict';
 
-  app.factory('SecureData', function($log, $q, RuntimeError, Storage, Encrypt, AuthCredentials) {
+  app.factory('SecureData', function(Log, $q, RuntimeError, Storage, Encrypt, AuthCredentials, Server) {
+    var log = Log.create('SecureData');
+    
 
     /** Cached secure data encryption keys for users. */
     var cachedSecureDataKey = {};
@@ -15,6 +17,54 @@
 
 
     return new (Class.extend({
+      /**
+       * Refresh secure data for the given user with what's on the server.
+       *
+       * This will fetch the user's secure data from the server. If data gets returned it will be saved to local
+       * storage, overwriting the secure data stored locally for the user.
+       *
+       * @param userId {string} the user id.
+       *
+       * @return {Promise} will resolve to true if server had data; false otherwise.
+       * @private
+       */
+      _refreshSecureDataFromServer: function(userId) {
+        return Server.getSecureData(userId)
+          .then(function handleData(data) {
+            if (data) {
+              return Storage.set(userId, data)
+                .then(function storageUpdated() {
+                  return true;
+                });
+            } else {
+              return false;
+            }
+          })
+      },
+
+
+
+      /**
+       * Persist secure data for the given user to the the server.
+       *
+       * This will fetch the user's secure data from local storage and send it to the server, overwriting what's there.
+       *
+       * @param userId {string} the user id.
+       *
+       * @return {Promise} will resolve to true.
+       * @private
+       */
+      _persistSecureDataToServer: function(userId) {
+        return Storage.get(userId)
+          .then(function handleData(data) {
+            if (data) {
+              return Server.setSecureData(userId, data);
+            }
+          });
+      },
+
+
+
       /**
        * Create secure skeleton data for the given user.
        *
@@ -30,7 +80,7 @@
 
         var auth = AuthCredentials.get(userId);
 
-        $log.debug('Creating data store for: ' + userId);
+        log.debug('Creating data store for: ' + userId);
 
         if (!auth) {
           defer.reject(new RuntimeError('No auth credentials found for: ' + userId));
@@ -114,16 +164,32 @@
 
         var defer = $q.defer();
 
+        var serverHadData = true;
+
         if (cachedSecureData[userId]) {
           defer.resolve(cachedSecureData[userId]);
         } else {
-          $log.debug('Loading secure data for: ' + userId);
+          log.debug('Loading secure data for: ' + userId);
 
-          Storage.get(userId)
+          self._refreshSecureDataFromServer(userId)
+            .then(function refreshedFromServer(_serverHadData) {
+              serverHadData = _serverHadData;
+              return Storage.get(userId);
+            })
             .then(function createStoredDataIfNeeded(data) {
               // already got secure key store
               if (data) {
-                return data;
+                // if server didn't have data then try and persist data to the server
+                if (!serverHadData) {
+                  return self._persistSecureDataToServer(userId)
+                    .then(function dataPersisted() {
+                      return data;
+                    });
+                }
+                // else if server had data then there's nothing we need to do
+                else {
+                  return data;
+                }
               }
               // need to create secure key store
               else {
@@ -173,7 +239,7 @@
           .then(function getValue(secureData) {
             var value = secureData[key];
 
-            $log.debug('Secure data [' + key + '] -> ', value);
+            log.debug('[' + key + '] -> ', value);
 
             return value;
           });
@@ -195,7 +261,7 @@
       set: function(userId, key, value) {
         var self = this;
 
-        $log.debug('Secure data [' + key + '] <- ', value);
+        log.debug('[' + key + '] <- ', value);
 
         return self._loadSecureData(userId)
           .then(function setValue() {
@@ -214,12 +280,18 @@
                 }
               });
           })
-          .then(function updateSecureDataInStorage(params) {
+          .then(function encryptData(params) {
             return Encrypt.encrypt(params.key, cachedSecureData[userId])
               .then(function save(encryptedSecureData) {
                 params.data.secureData = encryptedSecureData;
-
-                return Storage.set(userId, params.data);
+                return params.data;
+              });
+          })
+          .then(function persistToServerAndStorage(encryptedData) {
+            // we save to server first!
+            return self._persistSecureDataToServer(userId, encryptedData)
+              .then(function persistToStorage() {
+                return Storage.set(userId, encryptedData);
               });
           })
         ;

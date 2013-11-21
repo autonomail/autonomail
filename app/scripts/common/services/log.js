@@ -30,7 +30,7 @@
      * @private
      */
     var _log = function(category, level, msg, additionalContent) {
-      category = 0 < category.length ? category.join('.') + ' ' : '';
+      category = 0 < category.length ? category.join('.') + ': ' : '';
 
       switch (level) {
         case LEVEL_DEBUG:
@@ -47,9 +47,9 @@
           break;
       }
 
-      var levelStr = '[' + level.toUpperCase() + '] ';
+      var levelStr = ('[' + level.toUpperCase() + ']     ').slice(0,8);
 
-      var args = [category + levelStr + msg];
+      var args = [levelStr + category + msg];
       if (0 >= additionalContent.length) {
         args = args.concat(additionalContent);
       }
