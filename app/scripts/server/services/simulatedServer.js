@@ -26,6 +26,7 @@
         }
         this.db.users = this.db.users || {};
         this.db.secureData = this.db.secureData || {};
+        this.db.mail = this.db.mail || {};
       },
 
 
@@ -127,6 +128,57 @@
         return defer.promise;
       },
 
+
+      getMsgCount: function(userId, folder) {
+        var self = this;
+
+        log.debug('Get count of mail in [' + folder + '] for ' + userId);
+
+        var defer = $q.defer();
+
+        if (self.mail[userId]) {
+          if (self.mail[userId][folder]) {
+            defer.resolve(self.mail[userId][folder].length);
+          } else {
+            defer.resolve(0);
+          }
+        } else {
+          defer.resolve(0);
+        }
+
+        return defer.promise;
+      },
+
+
+
+      getMsg: function(userId, folder, from, count) {
+        var self = this;
+
+        log.debug('Get mail in [' + folder + '] for ' + userId);
+
+        var defer = $q.defer();
+
+        if (self.mail[userId]) {
+          if (self.mail[userId][folder]) {
+            var mail = self.mail[userId][folder],
+              ret = [];
+
+            for (var i=0; ret.length < count && i<mail.length; ++i) {
+              if (mail[i].ts && mail[i].ts < from) {
+                ret.push(mail[i]);
+              }
+            }
+
+            defer.resolve(ret);
+          } else {
+            defer.resolve([]);
+          }
+        } else {
+          defer.resolve([]);
+        }
+
+        return defer.promise;
+      },
 
 
 

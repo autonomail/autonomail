@@ -25,6 +25,18 @@
 
 
       /**
+       * Get the current user.
+       *
+       * @return {string} user id.
+       */
+      getCurrentUser: function() {
+        return currentUser;
+      },
+
+
+
+
+      /**
        * Ensures that the given user's secure data store and accompanying crypto keys have been setup.
        *
        * @param [userId] {string} user id. If not given then current user's is used. If current user not set then
@@ -51,7 +63,7 @@
               } else {
                 var user = AuthCredentials.get(userId);
 
-                return GPG.generateKeyPair(user.email, user.password, 4096)
+                return GPG.generateKeyPair(user.email, user.password, 2048)
                   .then(function getPGPData() {
                     return GPG.backup();
                   })

@@ -36,7 +36,7 @@
       })
       .state('inbox', {
         url: '/inbox',
-        templateUrl: 'app/inbox/index.html'
+        templateUrl: 'app/mailbox/inbox.html'
       })
     ;
 

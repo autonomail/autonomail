@@ -11,14 +11,22 @@
 
     return Class.extend({
       /**
+       * Return a rejected promise indicating a 'not yet implemented' error.
+       * @return {Promise.promise|*}
+       * @protected
+       */
+      _notYetImplemented: function() {
+        return $q.reject(new RuntimeError('Not yet implemented'));
+      },
+
+
+      /**
        * Check if given username is available.
        * @param username {string} the username to check.
        * @return {Promise} resolved if ok; rejected otherwise.
        */
       checkUsernameAvailable: function(username) {
-        var defer = $q.defer();
-        defer.reject(new RuntimeError('Not yet implemented'));
-        return defer.promise;
+        return this._notYetImplemented();
       },
 
       /**
@@ -27,9 +35,7 @@
        * @return {Promise} resolved if ok; rejected otherwise.
        */
       register: function(user) {
-        var defer = $q.defer();
-        defer.reject(new RuntimeError('Not yet implemented'));
-        return defer.promise;
+        return this._notYetImplemented();
       },
 
 
@@ -39,9 +45,7 @@
        * @return {Promise} resolved if ok; rejected otherwise.
        */
       login: function(user) {
-        var defer = $q.defer();
-        defer.reject(new RuntimeError('Not yet implemented'));
-        return defer.promise;
+        return this._notYetImplemented();
       },
 
 
@@ -51,9 +55,7 @@
        * @return {Promise} resolves to Object; rejected otherwise.
        */
       getSecureData: function(userId) {
-        var defer = $q.defer();
-        defer.reject(new RuntimeError('Not yet implemented'));
-        return defer.promise;
+        return this._notYetImplemented();
       },
 
 
@@ -65,10 +67,34 @@
        * @return {Promise} resolves if ok; rejected otherwise.
        */
       setSecureData: function(userId, data) {
-        var defer = $q.defer();
-        defer.reject(new RuntimeError('Not yet implemented'));
-        return defer.promise;
+        return this._notYetImplemented();
       },
+
+
+      /**
+       * Get no. of messages in given folder.
+       * @param userId {String} user id.
+       * @param [folder] {string} Folder to check.
+       * @return {Promise} resolves to integer.
+       */
+      getMsgCount: function(userId, folder) {
+        return this._notYetImplemented();
+      },
+
+
+
+      /**
+       * Get no. of messages in given folder.
+       * @param userId {String} user id.
+       * @param [folder] {string} Folder to check.
+       * @param from {string} retrieve messages older than this timestamp.
+       * @param [count] {Integer} no. of messages to retrieve. Default is 10.
+       * @return {Promise} resolves to Array of messages.
+       */
+      getMsg: function(userId, folder, from, count) {
+        return this._notYetImplemented();
+      },
+
 
 
 

@@ -2,14 +2,18 @@
 
 (function(app) {
 
-  app.controller('InboxCtrl', function ($scope, $state, Log, UserMgr) {
+  app.controller('InboxCtrl', function ($scope, $state, Log, UserMgr, Mail) {
     var log = Log.create('inbox');
 
     UserMgr.ensureSecureDataHasBeenSetup()
       .catch(function(err) { log.error(err); })
       .then(function allOk() {
 
-        log.info('in inbox!');
+        // init mailbox access
+        $scope._mailbox = Mail.open(UserMgr.getCurrentUser());
+
+
+        // TODO: load initial messages
 
       });
   });
