@@ -3,7 +3,7 @@
     <div class="col-md-6 col-md-offset-4">
       <h2>Login</h2>
 
-      <form role="form" name="loginForm" ng-controller="LoginFormCtrl">
+      <form ng-show="user.domain" role="form" name="loginForm" ng-controller="LoginFormCtrl">
         <span ng-show="error" class="alert alert-danger">{{error}}</span>
         <div class="form-group">
           <label class="sr-only" for="loginForm_username">Username</label>
@@ -11,7 +11,7 @@
                  ng-model="user.name"
                  required
               >
-          <span class="post-label"><span>@</span><span>autonomail.com</span></span>
+          <span class="post-label"><span>@</span><span>{{ user.domain }} </span></span>
             <span ng-show="signupForm.username.$dirty && signupForm.username.$invalid" class="validation_errors alert alert-danger">
               <span ng-show="signupForm.username.$error.required">Please fill this in</span>
             </span>

@@ -18,7 +18,7 @@
       /**
        * Set login credentials for the given user.
        *
-       * @param data {Object} contains keys: name, password
+       * @param data {Object} contains keys: name, password, domain
        *
        * @return user id
        */

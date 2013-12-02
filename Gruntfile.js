@@ -84,11 +84,11 @@ module.exports = function (grunt) {
         // Change this to '0.0.0.0' to access the server from outside.
         hostname: 'localhost'
       },
-      livereload: {
+      server: {
         options: {
           middleware: function (connect) {
             return [
-              lrSnippet,
+//              lrSnippet,
               mountFolder(connect, '.tmp'),
               mountFolder(connect, yeomanConfig.app)
             ];
@@ -428,7 +428,7 @@ module.exports = function (grunt) {
       'clean:server',
       'concurrent:server',
       'autoprefixer',
-      'connect:livereload',
+      'connect:server',
       'open',
       'watch'
     ]);

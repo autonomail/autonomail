@@ -67,6 +67,26 @@
           defer.reject('User already exists');
         } else {
           self.db.users[user.name] = user;
+
+          self.db.mail[user.name] = {
+            'inbox': {
+              name: 'Inbox',
+              messagles: []
+            },
+            'sent': {
+              name: 'Sent',
+              messagles: []
+            },
+            'drafts': {
+              name: 'Drafts',
+              messagles: []
+            },
+            'trash': {
+              name: 'Trash',
+              messagles: []
+            }
+          };
+
           self._save();
           defer.resolve();
         }
@@ -124,7 +144,6 @@
         self._save();
         defer.resolve();
 
-
         return defer.promise;
       },
 
@@ -136,9 +155,9 @@
 
         var defer = $q.defer();
 
-        if (self.mail[userId]) {
-          if (self.mail[userId][folder]) {
-            defer.resolve(self.mail[userId][folder].length);
+        if (self.db.mail[userId]) {
+          if (self.db.mail[userId][folder]) {
+            defer.resolve(self.db.mail[userId][folder].messages.length);
           } else {
             defer.resolve(0);
           }
@@ -158,9 +177,9 @@
 
         var defer = $q.defer();
 
-        if (self.mail[userId]) {
-          if (self.mail[userId][folder]) {
-            var mail = self.mail[userId][folder],
+        if (self.db.mail[userId]) {
+          if (self.db.mail[userId][folder]) {
+            var mail = self.db.mail[userId][folder].messages,
               ret = [];
 
             for (var i=0; ret.length < count && i<mail.length; ++i) {
@@ -173,6 +192,35 @@
           } else {
             defer.resolve([]);
           }
+        } else {
+          defer.resolve([]);
+        }
+
+        return defer.promise;
+      },
+
+
+
+      getFolders: function(userId) {
+        var self = this;
+
+        log.debug('Get folders for ' + userId);
+
+        var defer = $q.defer();
+
+        if (self.db.mail[userId]) {
+          var ret = [];
+
+          for (var folder in self.db.mail[userId]) {
+            if (self.db.mail[userId].hasOwnProperty(folder)) {
+              ret.push({
+                id: folder,
+                name: self.db.mail[userId][folder].name
+              });
+            }
+          }
+
+          defer.resolve(ret);
         } else {
           defer.resolve([]);
         }

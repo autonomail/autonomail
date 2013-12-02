@@ -10,6 +10,7 @@
     'App.server',
     'App.user',
     'App.login',
+    'App.mailbox',
     'App.signup'
   ]);
 

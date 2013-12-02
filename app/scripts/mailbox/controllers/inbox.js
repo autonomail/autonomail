@@ -7,16 +7,23 @@
 
     UserMgr.ensureSecureDataHasBeenSetup()
       .catch(function(err) { log.error(err); })
-      .then(function allOk() {
+      .then(function readyToOpenMailbox() {
+        return Mail.open(UserMgr.getCurrentUser())
+      })
+      .then(function getFolders(mailbox) {
+        $scope._mailbox = mailbox;
+        return $scope._mailbox.folders();
+      })
+      .then(function showFolders(folders) {
+        $scope.folders = folders;
+      })
+      .then(function showMessagesInCurrentfolder() {
+        // TODO
+      })
+    ;
 
-        // init mailbox access
-        $scope._mailbox = Mail.open(UserMgr.getCurrentUser());
 
-
-        // TODO: load initial messages
-
-      });
   });
 
-}(angular.module('App.signup', ['App.server', 'ui.validate'])));
+}(angular.module('App.mailbox', ['App.server', 'ui.validate'])));
 

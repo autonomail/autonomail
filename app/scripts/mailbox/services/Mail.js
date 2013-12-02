@@ -28,6 +28,19 @@
         self.log = Log.create('Mail(' + userId + ')');
       },
 
+
+
+      /**
+       * Get folders.
+       *
+       * @return {Promise} resolves to Array of folders.
+       */
+      folders: function() {
+        return Server.getFolders(this.userId);
+      },
+
+
+
       /**
        * Get messages.
        *
@@ -120,4 +133,4 @@
   });
 
 
-}(angular.module('App.user', ['App.common', 'App.data'])));
+}(angular.module('App.mailbox', ['App.common', 'App.data'])));

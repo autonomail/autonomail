@@ -84,7 +84,7 @@
 
 
       /**
-       * Get no. of messages in given folder.
+       * Get messages in given folder.
        * @param userId {String} user id.
        * @param [folder] {string} Folder to check.
        * @param from {string} retrieve messages older than this timestamp.
@@ -95,6 +95,16 @@
         return this._notYetImplemented();
       },
 
+
+
+      /**
+       * Get folders.
+       * @param userId {String} user id.
+       * @return {Promise} resolves to Array of {folder id: folder name}.
+       */
+      getFolders: function(userId) {
+        return this._notYetImplemented();
+      },
 
 
 

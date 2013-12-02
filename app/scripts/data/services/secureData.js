@@ -287,11 +287,10 @@
                 return params.data;
               });
           })
-          .then(function persistToServerAndStorage(encryptedData) {
-            // we save to server first!
-            return self._persistSecureDataToServer(userId, encryptedData)
-              .then(function persistToStorage() {
-                return Storage.set(userId, encryptedData);
+          .then(function persistToStorageAndServer(encryptedData) {
+            return Storage.set(userId, encryptedData)
+              .then(function persistToServer() {
+                return self._persistSecureDataToServer(userId);
               });
           })
         ;
