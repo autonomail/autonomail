@@ -1,0 +1,25 @@
+#page-mailbox {
+  padding: 1.5em 1em 1em;
+
+  .folders {
+    margin-top: 2em;
+
+    ul {
+      font-size: 120%;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+
+      li {
+        margin: 0.2em 0;
+
+        a {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+
+

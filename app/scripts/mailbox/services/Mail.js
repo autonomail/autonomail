@@ -26,6 +26,8 @@
 
         self.userId = userId;
         self.log = Log.create('Mail(' + userId + ')');
+
+        self.currentFolder = 'inbox'; // initial folder is always inbox
       },
 
 
@@ -35,32 +37,44 @@
        *
        * @return {Promise} resolves to Array of folders.
        */
-      folders: function() {
+      getFolders: function() {
         return Server.getFolders(this.userId);
       },
 
 
 
       /**
-       * Get messages.
+       * Set currently active folder.
+       *
+       * @param folderId {string} folder id.
+       */
+      setFolder: function(folderId) {
+        this.currentFolder = folderId;
+      },
+
+
+
+
+      /**
+       * Get messages in current folder.
        *
        * @param from {string} retrieve messages older than this timestamp.
        * @param [count] {Integer} no. of messages to retrieve. Default is 10.
        *
        * @return {Promise} resolves to Array of messages.
        */
-      get: function(from, count) {
+      getMessages function(from, count) {
         count = count || 10;
         return Server.getMsg(this.userId, 'inbox', from, count);
       },
 
 
       /**
-       * Get total no. of messages in mailbox.
+       * Get total no. of messages in current folder.
        *
        * @return {Promise} resolves to integer.
        */
-      count: function() {
+      getCount: function() {
         return Server.getMsgCount(this.userId, 'inbox');
       },
 

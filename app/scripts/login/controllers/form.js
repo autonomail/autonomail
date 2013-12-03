@@ -12,7 +12,7 @@
         $scope.user = {
           domain: lastUser ? lastUser.domain : 'autonomail.com',
           name: lastUser ? lastUser.name : '',
-          password: ''
+          password: 'password1'
         };
       });
 

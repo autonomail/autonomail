@@ -39,6 +39,38 @@
       },
 
 
+      /**
+       * Setup default mail folders for given user.
+       * @param userId {string} user id.
+       * @private
+       */
+      _setupUserMailFolders : function(userId) {
+        var self = this;
+
+        if (self.db.mail[userId]) return;
+
+        self.db.mail[userId] = {
+          'inbox': {
+            name: 'Inbox',
+            messagles: []
+          },
+          'sent': {
+            name: 'Sent',
+            messagles: []
+          },
+          'drafts': {
+            name: 'Drafts',
+            messagles: []
+          },
+          'trash': {
+            name: 'Trash',
+            messagles: []
+          }
+        };
+      },
+
+
+
       checkUsernameAvailable: function(username) {
         log.debug('Check username availability: ' + username);
 
@@ -67,26 +99,6 @@
           defer.reject('User already exists');
         } else {
           self.db.users[user.name] = user;
-
-          self.db.mail[user.name] = {
-            'inbox': {
-              name: 'Inbox',
-              messagles: []
-            },
-            'sent': {
-              name: 'Sent',
-              messagles: []
-            },
-            'drafts': {
-              name: 'Drafts',
-              messagles: []
-            },
-            'trash': {
-              name: 'Trash',
-              messagles: []
-            }
-          };
-
           self._save();
           defer.resolve();
         }
@@ -177,21 +189,19 @@
 
         var defer = $q.defer();
 
-        if (self.db.mail[userId]) {
-          if (self.db.mail[userId][folder]) {
-            var mail = self.db.mail[userId][folder].messages,
-              ret = [];
+        self._setupUserMailFolders(userId);
 
-            for (var i=0; ret.length < count && i<mail.length; ++i) {
-              if (mail[i].ts && mail[i].ts < from) {
-                ret.push(mail[i]);
-              }
+        if (self.db.mail[userId][folder]) {
+          var mail = self.db.mail[userId][folder].messages,
+            ret = [];
+
+          for (var i=0; ret.length < count && i<mail.length; ++i) {
+            if (mail[i].ts && mail[i].ts < from) {
+              ret.push(mail[i]);
             }
-
-            defer.resolve(ret);
-          } else {
-            defer.resolve([]);
           }
+
+          defer.resolve(ret);
         } else {
           defer.resolve([]);
         }
@@ -208,22 +218,20 @@
 
         var defer = $q.defer();
 
-        if (self.db.mail[userId]) {
-          var ret = [];
+        self._setupUserMailFolders(userId);
 
-          for (var folder in self.db.mail[userId]) {
-            if (self.db.mail[userId].hasOwnProperty(folder)) {
-              ret.push({
-                id: folder,
-                name: self.db.mail[userId][folder].name
-              });
-            }
+        var ret = [];
+
+        for (var folder in self.db.mail[userId]) {
+          if (self.db.mail[userId].hasOwnProperty(folder)) {
+            ret.push({
+              id: folder,
+              name: self.db.mail[userId][folder].name
+            });
           }
-
-          defer.resolve(ret);
-        } else {
-          defer.resolve([]);
         }
+
+        defer.resolve(ret);
 
         return defer.promise;
       },

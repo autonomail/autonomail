@@ -35,9 +35,16 @@
       .state('signup.process', {
         templateUrl: 'app/signup/process.html'
       })
-      .state('inbox', {
-        url: '/inbox',
-        templateUrl: 'app/mailbox/inbox.html'
+      .state('mail', {
+        url: '/mail',
+        templateUrl: 'app/mailbox/index.html',
+        controller: function($state) {
+          $state.go('mail.folder');
+        }
+      })
+      .state('mail.folder', {
+        url: '/mail/:folderId',
+        templateUrl: 'app/mailbox/folder.html'
       })
     ;
 
