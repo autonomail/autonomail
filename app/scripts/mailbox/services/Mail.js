@@ -10,10 +10,94 @@
 (function(app) {
   'use strict';
 
+
+  /**
+   * Represents a view of a mailbox.
+   *
+   * This acts as an intermediary to the mailbox's message fetching APIs to make message fetching easy. It also allows
+   * us to expose a pub-sub pattern API to the client to make it feel like messages show as soon as they arrive.
+   *
+   * This uses a timer to keep its view updated every so often.
+   */
+  app.provider('MailView', function() {
+    var fetchIntervalMs = 60000; // 60 seconds
+
+    return {
+      /**
+       * Set the delay between subsequent message fetches.
+       * @param intervalMs {Integer} delay in milliseconds.
+       */
+      setInterval: function(intervalMs) {
+        fetchIntervalMs = intervalMs;
+      },
+
+      $get: function(RuntimeError, Log, $timeout) {
+        return Class.extend({
+          /**
+           * Constructor.
+           * @param mailbox {_Mailbox} the mailbox to create this view on.
+           * @param options {Object} view configuration options.
+           * @param options.perPage {Number} no. of messages to show per page.
+           * @param options.page {Number} the page to show.
+           * @param options.onMessages {Function} handler to call when the messages in view change, signature: (Array messages)
+           */
+          init: function(mailbox, options) {
+            var self = this;
+
+            self.perPage = options.perPage;
+            self.page = options.page;
+            self.onMessages = options.onMessages;
+            self.mailbox = mailbox;
+
+            self.log = Log.create('Mailview(' + self.folderId + ')');
+
+            self.timerActive = true;
+            self._check();
+          },
+
+
+          /**
+           * Check for new messages.
+           * @private
+           */
+          _check: function() {
+            var self = this;
+
+            if (!self.timerActive) return;
+
+            self.mailbox.getMessages((self.page - 1) * self.perPage, self.perPage)
+              .catch(function (err) {
+                self.log.error(new RuntimeError('Error checking for new messages', err));
+              })
+              .then(function publishMessages(messages) {
+                self.onMessages.call(null, messages);
+              })
+              .then(function setTimer() {
+                $timeout(function() {
+                  self._check.call(self);
+                }, 60000);
+              })
+            ;
+          },
+
+          /**
+           * Destroy this mail view.
+           */
+          destroy: function() {
+            this.timerActive = false;
+          }
+        });
+      }
+    };
+  });
+
+
+
+
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('_Mailbox', function(Log, Server) {
+  app.factory('Mailbox', function(Log, Server, MailView) {
 
     return Class.extend({
 
@@ -63,9 +147,9 @@
        *
        * @return {Promise} resolves to Array of messages.
        */
-      getMessages function(from, count) {
+      getMessages: function(from, count) {
         count = count || 10;
-        return Server.getMsg(this.userId, 'inbox', from, count);
+        return Server.getMsg(this.userId, this.currentFolder, from, count);
       },
 
 
@@ -90,15 +174,38 @@
         var defer = $q.defer();
         defer.resolve();
         return defer.promise;
-      }
+      },
 
+
+      /**
+       * Create a view of the contents of this mailbox.
+       *
+       * Only *one* view is active at any given time, meaning that any previously created view is automatically stopped.
+       *
+       * @param options {Object} configuration options.
+       * @param options.perPage {Number} no. of messages to show per page.
+       * @param options.page {Number} the page to show.
+       * @param options.onMessages {Function} handler to call when the messages in view change, signature: (Array messages)
+       *
+       * @return {MailView}
+       */
+      createView: function(options) {
+        var self = this;
+
+        // destroy existing view
+        if (self._mailView) {
+          self._mailView.destroy();
+        }
+
+        return (self._mailView = new MailView(this, options));
+      }
     });
 
   });
 
 
 
-  app.factory('Mail', function($q, Log, _Mailbox) {
+  app.factory('Mail', function($q, Log, Mailbox) {
     var log = Log.create('Mail');
 
     /** Keep track of mailbox instances. */
@@ -114,7 +221,7 @@
       open: function(userId) {
         if (!mailBoxes[userId]) {
           log.info('Opening Mailbox: ' + userId);
-          mailBoxes[userId] = new _Mailbox(userId);
+          mailBoxes[userId] = new Mailbox(userId);
         }
         var defer = $q.defer();
         defer.resolve(mailBoxes[userId]);

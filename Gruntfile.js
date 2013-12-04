@@ -43,7 +43,7 @@ module.exports = function (grunt) {
       },
       styles: {
         files: ['<%= yeoman.app %>/styles/{,*/}*.css'],
-        tasks: ['copy:styles', 'autoprefixer']
+        tasks: ['copy:server', 'autoprefixer']
       },
       templates: {
         files: [
@@ -321,9 +321,8 @@ module.exports = function (grunt) {
           src: [
             '*.{ico,png,txt}',
             '.htaccess',
-            'bower_components/**/*',
-            'images/{,*/}*.{gif,webp}',
-            'styles/fonts/*'
+            'bower_components/font-awesome/fonts',
+            'images/{,*/}*.{gif,webp}'
           ]
         }, {
           expand: true,
@@ -334,11 +333,13 @@ module.exports = function (grunt) {
           ]
         }]
       },
-      styles: {
-        expand: true,
-        cwd: '<%= yeoman.app %>/styles',
-        dest: '.tmp/styles/',
-        src: '{,*/}*.css'
+      server: {
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.app %>/bower_components/font-awesome/fonts',
+          dest: '.tmp/fonts/',
+          src: '*.*'
+        }]
       }
     },
     concurrent: {
@@ -346,7 +347,7 @@ module.exports = function (grunt) {
         'coffee:dist',
         'ngtemplates',
         'compass:server',
-        'copy:styles'
+        'copy:server'
       ],
       test: [
         'coffee',

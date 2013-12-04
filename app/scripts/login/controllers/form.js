@@ -42,7 +42,7 @@
           });
         })
         .then(function showInbox() {
-          $state.go('inbox');
+          $state.go('mail');
         })
         .catch(function (err) {
           $scope.error = '' + err;

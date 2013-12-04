@@ -1,8 +1,6 @@
-$imagePath: "../images";
-$iconSpritePath: $imagePath + "/glyphicons-halflings.png";
-$iconWhiteSpritePath: $imagePath"/glyphicons-halflings-white.png";
-
+@import "variables";
 @import "sass-bootstrap/lib/bootstrap";
+@import "font-awesome/scss/font-awesome";
 @import "compass/css3";
 @import "./_mixins";
 @import "./_loader";

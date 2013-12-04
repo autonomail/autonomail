@@ -21,13 +21,15 @@
 
         // when user wants to open a folder
         $scope.openFolder = function(folderId) {
-          // set it as current folder in the mailbox
-          $scope.mailbox.setFolder(folderId);
           // shift inner state
           $state.go('mail.folder', {
             folderId: folderId
           });
+          return false;
         };
+
+
+        // TODO: watch for changes to current folder
 
       })
     ;

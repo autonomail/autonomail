@@ -73,7 +73,7 @@
         .then(function registeredOk() {
           var userId = AuthCredentials.set($scope.user);
           UserMgr.setCurrentUser(userId);
-          $state.go('inbox');
+          $state.go('mail');
         })
         .catch(function (err) {
           $scope.error = '' + err;

@@ -8,12 +8,23 @@
     var log = Log.create('FolderCtrl(' + folderId + ')');
     $scope.folderId = folderId;
 
-    // TODO: store the current folder in the Mailbox service instance - MailboxCtrl should watch this for changes and highlight the appropriate link accordingly.
-
     Mail.open(UserMgr.getCurrentUser())
       .catch(function(err) { log.error(err); })
-      .then(function getMessagesInFolder(mailbox) {
-        $scope._mailbox = mailbox;
+      .then(function gotMailbox(mailbox) {
+        $scope.mailbox = mailbox;
+      })
+      .then(function setCurrentFolder() {
+        $scope.mailbox.setFolder(folderId);
+      })
+      .then(function setupInitialView() {
+        $scope.view = $scope.mailbox.createView({
+          perPage: 10,
+          page: 1,
+          onMessages: function(messages) {
+            log.debug('Got messages: ' + messages.count);
+            $scope.messages = messages;
+          }
+        });
       })
     ;
   });

@@ -52,19 +52,19 @@
         self.db.mail[userId] = {
           'inbox': {
             name: 'Inbox',
-            messagles: []
+            messages: []
           },
           'sent': {
             name: 'Sent',
-            messagles: []
+            messages: []
           },
           'drafts': {
             name: 'Drafts',
-            messagles: []
+            messages: []
           },
           'trash': {
             name: 'Trash',
-            messagles: []
+            messages: []
           }
         };
       },

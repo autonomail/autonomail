@@ -2,7 +2,7 @@
   <div class="row">
 
     <div ng-controller="MailboxCtrl">
-      <div class="left col-md-2">
+      <div class="col-md-1">
         <div class="compose">
           <button type="button" class="btn btn-primary">Compose</button>
         </div>
@@ -10,12 +10,12 @@
           <div loader ng-hide="folders"></div>
           <ul ng-show="folders">
             <li ng-repeat="folder in folders">
-              <a ng-class="folder.id" href="#" ng-click="openFolder(folder.id)" ng-attr-title="Open {{ folder.name }}">{{ folder.name }}</a>
+              <a ng-class="folder.id" ng-click="openFolder(folder.id)" ng-attr-title="Open {{ folder.name }}">{{ folder.name }}</a>
             </li>
           </ul>
         </div>
       </div>
-      <div class="right col-md-10">
+      <div class="col-md-11">
         <div ui-view></div>
       </div>
     </div>

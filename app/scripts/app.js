@@ -14,7 +14,7 @@
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider, MailViewProvider) {
     $urlRouterProvider.otherwise('/login');
 
     $stateProvider
@@ -32,18 +32,17 @@
       .state('signup.form', {
         templateUrl: 'app/signup/form.html'
       })
-      .state('signup.process', {
-        templateUrl: 'app/signup/process.html'
-      })
       .state('mail', {
         url: '/mail',
         templateUrl: 'app/mailbox/index.html',
         controller: function($state) {
-          $state.go('mail.folder');
+          $state.go('mail.folder', {
+            folderId: 'inbox'
+          });
         }
       })
       .state('mail.folder', {
-        url: '/mail/:folderId',
+        url: '/:folderId',
         templateUrl: 'app/mailbox/folder.html'
       })
     ;
@@ -54,6 +53,8 @@
 
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);
     StorageProvider.setBackend(StorageProvider.BACKEND_TYPES.LOCAL_STORAGE);
+
+    MailViewProvider.setInterval(5000);
   });
 
   app.run(function(Random) {
