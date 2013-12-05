@@ -24,6 +24,7 @@
   }
 
   .messages {
+    overflow: hidden;
     padding-left: 3em;
 
     .actions {
@@ -43,6 +44,31 @@
     .table {
       clear: both;
       padding-top: 0.2em;
+
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+
+        li {
+          @include clearfix;
+          margin: 0;
+          padding: 0.5em 0;
+          background-color: #f6f6f6;
+          border-bottom: 1px solid #e1e1e1;
+
+          span {
+            white-space: nowrap;
+            overflow: hidden;
+          }
+
+          .preview {
+            color: #777;
+          }
+        }
+      }
     }
   }
 }

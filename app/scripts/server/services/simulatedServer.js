@@ -52,7 +52,34 @@
         self.db.mail[userId] = {
           'inbox': {
             name: 'Inbox',
-            messages: []
+            messages: [
+              {
+                id: '182774',
+                date: moment().toISOString(),
+                from: _.str.gen(1, 998).pop() + ' <' + _.str.gen(1, 998).pop() + '@test.com>',
+                to: 'john@test.com',
+                /*
+                  From http://www.faqs.org/rfcs/rfc2822.html (section 2.1.1)
+                  - absolute max 998 characters (excluding CRLF) per line
+                  - preferred max of 78 characters (excluding CRLF) per line
+                 */
+                subject: _.str.gen(5, 998).join("\r\n"),
+                body: _.str.gen(40, 998).join("\r\n")
+              },
+              {
+                id: '182775',
+                date: moment().add(-1, 'days').toISOString(),
+                from: ' <' + _.str.gen(1, 998).pop() + '@test.com>  ',
+                to: 'john@test.com',
+                /*
+                 From http://www.faqs.org/rfcs/rfc2822.html (section 2.1.1)
+                 - absolute max 998 characters (excluding CRLF) per line
+                 - preferred max of 78 characters (excluding CRLF) per line
+                 */
+                subject: _.str.gen(5, 998).join("\r\n"),
+                body: _.str.gen(40, 998).join("\r\n")
+              }
+            ]
           },
           'sent': {
             name: 'Sent',
@@ -195,10 +222,8 @@
           var mail = self.db.mail[userId][folder].messages,
             ret = [];
 
-          for (var i=0; ret.length < count && i<mail.length; ++i) {
-            if (mail[i].ts && mail[i].ts < from) {
-              ret.push(mail[i]);
-            }
+          for (var i=from; ret.length < count && i<mail.length; ++i) {
+            ret.push(mail[i]);
           }
 
           defer.resolve(ret);

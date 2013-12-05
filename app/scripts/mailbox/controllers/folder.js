@@ -21,8 +21,16 @@
           perPage: 10,
           page: 1,
           onMessages: function(messages) {
-            log.debug('Got messages: ' + messages.count);
-            $scope.messages = messages;
+            log.debug('Got messages: ' + messages.length);
+
+            $scope.messages = _.map(messages, function(message) {
+              return {
+                date: moment(message.date).format('MMM d'),
+                from: _.str.prune(message.from.name || message.from.email, 30),
+                subject: _.str.prune(message.subject, 30),
+                preview: _.str.prune(message.body, 70)
+              };
+            });
           }
         });
       })

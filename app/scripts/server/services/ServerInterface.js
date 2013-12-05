@@ -87,8 +87,8 @@
        * Get messages in given folder.
        * @param userId {String} user id.
        * @param [folder] {string} Folder to check.
-       * @param from {string} retrieve messages older than this timestamp.
-       * @param [count] {Integer} no. of messages to retrieve. Default is 10.
+       * @param from {string} retrieve messages from this index onwards (0 = newest message, 1 = second newest, etc).
+       * @param [count] {Integer} no. of messages to retrieve.
        * @return {Promise} resolves to Array of messages.
        */
       getMsg: function(userId, folder, from, count) {
