@@ -4,7 +4,7 @@
   app.provider('MailMessage', function() {
 
     return {
-      $get: function(Log) {
+      $get: function(Log, $timeout) {
 
         var MailMessage = Class.extend({
           /**
@@ -16,7 +16,37 @@
             this.log = Log.create('Message(' + msg.id + ')');
             this.raw = msg;
             this.parsed = {};
+            this.observers = {};
             this.log.debug('created!', this.raw);
+
+            this.process();
+          },
+
+          /**
+           * Register for event notifications.
+           * @param obj {object} the object to be notified.
+           */
+          registerObserver: function(obj) {
+            this.observers[obj] = obj;
+          },
+
+
+          /**
+           * Process this message, notifying observers once done.
+           */
+          process: function() {
+            var self = this;
+
+            $timeout(function() {
+              _.invoke(self.observers, 'notify', 'processed');
+            }, 3000);
+          }
+        });
+
+        MailMessage.prop('id', {
+          set: false,
+          get: function() {
+            return this.raw.id;
           }
         });
 

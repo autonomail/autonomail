@@ -6,7 +6,7 @@
    */
   app.factory('Mailbox', function(Log, Server, MailView, MailMessage) {
 
-    return Class.extend({
+    var Mailbox = Class.extend({
 
       /**
        * Constructor.
@@ -18,7 +18,7 @@
         self.userId = userId;
         self.log = Log.create('Mail(' + userId + ')');
 
-        self.currentFolder = 'inbox'; // initial folder is always inbox
+        self.folder = 'inbox'; // initial folder is always inbox
       },
 
 
@@ -34,16 +34,6 @@
 
 
 
-      /**
-       * Set currently active folder.
-       *
-       * @param folderId {string} folder id.
-       */
-      setFolder: function(folderId) {
-        this.currentFolder = folderId;
-      },
-
-
 
 
       /**
@@ -56,11 +46,13 @@
        */
       getMessages: function(from, count) {
         count = count || 10;
-        return Server.getMsg(this.userId, this.currentFolder, from, count)
+        return Server.getMsg(this.userId, this.folder, from, count)
           .then(function buildMessageObjects(messages) {
-            return _.map(messages, function(msg) {
-              return new MailMessage(msg);
+            var ret = {};
+            _.each(messages, function(msg) {
+              ret[msg.id] = new MailMessage(msg);
             });
+            return ret;
           });
       },
 
@@ -113,6 +105,14 @@
       }
     });
 
+
+    /**
+     * Mailbox current folder.
+     */
+    Mailbox.prop('folder', { set: true });
+
+
+    return Mailbox;
   });
 
 

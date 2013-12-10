@@ -51,10 +51,10 @@
 
       /**
        * Get secure data from server.
-       * @param userId {String} user id.
+       * @param emailAddress {String} user id.
        * @return {Promise} resolves to Object; rejected otherwise.
        */
-      getSecureData: function(userId) {
+      getSecureData: function(emailAddress) {
         return this._notYetImplemented();
       },
 
@@ -62,22 +62,22 @@
 
       /**
        * Send secure data to server.
-       * @param userId {String} user id.
+       * @param emailAddress {String} user id.
        * @param data {Object} secure data.
        * @return {Promise} resolves if ok; rejected otherwise.
        */
-      setSecureData: function(userId, data) {
+      setSecureData: function(emailAddress, data) {
         return this._notYetImplemented();
       },
 
 
       /**
        * Get no. of messages in given folder.
-       * @param userId {String} user id.
+       * @param emailAddress {String} user id.
        * @param [folder] {string} Folder to check.
        * @return {Promise} resolves to integer.
        */
-      getMsgCount: function(userId, folder) {
+      getMsgCount: function(emailAddress, folder) {
         return this._notYetImplemented();
       },
 
@@ -85,13 +85,13 @@
 
       /**
        * Get messages in given folder.
-       * @param userId {String} user id.
+       * @param emailAddress {String} user id.
        * @param [folder] {string} Folder to check.
        * @param from {string} retrieve messages from this index onwards (0 = newest message, 1 = second newest, etc).
        * @param [count] {Integer} no. of messages to retrieve.
        * @return {Promise} resolves to Array of messages.
        */
-      getMsg: function(userId, folder, from, count) {
+      getMsg: function(emailAddress, folder, from, count) {
         return this._notYetImplemented();
       },
 
@@ -99,10 +99,10 @@
 
       /**
        * Get folders.
-       * @param userId {String} user id.
+       * @param emailAddress {String} user id.
        * @return {Promise} resolves to Array of {folder id: folder name}.
        */
-      getFolders: function(userId) {
+      getFolders: function(emailAddress) {
         return this._notYetImplemented();
       },
 

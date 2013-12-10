@@ -5,11 +5,8 @@
   app.controller('MailboxCtrl', function ($scope, $state, Log, UserMgr, Mail) {
     var log = Log.create('MailboxCtrl');
 
-    UserMgr.ensureSecureDataHasBeenSetup()
+    Mail.open(UserMgr.getCurrentUser())
       .catch(function(err) { log.error(err); })
-      .then(function readyToOpenMailbox() {
-        return Mail.open(UserMgr.getCurrentUser());
-      })
       .then(function getFolders(mailbox) {
         $scope.mailbox = mailbox;
         return $scope.mailbox.getFolders();

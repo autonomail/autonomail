@@ -33,6 +33,7 @@
         templateUrl: 'app/signup/form.html'
       })
       .state('mail', {
+        auth: true,
         url: '/mail',
         templateUrl: 'app/mailbox/index.html',
         controller: function($state) {
@@ -42,6 +43,7 @@
         }
       })
       .state('mail.folder', {
+        auth: true,
         url: '/:folderId',
         templateUrl: 'app/mailbox/folder.html'
       })
@@ -57,8 +59,23 @@
     MailViewProvider.setInterval(5000);
   });
 
-  app.run(function(Random) {
+  app.run(function($rootScope, $state, Log, UserMgr, Random) {
+    var log = Log.create('App');
+
     Random.startEntropyCollection();
+
+    $rootScope.$on('$stateChangeStart', function(event, toState){
+      // authentication for states which need it
+      if (toState.auth) {
+        UserMgr.ensureUserIsLoggedInAndHasSecureDataSetup()
+          .catch(function(err) {
+            event.preventDefault();
+            log.warn(err);
+            $state.go('login');
+          });
+      }
+    });
+
   });
 
 }(angular));

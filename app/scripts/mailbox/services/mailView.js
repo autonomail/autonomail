@@ -39,7 +39,7 @@
             self.onMessages = options.onMessages;
             self.mailbox = mailbox;
 
-            self.log = Log.create('Mailview(' + self.folderId + ')');
+            self.log = Log.create('Mailview(' + self.mailbox.folder + ')');
 
             self.timerActive = true;
             self._check();
@@ -54,6 +54,8 @@
             var self = this;
 
             if (!self.timerActive) return;
+
+            self.log.debug('Checking for new messages');
 
             self.mailbox.getMessages((self.page - 1) * self.perPage, self.perPage)
               .catch(function (err) {

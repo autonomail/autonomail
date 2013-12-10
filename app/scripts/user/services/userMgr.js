@@ -40,16 +40,16 @@
        * Ensures that the given user's secure data store and accompanying crypto keys have been setup.
        *
        * @param [userId] {string} user id. If not given then current user's is used. If current user not set then
-       * the 'login' state is invoked.
+       * the Promise is rejected.
        *
        * @return {Promise}
        */
-      ensureSecureDataHasBeenSetup: function(userId) {
+      ensureUserIsLoggedInAndHasSecureDataSetup: function(userId) {
         var defer = $q.defer();
 
         if (!userId) {
           if (!currentUser) {
-            $state.go('login');
+            defer.reject(new RuntimeError('User not yet logged in'));
           } else {
             userId = currentUser;
           }
@@ -74,8 +74,7 @@
             })
             .then(defer.resolve)
             .catch(function error(err) {
-              log.error(err);
-              defer.reject();
+              defer.reject(err);
             });
         }
 
