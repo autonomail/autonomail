@@ -29,7 +29,8 @@
            * @param options {Object} view configuration options.
            * @param options.perPage {Number} no. of messages to show per page.
            * @param options.page {Number} the page to show.
-           * @param options.onMessages {Function} handler to call when the messages in view change, signature: (Array messages)
+           * @param options.onMessages {Function} handler to call when the messages in view change, signature: (Array)
+           * @param options.onCount {Function} handler to call when the total messages in the folder changes, signature: (Number)
            */
           init: function(mailbox, options) {
             var self = this;
@@ -37,6 +38,7 @@
             self.perPage = options.perPage;
             self.page = options.page;
             self.onMessages = options.onMessages;
+            self.onCount = options.onCount;
             self.mailbox = mailbox;
 
             self.log = Log.create('Mailview(' + self.mailbox.folder + ')');
@@ -61,9 +63,11 @@
               .catch(function (err) {
                 self.log.error(new RuntimeError('Error checking for new messages', err));
               })
-              .then(function publishMessages(messages) {
-                self.onMessages.call(null, messages);
+              .then(self.onMessages)
+              .then(function getCount() {
+                return self.mailbox.getCount();
               })
+              .then(self.onCount)
               .then(function setTimer() {
                 $timeout(function() {
                   self._check.call(self);

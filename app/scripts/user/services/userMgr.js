@@ -5,7 +5,7 @@
 (function(app) {
   'use strict';
 
-  app.factory('UserMgr', function(Log, $q, RuntimeError, SecureData, AuthCredentials, GPG, $state) {
+  app.factory('UserMgr', function(Log, $q, RuntimeError, SecureData, AuthCredentials, GPG, Server) {
 
     var log = Log.create('UserMgr');
 
@@ -69,7 +69,8 @@
                   })
                   .then(function savePGPData(pgpData) {
                     return SecureData.set(userId, 'pgp', pgpData);
-                  });
+                  })
+                ;
               }
             })
             .then(defer.resolve)

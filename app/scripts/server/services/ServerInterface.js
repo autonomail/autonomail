@@ -23,9 +23,10 @@
       /**
        * Check if given username is available.
        * @param username {string} the username to check.
+       * @param domain {string} the domain to check against.
        * @return {Promise} resolved if ok; rejected otherwise.
        */
-      checkUsernameAvailable: function(username) {
+      checkUsernameAvailable: function(username, domain) {
         return this._notYetImplemented();
       },
 

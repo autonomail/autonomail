@@ -11,9 +11,13 @@
     $scope.mailbox = $scope.$parent.mailbox;
 
     $scope.mailbox.folder = folderId;
+
     $scope.view = $scope.mailbox.createView({
       perPage: 10,
       page: 1,
+      onCount: function(count) {
+        $scope.totalItems = count;
+      },
       onMessages: function(messages) {
         $scope.messages = messages;
         $scope.msgIds = _.pluck(messages, 'id');
@@ -22,5 +26,5 @@
     });
   });
 
-}(angular.module('App.mailbox', ['App.common', 'App.user'])));
+}(angular.module('App.mailbox', ['App.common', 'App.user', 'ui.bootstrap.pagination'])));
 

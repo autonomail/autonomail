@@ -19,6 +19,10 @@
         self.log = Log.create('Mail(' + userId + ')');
 
         self.folder = 'inbox'; // initial folder is always inbox
+
+        self._cache = {
+          messages: {}
+        };
       },
 
 
@@ -45,12 +49,18 @@
        * @return {Promise} resolves to Array of Message instances.
        */
       getMessages: function(from, count) {
+        var self = this;
+        
         count = count || 10;
-        return Server.getMsg(this.userId, this.folder, from, count)
+        return Server.getMsg(self.userId, self.folder, from, count)
           .then(function buildMessageObjects(messages) {
             var ret = {};
             _.each(messages, function(msg) {
-              ret[msg.id] = new MailMessage(msg);
+              // re-use cached messages
+              if (!self._cache.messages[msg.id]) {
+                self._cache.messages[msg.id] = new MailMessage(msg);
+              }
+              ret[msg.id] = self._cache.messages[msg.id];
             });
             return ret;
           });
@@ -63,7 +73,7 @@
        * @return {Promise} resolves to integer.
        */
       getCount: function() {
-        return Server.getMsgCount(this.userId, 'inbox');
+        return Server.getMsgCount(this.userId, this.folder);
       },
 
 

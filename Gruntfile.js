@@ -171,7 +171,7 @@ module.exports = function (grunt) {
     ngtemplates:  {
       bootstrap:        {
         cwd:      '<%= yeoman.app %>/bower_components/angular-bootstrap',
-        src:      'template/{modal,progressbar,alert}/*.html',
+        src:      'template/{modal,progressbar,alert,pagination}/*.html',
         dest:     '<%= yeoman.app %>/scripts/bootstrap-templates.generated.js',
         options:  {
           module: 'App',

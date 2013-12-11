@@ -61,7 +61,7 @@
      * @return {Promise}
      */
     $scope.validateNameAvailable = function(username) {
-      return Server.checkUsernameAvailable(username);
+      return Server.checkUsernameAvailable(username, $scope.user.domain);
     };
 
 

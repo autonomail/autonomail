@@ -27,11 +27,10 @@
 
         $timeout(function() {
           for (var userId in self.db.users) {
-            var emailAddress = userId + '@autonomail.com';
-            self._setupUserMailFolders(emailAddress);
+            self._setupUserMailFolders(userId);
             var messages = self._createInboxMessages(parseInt(Math.random() * 3));
-            log.debug('Generated ' + messages.length + ' new inbox messages for: ' + emailAddress);
-            self.db.mail[emailAddress].inbox.messages = self.db.mail[emailAddress].inbox.messages.concat(messages);
+            log.debug('Generated ' + messages.length + ' new inbox messages for: ' + userId);
+            self.db.mail[userId].inbox.messages = messages.concat(self.db.mail[userId].inbox.messages);
           }
 
           if (!self.stopTimers) {
@@ -103,15 +102,15 @@
 
       /**
        * Setup default mail folders for given user.
-       * @param emailAddress {string} user id.
+       * @param userId {string} user id.
        * @private
        */
-      _setupUserMailFolders : function(emailAddress) {
+      _setupUserMailFolders : function(userId) {
         var self = this;
 
-        if (self.db.mail[emailAddress]) return;
+        if (self.db.mail[userId]) return;
 
-        self.db.mail[emailAddress] = {
+        self.db.mail[userId] = {
           'inbox': {
             name: 'Inbox',
             messages: self._createInboxMessages(2)
@@ -132,20 +131,16 @@
       },
 
 
-      _getUserIdFromEmailAddress: function(emailAddress) {
-        return emailAddress.substr(0, emailAddress.indexOf('@'));
-      },
 
-
-
-      checkUsernameAvailable: function(username) {
-        log.debug('Check username availability: ' + username);
+      checkUsernameAvailable: function(username, domain) {
+        var userId = username + '@' + domain;
+        log.debug('Check username availability: ' + userId);
 
         var self = this;
 
         var defer = $q.defer();
 
-        if (self.db.users[username]) {
+        if (self.db.users[userId]) {
           defer.reject(new RuntimeError('User already exists'));
         } else {
           defer.resolve();
@@ -162,10 +157,11 @@
 
         var defer = $q.defer();
 
-        if (self.db.users[user.name]) {
+        var userId = user.name + '@' + user.domain;
+        if (self.db.users[userId]) {
           defer.reject('User already exists');
         } else {
-          self.db.users[user.name] = user;
+          self.db.users[userId] = user;
           self._save();
           defer.resolve();
         }
@@ -181,8 +177,9 @@
 
         var defer = $q.defer();
 
-        if (self.db.users[user.name]) {
-          var stored = self.db.users[user.name];
+        var userId = user.name + '@' + user.domain;
+        if (self.db.users[userId]) {
+          var stored = self.db.users[userId];
 
           if (stored.password === user.password) {
             defer.resolve();
@@ -198,28 +195,28 @@
 
 
 
-      getSecureData: function(emailAddress) {
-        log.debug('Get secure data: ' + emailAddress);
+      getSecureData: function(userId) {
+        log.debug('Get secure data: ' + userId);
 
         var self = this;
 
         var defer = $q.defer();
 
-        defer.resolve(self.db.secureData[emailAddress] || null);
+        defer.resolve(self.db.secureData[userId] || null);
 
         return defer.promise;
       },
 
 
 
-      setSecureData: function(emailAddress, data) {
-        log.debug('Set secure data: ' + emailAddress, data);
+      setSecureData: function(userId, data) {
+        log.debug('Set secure data: ' + userId, data);
 
         var self = this;
 
         var defer = $q.defer();
 
-        self.db.secureData[emailAddress] = data;
+        self.db.secureData[userId] = data;
         self._save();
         defer.resolve();
 
@@ -227,16 +224,16 @@
       },
 
 
-      getMsgCount: function(emailAddress, folder) {
+      getMsgCount: function(userId, folder) {
         var self = this;
 
-        log.debug('Get count of mail in [' + folder + '] for ' + emailAddress);
+        log.debug('Get count of mail in [' + folder + '] for ' + userId);
 
         var defer = $q.defer();
 
-        if (self.db.mail[emailAddress]) {
-          if (self.db.mail[emailAddress][folder]) {
-            defer.resolve(self.db.mail[emailAddress][folder].messages.length);
+        if (self.db.mail[userId]) {
+          if (self.db.mail[userId][folder]) {
+            defer.resolve(self.db.mail[userId][folder].messages.length);
           } else {
             defer.resolve(0);
           }
@@ -249,17 +246,17 @@
 
 
 
-      getMsg: function(emailAddress, folder, from, count) {
+      getMsg: function(userId, folder, from, count) {
         var self = this;
 
-        log.debug('Get mail in [' + folder + '] for ' + emailAddress);
+        log.debug('Get mail in [' + folder + '] for ' + userId);
 
         var defer = $q.defer();
 
-        self._setupUserMailFolders(emailAddress);
+        self._setupUserMailFolders(userId);
 
-        if (self.db.mail[emailAddress][folder]) {
-          var mail = self.db.mail[emailAddress][folder].messages,
+        if (self.db.mail[userId][folder]) {
+          var mail = self.db.mail[userId][folder].messages,
             ret = [];
 
           for (var i=from; ret.length < count && i<mail.length; ++i) {
@@ -276,22 +273,22 @@
 
 
 
-      getFolders: function(emailAddress) {
+      getFolders: function(userId) {
         var self = this;
 
-        log.debug('Get folders for ' + emailAddress);
+        log.debug('Get folders for ' + userId);
 
         var defer = $q.defer();
 
-        self._setupUserMailFolders(emailAddress);
+        self._setupUserMailFolders(userId);
 
         var ret = [];
 
-        for (var folder in self.db.mail[emailAddress]) {
-          if (self.db.mail[emailAddress].hasOwnProperty(folder)) {
+        for (var folder in self.db.mail[userId]) {
+          if (self.db.mail[userId].hasOwnProperty(folder)) {
             ret.push({
               id: folder,
-              name: self.db.mail[emailAddress][folder].name
+              name: self.db.mail[userId][folder].name
             });
           }
         }

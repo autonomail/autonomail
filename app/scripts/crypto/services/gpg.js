@@ -329,7 +329,7 @@
           /**
            * Backup all GPG data.
            *
-           * @return {Promise} resolves to Object
+           * @return {Promise} resolves to Object containg backup data
            */
           backup: function() {
             var self = this;

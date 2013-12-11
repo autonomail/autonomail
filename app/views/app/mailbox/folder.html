@@ -2,17 +2,7 @@
   <div class="actions">
     <button class="refresh" type="button" class="btn btn-default"><i class="fa fa-refresh"></i></button>
   </div>
-  <div class="paging">
-    <ul class="pagination">
-      <li><a href="#">&laquo;</a></li>
-      <li><a href="#">1</a></li>
-      <li><a href="#">2</a></li>
-      <li><a href="#">3</a></li>
-      <li><a href="#">4</a></li>
-      <li><a href="#">5</a></li>
-      <li><a href="#">&raquo;</a></li>
-    </ul>
-  </div>
+  <pagination total-items="totalItems" page="view.page" items-per-page="view.perPage" ng-show="totalItems"></pagination>
   <div class="table">
     <div loader ng-hide="messages"></div>
     <ul ng-show="messages">
@@ -20,3 +10,5 @@
     </ul>
   </div>
 </div>
+
+
