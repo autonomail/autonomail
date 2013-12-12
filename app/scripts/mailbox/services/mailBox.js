@@ -45,24 +45,29 @@
        *
        * @param from {string} retrieve messages from this index onwards (0 = newest message, 1 = second newest, etc).
        * @param [count] {Integer} no. of messages to retrieve. Default is 10.
+       * @param [options] {Object} additional options.
+       * @param [options.expectedFirstId] {Number} expected id of first message in results.
+       * @param [options.expectedLastId] {Number} expected id of last message in results.
        *
-       * @return {Promise} resolves to Array of Message instances.
+       * @return {Promise} resolves to [ MailMessage, MailMessage, ... ] or { noChange: true }
        */
-      getMessages: function(from, count) {
+      getMessages: function(from, count, options) {
         var self = this;
         
         count = count || 10;
-        return Server.getMsg(self.userId, self.folder, from, count)
-          .then(function buildMessageObjects(messages) {
-            var ret = {};
-            _.each(messages, function(msg) {
-              // re-use cached messages
-              if (!self._cache.messages[msg.id]) {
-                self._cache.messages[msg.id] = new MailMessage(msg);
-              }
-              ret[msg.id] = self._cache.messages[msg.id];
-            });
-            return ret;
+        return Server.getMsg(self.userId, self.folder, from, count, options)
+          .then(function buildMessageObjects(result) {
+            if (result.noChange) {
+              return result;
+            } else {
+              return _.map(result.messages, function(msg) {
+                // re-use cached messages
+                if (!self._cache.messages[msg.id]) {
+                  self._cache.messages[msg.id] = new MailMessage(msg);
+                }
+                return self._cache.messages[msg.id];
+              });
+            }
           });
       },
 

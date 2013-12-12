@@ -1,6 +1,6 @@
 <div class="messages" ng-controller="FolderCtrl">
   <div class="actions">
-    <button class="refresh" type="button" class="btn btn-default" ng-click="view.refresh()"><i class="fa fa-refresh"></i></button>
+    <button class="refresh" type="button" class="btn btn-default" ng-click="view.refresh(true)"><i class="fa fa-refresh"></i></button>
   </div>
   <pagination total-items="totalItems" page="view.page" items-per-page="view.perPage" ng-show="totalItems" max-size="10" on-select-page="view.check()"></pagination>
   <div class="table">

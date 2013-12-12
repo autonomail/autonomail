@@ -49,6 +49,8 @@
 
             self.log = Log.create('Mailview(' + self.mailbox.folder + ')');
 
+            self.messageFetchOptions = {};
+
             self.timerPromise = null;
             self.timerIsActive = true;
             self.refresh();
@@ -57,34 +59,59 @@
 
           /**
            * Refresh messages.
+           *
+           * @param force {Boolean} if true then execute even if another timer is currently executing. Default is false.
            * @private
            */
-          refresh: function() {
+          refresh: function(force) {
             var self = this;
 
             // we might have called this method manually - let's cancel any pending timer in that case
             if (self.timerPromise) {
               $timeout.cancel(self.timerPromise);
             }
+            if (!self.timerIsActive) return;  // timer cancelled?
 
-            if (!self.timerIsActive) return;
+            if (self.timerExecuting && !force) return;  // already executing?
+            self.timerExecuting = true; // now we're executing
 
             var startIndex = (self.page - 1) * self._perPage;
             var count = self._perPage;
             self.log.debug('Loading upto ' + count + ' messages from index ' + startIndex);
 
-            self.mailbox.getMessages(startIndex, count)
+            // TODO: send current starting message id to server - if server sees unchanged then nothing to send back!
+            self.mailbox.getMessages(startIndex, count, self.messageFetchOptions)
               .catch(function (err) {
                 self.log.error(new RuntimeError('Error loading messages', err));
               })
-              .then(self.onMessages)
-              .then(function getCount() {
-                return self.mailbox.getCount();
+              .then(function checkResult(result) {
+                // only do stuff if something changed
+                if (result.noChange) {
+                  return self.log.debug('No change in messages');
+                } else {
+                  // notify client
+                  self.onMessages(result);
+
+                  // cache information useful for next call to fetch messages
+                  self.messageFetchOptions = {
+                    expectedFirstId: 0 < result.length ? result[0].id : null,
+                    expectedLastId: 0 < result.length ? result[result.length-1].id : null
+                  };
+
+                  // refresh the message count (it has probably changed)
+                  return self.mailbox.getCount().then(self.onCount);
+                }
               })
-              .then(self.onCount)
               .then(function setTimer() {
+                self.timerExecuting = false;  // we're done executing
+
                 // are we still wanting to do this?
                 if (self.timerIsActive) {
+                  // cancel any pending timers because we're about to kick one off!
+                  if (self.timerPromise) {
+                    $timeout.cancel(self.timerPromise);
+                  }
+
                   self.timerPromise = $timeout(function() {
                     self.refresh.call(self);
                   }, fetchIntervalMs, false /* don't do a digest() */);
@@ -92,6 +119,7 @@
               })
             ;
           },
+
 
           /**
            * Destroy this mail view.
@@ -111,7 +139,7 @@
           internal: '_perPage',
           set: function(val) {
             this._perPage = val;
-            this.refresh(); // trigger check
+            this.refresh(true); // trigger check
           }
         });
 
@@ -122,7 +150,7 @@
           internal: '_page',
           set: function(val) {
             this._page = val;
-            this.refresh(); // trigger check
+            this.refresh(true); // trigger check
           }
         });
 

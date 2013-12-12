@@ -11,6 +11,16 @@
 
 (function(app) {
 
+  app.factory('GPGError', function(RuntimeError) {
+    var GPGError = function() { RuntimeError.apply(this, arguments); };
+    GPGError.prototype = Object.create(RuntimeError);
+    GPGError.prototype.constructor = GPGError ;
+    return GPGError ;
+  });
+
+
+
+
   app.provider('GPG', function() {
 
     var workerScriptUrl = null;
@@ -21,7 +31,7 @@
       },
 
 
-      $get: function(Log, $q, RuntimeError, GPGWorker, Random) {
+      $get: function(Log, $q, GPGError, GPGWorker, Random) {
         var log = Log.create('GPG');
         
         return new (Class.extend({
@@ -253,7 +263,7 @@
                 return worker.run.apply(worker, args);
               })
               .then(function getFilesToSave() {
-                return worker.getFiles(
+                return self._fsGetFiles(
                   '/home/emscripten/.gnupg/pubring.gpg',
                   '/home/emscripten/.gnupg/secring.gpg',
                   '/home/emscripten/.gnupg/trustdb.gpg',
@@ -289,7 +299,7 @@
             self._lock()
               .then(function createInput() {
                 if (2048 !== keyStrength && 4096 !== keyStrength) {
-                  throw new RuntimeError('GPG key bit size must be either 2048 or 4096');
+                  throw new GPGError('GPG key bit size must be either 2048 or 4096');
                 }
 
                 var keyInput = [              
@@ -316,13 +326,55 @@
               })
               .then(defer.resolve)
               .catch(function (err) {
-                // TODO: create a GPGError class so that we can detect the error type outside!
-                defer.reject(new RuntimeError('PGP keypair generation error', err));
-              });
+                defer.reject(new GPGError('Keypair generation error', err));
+              })
             ;
 
             return defer.promise;
           }, // generateKeyPair()
+
+
+
+          /**
+           * Encrypt given data with user's public key.
+           *
+           * @param emailAddress {string} user id.
+           * @param data {string} data to encrypt.
+           */
+          encryptWithPublicKey: function(emailAddress, data) {
+            var self = this;
+
+            var defer = $q.defer();
+
+            log.debug('Encrypting ' + data.length + ' characters with public key for: '  + emailAddress);
+
+            var startTime = null;
+
+            self._lock()
+              .then(function createInput() {
+                return self._fsWriteFile(data, '/input.txt')
+              })
+              .then(function encrypt() {
+                startTime = moment();
+                return self._gpg('-r', emailAddress, '--output', '/encrypted.txt', '--encrypt', '/input.txt');
+              })
+              .then(function getOutput() {
+                return self._fsGetFiles('/encrypted.txt');
+              })
+              .then(self._unlock)
+              .then(function allDone(fileData) {
+                log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
+                return fileData['/encrypted.txt'];
+              })
+              .then(defer.resolve)
+              .catch(function (err) {
+                defer.reject(new GPGError('Data encryption error', err));
+              })
+            ;
+
+            return defer.promise;
+          }, // generateKeyPair()
+
 
 
 
@@ -375,8 +427,7 @@
               .then(self._unlock)
               .then(defer.resolve)
               .catch(function(err) {
-                // TODO: create a GPGError class so that we can detect the error type outside!
-                defer.reject(new RuntimeError('GPG restore error', err));                
+                defer.reject(new GPGError('Restore data error', err));
               })
             ;
 
@@ -390,7 +441,7 @@
 
 
 
-  app.factory('GPGWorker', function(Log, $q, RuntimeError) {
+  app.factory('GPGWorker', function(Log, $q, GPGError) {
 
     return Class.extend({
 
@@ -420,7 +471,7 @@
           obj = JSON.parse(ev.data);
         }
         catch(e) {
-          return self.log.error(new RuntimeError('GPG worker thread returned bad data', ev.data));
+          return self.log.error(new GPGError('GPG worker thread returned bad data', ev.data));
         }
 
         // got reference id?
@@ -428,7 +479,7 @@
         if('id' in obj && (defer = self.promises[obj.id])) {
           // error occurred?
           if ('error' in obj) {
-            defer.reject(new RuntimeError('GPG worker thread threw error for: ' + defer.desc));
+            defer.reject(new GPGError('GPG worker thread threw error for: ' + defer.desc));
           } else {
             // does this call have notifications
             if (defer.hasUpdates) {

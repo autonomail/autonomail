@@ -8,16 +8,15 @@ this comes to around ~45,000 iterations.
 
 This derived 512-bit key is split into two 256-bit keys:
 
-* The first 256-bits is used as the password to the secure key storage area (see below)
-* The second 256-bits is used as the password to authenticate the user against the Autonomail server
+* The first 256-bits - the master key - is used as encryption key for any user data which needs to stay private and secure (see below).
+* The second 256-bits - the authentication key - is used as the password to authenticate the user against the Autonomail server
 
+## Encrypted data storage
 
-## Key storage
+We store the user's PGP keys in window.localStorage, encrypted using the _master key_ and AES-256. This encrypted bundle is also
+backed up to the server for redundancy purposes and also to ease transition between different devices.
 
-We use window.localStorage to store the encryption keys and apsswords. The user is prompted to back up a
-base64-encoded encrypted copy of this data to file whenever this data changes.
-
-The main data object is saved against the user's email address:
+The encrypted bundle has the following format:
 
 ```
 emailAddress [text]:
@@ -26,13 +25,12 @@ emailAddress [text]:
   secureKeyStorage: [encrypted data]
 ```
 
-The `salt` and `iterations` items are parameters which get passed to the key derivation algorithm to generate the
- key required to decrypt the `secureKeyStorage` blob.
+The `salt` and `iterations` items are parameters which get passed to the [key derivation algorithm](#keyDerivation) to
+generate the key required to decrypt the `secureKeyStorage` blob.
 
 The `secureKeyStorage` blog contains the following, once decrypted:
 
-* `pgpPublicKey` [hex] - PGP public key
-* `pgpPrivateKey` [hex] - PGP private key
+* All PGP data, including user's certificate trust database.
 
 
 

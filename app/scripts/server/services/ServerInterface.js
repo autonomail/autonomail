@@ -86,13 +86,22 @@
 
       /**
        * Get messages in given folder.
+       *
+       * If `options.expectedFirstId` and `options.expectedLastId` are provided then the server will first check to
+       * see if the results match with expectations. If so then it means then nothing has changed since the last fetch
+       * and `{ noChange: true }` will be returned, thus saving on bandwidth. If there is a mismatch then it means
+       * that there have been changes and `{ messages: array }` will be returned.
+       *
        * @param emailAddress {String} user id.
        * @param [folder] {string} Folder to check.
        * @param from {string} retrieve messages from this index onwards (0 = newest message, 1 = second newest, etc).
-       * @param [count] {Integer} no. of messages to retrieve.
-       * @return {Promise} resolves to Array of messages.
+       * @param [count] {Number} no. of messages to retrieve.
+       * @param [options] {Object} additional options.
+       * @param [options.expectedFirstId] {Number} expected id of first message in results.
+       * @param [options.expectedLastId] {Number} expected id of last message in results.
+       * @return {Promise} resolves to { messages: array } or { noChange: true }
        */
-      getMsg: function(emailAddress, folder, from, count) {
+      getMsg: function(emailAddress, folder, from, count, options) {
         return this._notYetImplemented();
       },
 

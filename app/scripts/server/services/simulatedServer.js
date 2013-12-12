@@ -246,10 +246,15 @@
 
 
 
-      getMsg: function(userId, folder, from, count) {
+      getMsg: function(userId, folder, from, count, options) {
         var self = this;
 
         log.debug('Get mail in [' + folder + '] for ' + userId);
+
+        options = _.extend({
+          expectedFirstId: null,
+          expectedLastId: null
+        }, options);
 
         var defer = $q.defer();
 
@@ -263,7 +268,21 @@
             ret.push(mail[i]);
           }
 
-          defer.resolve(ret);
+          if (0 < ret.length) {
+            if (ret[0].id === options.expectedFirstId && ret[ret.length-1].id === options.expectedLastId) {
+              defer.resolve({
+                noChange: true
+              });
+              ret = null;
+            }
+          }
+
+          if (ret) {
+            defer.resolve({
+              messages: ret
+            });
+          }
+
         } else {
           defer.resolve([]);
         }

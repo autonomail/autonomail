@@ -19,8 +19,8 @@
         $scope.totalItems = count;
       },
       onMessages: function(messages) {
-        $scope.messages = messages;
-        $scope.msgIds = _.pluck(messages, 'id');
+        $scope.messages = _.indexBy(messages, 'id');
+        $scope.msgIds = _.keys($scope.messages);   // this causes the display to refresh
         log.debug('Got ' + $scope.msgIds.length + ' messages for page ' + $scope.view.page);
       }
     });
