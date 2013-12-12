@@ -28,7 +28,7 @@
         $timeout(function() {
           for (var userId in self.db.users) {
             self._setupUserMailFolders(userId);
-            var messages = self._createInboxMessages(parseInt(Math.random() * 3));
+            var messages = self._createInboxMessages(parseInt(Math.random() * 5));
             log.debug('Generated ' + messages.length + ' new inbox messages for: ' + userId);
             self.db.mail[userId].inbox.messages = messages.concat(self.db.mail[userId].inbox.messages);
           }
@@ -36,7 +36,7 @@
           if (!self.stopTimers) {
             self._startInboxMsgGenerator();
           }
-        }, 30000);
+        }, 20000);
       },
 
 

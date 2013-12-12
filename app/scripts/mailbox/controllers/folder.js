@@ -21,9 +21,10 @@
       onMessages: function(messages) {
         $scope.messages = messages;
         $scope.msgIds = _.pluck(messages, 'id');
-        log.debug('Got messages: ' + $scope.msgIds.length);
+        log.debug('Got ' + $scope.msgIds.length + ' messages for page ' + $scope.view.page);
       }
     });
+
   });
 
 }(angular.module('App.mailbox', ['App.common', 'App.user', 'ui.bootstrap.pagination'])));
