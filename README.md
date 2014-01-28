@@ -1,6 +1,6 @@
 Autonomail client application.
 
-**UNDER HEAVY DEVELOPMENT**
+(NOT USABLE, CURRENTLY UNDER HEAVY DEVELOPMENT)
 
 ## LICENSE
 
