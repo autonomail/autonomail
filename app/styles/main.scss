@@ -14,13 +14,22 @@ body {
 }
 
 
+a {
+  cursor: pointer;
+
+  i {
+    margin-right: 0.2em;
+  }
+}
+
+
 
 /* site header */
 
 #site-header {
   h1 {
     max-height: 4em;
-    margin-left: 1em;
+    margin: 1em;
     padding-left: 1.3em;
     background: image-url('logo.png', false, false) no-repeat left center;
     background-size: contain;
@@ -33,6 +42,22 @@ body {
       color: #999;
     }
   }
+
+  nav {
+    padding-top: 1em;
+    text-align: right;
+
+    a.pgp {
+      margin-right: 2em;
+      font-size: 120%;
+    }
+
+    a.logout {
+      margin-right: 1em;
+      font-size: 100%;
+    }
+  }
+
 }
 
 
@@ -70,3 +95,4 @@ body {
 @import "views/signup";
 @import "views/login";
 @import "views/mailbox";
+@import "views/pgpKeys";

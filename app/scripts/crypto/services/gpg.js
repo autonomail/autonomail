@@ -19,8 +19,6 @@
   });
 
 
-
-
   app.provider('GPG', function() {
 
     var workerScriptUrl = null;
@@ -31,7 +29,7 @@
       },
 
 
-      $get: function(Log, $q, GPGError, GPGWorker, Random) {
+      $get: function(Log, $q, GPGError, GPGWorker, GPGUtils, Random) {
         var log = Log.create('GPG');
         
         return new (Class.extend({
@@ -277,6 +275,7 @@
           },
 
 
+
           /**
            * Generate a new key-pair
            * 
@@ -374,6 +373,44 @@
 
             return defer.promise;
           }, // generateKeyPair()
+
+
+
+
+          /**
+           * Get all keys in the user's keychain.
+           *
+           * @param emailAddress {string} user id.
+           */
+          getAllKeys: function(emailAddress) {
+            var self = this;
+
+            var defer = $q.defer();
+
+            log.debug('Getting all keys stored in keychain of ' + emailAddress);
+
+            var startTime = null;
+
+            self._lock()
+              .then(function getAllKeys() {
+                startTime = moment();
+                return self._gpg('--list-keys', '--with-colons' '--fixed-list-mode', '--output', '/keys.txt');
+              })
+              .then(function getOutput() {
+                return self._fsGetFiles('/keys.txt');
+              })
+              .then(self._unlock)
+              .then(function allDone(fileData) {
+                return GPGUtils.parseKeyList(fileData);
+              })
+              .then(defer.resolve)
+              .catch(function (err) {
+                defer.reject(new GPGError('Could not get key list', err));
+              })
+            ;
+
+            return defer.promise;
+          }, // getAllKeys()
 
 
 
@@ -743,6 +780,28 @@
 
   });
 
+
+  app.factory('GPGUtils', function() {
+
+    return {
+      /**
+       * Parse the list of keys returned by GPG2.
+       *
+       * The list is assumed to be in machine-parseable format generated using the `--with-colons` options.
+       * 
+       * @param  {String} str
+       * @return {Array} List of objects specifying each key.
+       */
+      parseKeyList: function(str) {
+        var lines = str.split("\n");
+
+        for (var i = 0; lines.length > i; ++i) {
+           
+        }
+      }
+    }
+
+  });
 
 
 

@@ -2,6 +2,10 @@
 
 (function(app) {
 
+
+  /**
+   * General encryptinon service using SJCL. For PGP encryption see the GPG service.
+   */
   app.factory('Encrypt', function(Log, $q, RuntimeError, Random, WebWorker) {
     var log = Log.create('Encrypt');
 
