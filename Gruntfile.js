@@ -1,5 +1,12 @@
 // Generated on 2013-10-15 using generator-angular 0.4.0
 'use strict';
+
+var nodeVersion = process.version.match(/^v(\d+\.\d+.\d+)/)[1].split('.').map(function(s) { return parseInt(s); });
+if (0 !== nodeVersion[0] || 10 !== nodeVersion[1] || 26 > nodeVersion[2]) {
+  throw new Error('Required node version: 0.10.26+');
+}
+
+
 var LIVERELOAD_PORT = 35729;
 var lrSnippet = require('connect-livereload')({ port: LIVERELOAD_PORT });
 var mountFolder = function (connect, dir) {
@@ -358,7 +365,7 @@ module.exports = function (grunt) {
         'coffee',
         'ngtemplates',
         'compass:dist',
-        'copy:styles',
+        'copy:dist',
         'imagemin',
         'svgmin',
         'htmlmin'

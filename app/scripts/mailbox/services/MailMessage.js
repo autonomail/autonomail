@@ -37,9 +37,27 @@
           process: function() {
             var self = this;
 
+            if (!self._processed) {
+              self.parsed.body = self.raw.body;
+              self.parsed.subject = self.raw.subject;
+              self.parsed.date = self.raw.date;
+
+              self.parsed.from = {};
+              var po = self.raw.from.indexOf('<');
+              if (0 < po) {
+                self.parsed.from.name = _.str.trim(self.raw.from.substr(0, po));
+                self.parsed.from.email = _.str.trim(self.raw.from.substr(po + 1), ' >');
+              } else {
+                self.parsed.from.name = null;
+                self.parsed.from.email = _.str.trim(self.raw.from);
+              }
+
+              self._processed = true;
+            }
+
             $timeout(function() {
               _.invoke(self.observers, 'notify', 'processed');
-            }, 3000);
+            });
           }
         });
 
@@ -54,39 +72,28 @@
         MailMessage.prop('date', {
           set: false,
           get: function() {
-            return this.raw.date;
+            return this.parsed.date || this.raw.date;
           }
         });
 
         MailMessage.prop('from', {
           set: false,
           get: function() {
-            if (!this.parsed.from) {
-              this.parsed.from = {};
-              var po = this.raw.from.indexOf('<');
-              if (0 < po) {
-                this.parsed.from.name = _.str.trim(this.raw.from.substr(0, po));
-                this.parsed.from.email = _.str.trim(this.raw.from.substr(po + 1), ' >');
-              } else {
-                this.parsed.from.name = null;
-                this.parsed.from.email = _.str.trim(this.raw.from);
-              }
-            }
-            return this.parsed.from;
+            return this.parsed.from || this.raw.from;
           }
         });
 
         MailMessage.prop('subject', {
           set: false,
           get: function() {
-            return this.raw.subject;
+            return this.parsed.subject || this.raw.subject;
           }
         });
 
         MailMessage.prop('body', {
           set: false,
           get: function() {
-            return this.raw.body;
+            return this.parsed.body || this.raw.body;
           }
         });
 

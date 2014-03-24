@@ -32,7 +32,7 @@
       }
     };
     msg.registerObserver(self);
-
+    msg.process(); // process the msg
   });
 
 }(angular.module('App.mailbox', [])));
