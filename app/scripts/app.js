@@ -67,7 +67,7 @@
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);
     StorageProvider.setBackend(StorageProvider.BACKEND_TYPES.LOCAL_STORAGE);
 
-    MailViewProvider.setInterval(30000);
+    MailViewProvider.setInterval(300000);
   });
 
   app.run(function($rootScope, $state, Log, UserMgr, Random) {

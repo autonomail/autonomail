@@ -25,6 +25,7 @@
       }
     });
 
+
   });
 
 }(angular.module('App.mailbox', ['App.common', 'App.user', 'ui.bootstrap.pagination'])));

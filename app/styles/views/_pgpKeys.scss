@@ -7,6 +7,57 @@
   & > .row {
     margin: 0;
   }
+
+  .key-table {
+    & > ul > li {
+      margin-bottom: 1em;
+
+      ul.identities, ul.subkeys {
+        list-style: none;
+        margin: 0 0 1em;
+        padding: 0;
+
+        .text {
+          font-weight: bold;
+          font-size: 140%;
+        }
+      }
+
+      ul.identities {
+        padding-left: 0.3em;
+      }
+
+      .label {
+        margin-top: 0.3em;
+        color: #666;
+        font-style: italic;
+      }
+
+      .keyInfo {
+        margin-left: 1em;
+
+        span {
+          display: inline-block;
+          margin-right: 1em;
+
+          &.hash {
+            font-size: 100%;
+            font-weight: bold;
+          }
+
+          &.algo, &.valid, &.caps {
+            font-size: 80%;
+          }
+
+          em {
+            color: #999;
+            font-style: italic;
+            margin-right: 0.3em;
+          }
+        }
+      }
+    }
+  }
 }
 
 

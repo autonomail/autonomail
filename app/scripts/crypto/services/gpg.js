@@ -127,13 +127,13 @@
                   self.worker.mkdir('/home');
                   self.worker.mkdir('/home/emscripten');
                   self.worker.mkdir('/home/emscripten/.gnupg');
-                  return self.worker.wait();
+                  return self.worker.waitUntilReady();
                 })
                 .then(function addSavedFileData() {
                   for (var f in self.virtualFs) {
                     self.worker.addData(self.virtualFs[f], f);
                   }
-                  return self.worker.wait();
+                  return self.worker.waitUntilReady();
                 })
                 .then(function done() {
                   defer.resolve(self.worker);
@@ -237,6 +237,8 @@
 
           /**
            * Run a GPG command.
+           *
+           * @return {Promise} eventually resolves to stdout from the GPG command.
            */
           _gpg: function() {
             var self = this;
@@ -255,12 +257,16 @@
               log.warn('Ensure you save the contents of "' + fileName + '" prior to running the next GPG command');
             }
 
+            var commandStdout = '';
+
             return self._getWorker({ wantToRun: true })
               .then(function runCommand(newWorker) {
                 worker = newWorker;
                 return worker.run.apply(worker, args);
               })
-              .then(function getFilesToSave() {
+              .then(function getFilesToSave(stdout) {
+                commandStdout = stdout;
+
                 return self._fsGetFiles(
                   '/home/emscripten/.gnupg/pubring.gpg',
                   '/home/emscripten/.gnupg/secring.gpg',
@@ -270,7 +276,8 @@
               })
               .then(function saveFileData(fileData) {
                 self.virtualFs = fileData;
-              })
+                return commandStdout;
+              });
             ;
           },
 
@@ -394,14 +401,11 @@
             self._lock()
               .then(function getAllKeys() {
                 startTime = moment();
-                return self._gpg('--list-keys', '--with-colons' '--fixed-list-mode', '--output', '/keys.txt');
-              })
-              .then(function getOutput() {
-                return self._fsGetFiles('/keys.txt');
+                return self._gpg('--list-keys', '--with-colons', '--fixed-list-mode');
               })
               .then(self._unlock)
-              .then(function allDone(fileData) {
-                return GPGUtils.parseKeyList(fileData);
+              .then(function getOutput(stdout) {
+                return GPGUtils.parseKeyList(stdout);
               })
               .then(defer.resolve)
               .catch(function (err) {
@@ -458,9 +462,6 @@
               .then(function getFreshWorkerInstance() {
                 return self._getWorker({ reset: true });
               })
-              .then(function checkGPG() {
-                return self._gpg('--list-keys');
-              })
               .then(self._unlock)
               .then(defer.resolve)
               .catch(function(err) {
@@ -478,6 +479,9 @@
 
 
 
+  /**
+   * GPG worker object which calls through to the worker thread.
+   */
   app.factory('GPGWorker', function(Log, $q, GPGError) {
 
     return Class.extend({
@@ -489,6 +493,8 @@
 
         self.promiseCount = 0;
         self.promises = {};
+
+        self.stdout = [];
 
         self.thread = new Worker(workerScriptUrl);
         self.thread.onmessage = function(ev) {
@@ -531,6 +537,7 @@
 
         if(obj.cmd) {
           if('stdout' === obj.cmd) {
+            self.stdout.push(obj.contents);
             self.log.debug(obj.contents);
           } else if('stderr' === obj.cmd) {
             self.log.error(obj.contents);
@@ -729,7 +736,10 @@
 
       /**
        * Run given GPG command.
-       * @return {Promise}
+       *
+       * In order to accurately capture stdout for each GPG command only run one at a time.
+       *  
+       * @return {Promise} resolves to stdout (array of strings) result from executing command.
        */
       run: function() {
         var self = this;
@@ -737,14 +747,18 @@
 
         var args = Array.prototype.slice.call(arguments);
 
-        return self.wait()
-          .then(function runCommand() {
+        var defer = null;
 
+        return self.waitUntilReady()
+          .then(function runCommand() {
             args.unshift('--lock-never');
 
-            var defer = self._newTrackableDeferred({
+            defer = self._newTrackableDeferred({
               desc: '' + args.join(' ')
             });
+            self.log.debug('Execute command: ' + defer.desc);
+
+            self.stdout = [];
 
             self.thread.postMessage(JSON.stringify({
               cmd:         'run',
@@ -754,6 +768,9 @@
 
             return defer.promise;
           })
+            .then(function returnStdoutResult() {
+              return self.stdout;
+            })
         ;
       },
 
@@ -772,7 +789,7 @@
        * Wait for all outstanding calls to be resolved.
        * @return {Promise}
        */
-      wait: function() {
+      waitUntilReady: function() {
         return $q.all(this.promises);
       }
 
@@ -783,21 +800,112 @@
 
   app.factory('GPGUtils', function() {
 
+    var PGP_PK_ALGO_IDS = {
+      1: 'RSA (Encrypt or Sign)',
+      2: 'RSA (Encrypt-Only)',
+      3: 'RSA (Sign-Only)',
+      16: 'Elgamal (Encrypt-Only)',
+      17: 'DSA (Digital Signature Algorithm)',
+      18: 'Reserved for Elliptic Curve',
+      19: 'Reserved for ECDSA',
+      20: 'Reserved (formerly Elgamal Encrypt or Sign)',
+      21: 'Reserved for Diffie-Hellman (X9.42, as defined for IETF-S/MIME)',
+      100: 'Private/Experimental algorithm',
+      101: 'Private/Experimental algorithm',
+      102: 'Private/Experimental algorithm',
+      103: 'Private/Experimental algorithm',
+      104: 'Private/Experimental algorithm',
+      105: 'Private/Experimental algorithm',
+      106: 'Private/Experimental algorithm',
+      107: 'Private/Experimental algorithm',
+      108: 'Private/Experimental algorithm',
+      109: 'Private/Experimental algorithm',
+      1010: 'Private/Experimental algorithm'
+    };
+
+
+    var constructKeyInfo = function(tokens) {
+      var key = {};
+      key.trusted = ('u' === tokens[1]);
+      key.bits = (0 < tokens[2].length) ? parseInt(tokens[2], 10) : '0';
+      key.algorithm = (0 < tokens[3].length) ? PGP_PK_ALGO_IDS[parseInt(tokens[3],10)] : 'Unknown';
+      key.hash = tokens[4];
+      key.created = new Date(parseInt(tokens[5], 10));
+      key.expires = (0 < tokens[6].length) ? new Date(parseInt(tokens[6], 10)) : null;
+
+      key.caps = {};
+      var caps = tokens[tokens.length-2];
+      for (var j=0; caps.length>j; ++j) {
+        switch (caps[j]) {
+          case 's':
+            key.caps.sign = true;
+          case 'c':
+            key.caps.certify = true;
+          case 'e':
+            key.caps.encrypt = true;
+        }
+      }
+
+      return key;
+    };
+
+
+
+    var constructKeyIdentity = function(tokens) {
+      return {
+        trusted: ('u' === tokens[1]),
+        created: new Date(parseInt(tokens[5], 10)),
+        expires: (0 < tokens[6].length) ? new Date(parseInt(tokens[6], 10)) : null,
+        hash: tokens[7],
+        text: (tokens[9] || '').trim()
+      };      
+    }
+
+
     return {
       /**
        * Parse the list of keys returned by GPG2.
        *
        * The list is assumed to be in machine-parseable format generated using the `--with-colons` options.
        * 
-       * @param  {String} str
+       * @param {Array} stdout List of strings representing the stdout holding the key list.
        * @return {Array} List of objects specifying each key.
        */
-      parseKeyList: function(str) {
-        var lines = str.split("\n");
+      parseKeyList: function(stdout) {
+        var keys = [],
+          currentKey = null;
 
-        for (var i = 0; lines.length > i; ++i) {
-           
+        for (var i = 0; stdout.length > i; ++i) {
+          var str = stdout[i];
+
+          var tokens = str.split(':');
+
+          switch (tokens[0]) {
+            case 'pub':
+              var currentKey = constructKeyInfo(tokens);
+              keys.push(currentKey);
+
+              currentKey.identities = [];
+              currentKey.subKeys = [];
+              break;
+            case 'uid':
+              var uid = constructKeyIdentity(tokens);
+
+              if (currentKey) {
+                currentKey.identities.push(uid);
+              }
+              break;
+            case 'sub':
+              var subKey = constructKeyInfo(tokens);
+
+              if (currentKey) {
+                currentKey.subKeys.push(subKey);
+              }
+              break; 
+          }
         }
+
+        return keys;
       }
     }
 
