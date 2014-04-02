@@ -14,7 +14,19 @@
   </head>
   <body ng-app="App">
     <header id="site-header">
-      <h1><span>autonomail</span></h1>
+      <div class="row">
+        <div class="col-md-2">
+          <h1><span>autonomail</span></h1>      
+        </div>
+          <nav class="col-md-5 pull-right logged-in" ng-show="loggedIn()">
+            <a class="pgp" ui-sref="pgpKeys" title="PGP keys">
+              <i class="fa fa-key fa-rotate-180"></i><span>Encryption keys</span>
+            </a>
+            <a class="logout" ui-sref="logout" title="Sign out">
+              <i class="fa fa-sign-out"></i><span>Logout</span>
+            </a>
+        </nav>
+      </div>
     </header>
 
     <!-- Add your site or application content here -->
@@ -48,10 +60,12 @@
     <script src="scripts/common/services/RuntimeError.js"></script>
     <script src="scripts/common/services/webWorker.js"></script>
     <script src="scripts/common/directives/loader.js"></script>    ̰
+    <script src="scripts/common/filters/prettyDate.js"></script>    ̰
     <script src="scripts/crypto/lib/sjcl-addons.js"></script>
     <script src="scripts/crypto/services/gpg.js"></script>
     <script src="scripts/crypto/services/random.js"></script>
     <script src="scripts/crypto/services/encrypt.js"></script>
+    <script src="scripts/crypto/filters/keyCapability.js"></script>    ̰
     <script src="scripts/data/services/StorageLayerInterface.js"></script>
     <script src="scripts/data/services/localStorage.js"></script>
     <script src="scripts/data/services/storage.js"></script>
@@ -61,6 +75,8 @@
     <script src="scripts/server/services/server.js"></script>
     <script src="scripts/user/services/authCredentials.js"></script>
     <script src="scripts/user/services/userMgr.js"></script>
+    <script src="scripts/user/controllers/keys.js"></script>
+    <script src="scripts/user/directives/pgpKey.js"></script>
     <script src="scripts/login/controllers/form.js"></script>
     <script src="scripts/signup/services/signupManager.js"></script>
     <script src="scripts/signup/controllers/form.js"></script>

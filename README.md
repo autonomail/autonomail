@@ -1,13 +1,13 @@
-Autonomail is the email client for use with the [autonomail.com](https://autonomail.com) secure mail serivce. It is an offline web app currently runnable as a [Chrome packaged app]().
+Autonomail is a browser-based email client for use with the [autonomail.com](https://autonomail.com) secure email serivce. It currently runs in the [Chrome browser](http://developer.chrome.com/apps/about_apps).
 
-## Features **(under HEAVY development)**
+**Note: Autonomail is under HEAVY development and not yet ready for general use**
+
+## Features
 
  * Email encryption ([OpenPGP](http://www.openpgp.org/))
    * User-friendly PGP key management interface
    * Automatic mail encryption and signing where possible
    * Rock-solid encryption support: [GPG2](http://www.gnupg.org/documentation/manuals/gnupg-devel/Invoking-GPG.html) and [SJCL](http://crypto.stanford.edu/sjcl/)
- * Folders
- * 
 
 ## How to use
 

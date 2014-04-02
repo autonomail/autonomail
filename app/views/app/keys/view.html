@@ -1,0 +1,19 @@
+<div id="page-pgp-keys">
+  <div class="row">
+
+    <div ng-controller="KeysCtrl">
+      <p>These are all the encryption keys stored in your local chain. To send an encrypted email to somebody you need to import their 
+      <strong>public</strong> key into this list. If you no longer trust a particular key then remove it and request another one from the 
+      person whose key you removed.</p>
+
+      <div class="key-table standard-table">
+        <div loader ng-hide="keys"></div>
+        <ul ng-show="keys">
+          <li ng-repeat="id in keys" pgp-key class="row"></li>
+        </ul>
+      </div>
+      
+    </div>
+
+  </div>
+</div>

@@ -22,6 +22,13 @@
         url: '/login',
         templateUrl: 'app/login/form.html'
       })
+      .state('logout', {
+        url: '/logout',
+        controller: function(UserMgr, $state) {
+          UserMgr.setCurrentUser(null);
+          $state.go('login');
+        }
+      })
       .state('signup', {
         url: '/signup',
         templateUrl: 'app/signup/index.html',
@@ -31,6 +38,10 @@
       })
       .state('signup.form', {
         templateUrl: 'app/signup/form.html'
+      })
+      .state('pgpKeys', {
+        auth: true,
+        templateUrl: 'app/keys/view.html'
       })
       .state('mail', {
         auth: true,
@@ -56,13 +67,18 @@
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);
     StorageProvider.setBackend(StorageProvider.BACKEND_TYPES.LOCAL_STORAGE);
 
-    MailViewProvider.setInterval(30000);
+    MailViewProvider.setInterval(300000);
   });
 
   app.run(function($rootScope, $state, Log, UserMgr, Random) {
     var log = Log.create('App');
 
     Random.startEntropyCollection();
+
+    // this will get flipped whenever user successfully logs in
+    $rootScope.loggedIn = function() {
+      return !!(UserMgr.getCurrentUser());
+    };
 
     $rootScope.$on('$stateChangeStart', function(event, toState){
       // authentication for states which need it
