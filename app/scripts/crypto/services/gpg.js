@@ -800,6 +800,7 @@
 
   app.factory('GPGUtils', function() {
 
+    // From 9.1 and 9.2 in http://www.ietf.org/rfc/rfc4880.txt
     var PGP_PK_ALGO_IDS = {
       1: 'RSA (Encrypt or Sign)',
       2: 'RSA (Encrypt-Only)',
@@ -830,8 +831,8 @@
       key.bits = (0 < tokens[2].length) ? parseInt(tokens[2], 10) : '0';
       key.algorithm = (0 < tokens[3].length) ? PGP_PK_ALGO_IDS[parseInt(tokens[3],10)] : 'Unknown';
       key.hash = tokens[4];
-      key.created = new Date(parseInt(tokens[5], 10));
-      key.expires = (0 < tokens[6].length) ? new Date(parseInt(tokens[6], 10)) : null;
+      key.created = new Date(parseInt(tokens[5], 10) * 1000);
+      key.expires = (0 < tokens[6].length) ? new Date(parseInt(tokens[6], 10) * 1000) : null;
 
       key.caps = {};
       var caps = tokens[tokens.length-2];

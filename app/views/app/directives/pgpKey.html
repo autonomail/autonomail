@@ -7,15 +7,15 @@
 <div class="keyInfo">
   <span class="hash">{{ key.hash }}</span>
   <span class="algo"><em>Algorithm:</em>{{ key.bits }}-bit {{ key.algorithm }}</span>
-  <span class="valid"><em>Validity:</em>{{ key.created }} - {{ key.expires }}</span>
-  <span class="caps"><em>Capabilities:</em>{{ key.caps }}</span>
+  <span class="valid"><em>Validity:</em>{{ key.created | prettyDate }} - {{ key.expires | prettyDate }}</span>
+  <span class="caps"><em>Capabilities:</em>{{ key.caps | keyCapability }}</span>
 </div>
 <div class="label">Sub keys</div>
 <ul class="subkeys">
   <li class="keyInfo" ng-repeat="subkey in key.subKeys">
     <span class="hash">{{ subkey.hash }}</span>
     <span class="algo"><em>Algorithm:</em>{{ subkey.bits }}-bit {{ subkey.algorithm }}</span>
-    <span class="valid"><em>Validity:</em>{{ subkey.created }} - {{ subkey.expires }}</span>
-    <span class="caps"><em>Capabilities:</em>{{ subkey.caps }}</span>
+    <span class="valid"><em>Validity:</em>{{ subkey.created | prettyDate }} - {{ subkey.expires | prettyDate }}</span>
+    <span class="caps"><em>Capabilities:</em>{{ subkey.caps | keyCapability }}</span>
   </li>
 </ul>
