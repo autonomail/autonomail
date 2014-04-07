@@ -1,0 +1,27 @@
+<div class="addKey">
+
+  <div class="container">
+    <h2>Add PGP key</h2>
+
+    <form role="form" name="addKeyForm" ng-controller="AddKeyFormCtrl">
+      <span ng-show="error" class="alert alert-danger">{{error}}</span>
+      <div class="form-group">
+      <div class="form-group">
+        <label class="sr-only" for="addKeyForm_publicKey">Public key</label>
+        <textarea class="form-control" name="publicKey" id="addKeyForm_publicKey" placeholder="Paste the exported public key in ASCII armour format here"
+               ng-model="publicKey" rows="10" required></textarea>
+          <span ng-show="addKeyForm.publicKey.$dirty && addKeyForm.publicKey.$invalid" class="validation_errors alert alert-danger">
+            <span ng-show="addKeyForm.publicKey.$error.required">Please fill this in</span>
+          </span>
+      </div>
+      <div class="submit">
+        <button type="submit" class="btn btn-primary"
+                ng-disabled="!canSubmit()"
+                ng-click="submit()"
+            >Add</button>
+      </div>
+    </form>
+
+  </div>
+
+</div>
