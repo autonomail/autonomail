@@ -6,7 +6,7 @@
     "jquery": "2.0.3",
     "angular-resource": "1.2.0-rc.3",
     "angular-sanitize": "1.2.0-rc.3",
-    "angular-ui-router": "~0.2.0",
+    "angular-ui-router": "~0.2.10",
     "angular-ui-utils": "https://github.com/angular-ui/ui-utils.git#ce95fd61a4ff0a387019b72c81b0f54767a9a6bb",
     "parallel.js": "https://github.com/adambom/parallel.js.git#0e455b15dc9a5d2149436f9483e0cce826c67ce4",
     "angular-bootstrap": "https://github.com/angular-ui/bootstrap.git#304a662a0a8d3fe622f14a45e8e0bb80b25abe47",
@@ -23,5 +23,8 @@
     "angular-scenario": "1.2.0-rc.3",
     "chai": "~1.8.1",
     "sinon-chai": "~2.4.0"
+  },
+  "resolutions": {
+    "angular": "1.2.0-rc.3"
   }
 }

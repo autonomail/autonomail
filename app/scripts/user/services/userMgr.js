@@ -11,7 +11,8 @@
 
     var currentUser = null;
 
-    return new (Class.extend({
+    var UserMgr = Class.extend({
+
 
       /**
        * Set the current user.
@@ -44,7 +45,7 @@
        *
        * @return {Promise}
        */
-      ensureUserIsLoggedInAndHasSecureDataSetup: function(userId) {
+      ensureUserHasSecureDataSetup: function(userId) {
         var defer = $q.defer();
 
         if (!userId) {
@@ -82,7 +83,17 @@
         return defer.promise;
       }
 
-    }));
+    });
+
+
+    /**
+     * The state to take the user to once logged-in.
+     * @type {String}
+     */
+    UserMgr.prop('postLoginState', { set: true });
+
+
+    return new UserMgr();
   });
 
 

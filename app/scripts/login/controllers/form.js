@@ -41,8 +41,8 @@
             name: $scope.user.name
           });
         })
-        .then(function showInbox() {
-          $state.go('mail');
+        .then(function showNextState() {
+          $state.go(UserMgr.postLoginState || 'mail');
         })
         .catch(function (err) {
           $scope.error = '' + err;

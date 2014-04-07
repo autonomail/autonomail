@@ -8,9 +8,11 @@
 
     $scope.user = AuthCredentials.get($scope.userId);
 
-    log.debug('Fetching GPG keys...');
-
-    GPG.getAllKeys($scope.user.email)
+    UserMgr.ensureUserHasSecureDataSetup()
+      .then(function() {
+        log.debug('Fetching GPG keys...');
+        return GPG.getAllKeys($scope.user.email);
+      })
       .then(function(keys) {
         $scope.keys = keys;
       })
@@ -20,4 +22,4 @@
   });
 
 }(angular.module('App.user', ['App.common', 'ui.bootstrap.pagination'])));
-
+  

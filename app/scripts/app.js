@@ -41,6 +41,7 @@
       })
       .state('pgpKeys', {
         auth: true,
+        url: '/keys',
         templateUrl: 'app/keys/view.html'
       })
       .state('mail', {
@@ -83,10 +84,13 @@
     $rootScope.$on('$stateChangeStart', function(event, toState){
       // authentication for states which need it
       if (toState.auth) {
-        UserMgr.ensureUserIsLoggedInAndHasSecureDataSetup()
+        UserMgr.ensureUserHasSecureDataSetup()
           .catch(function(err) {
             event.preventDefault();
             log.warn(err);
+
+            UserMgr.postLoginState = toState.name;
+
             $state.go('login');
           });
       }

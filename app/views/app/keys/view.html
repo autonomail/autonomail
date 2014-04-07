@@ -6,6 +6,8 @@
       <strong>public</strong> key into this list. If you no longer trust a particular key then remove it and request another one from the 
       person whose key you removed.</p>
 
+      <button class="btn btn-primary" ng-click="addKey()">Add Key</button>
+
       <div class="key-table standard-table">
         <div loader ng-hide="keys"></div>
         <ul ng-show="keys">
