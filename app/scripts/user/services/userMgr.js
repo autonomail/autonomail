@@ -36,6 +36,27 @@
 
 
 
+      /** 
+       * Backup GPG data for given user.
+       * @param  {String} userId If not given then current user is used.
+       * @return {Promise}        
+       */
+      backupGPGData: function(userId) {
+        if (!userId) {
+          if (!currentUser) {
+            defer.reject(new RuntimeError('User not yet logged in'));
+          } else {
+            userId = currentUser;
+          }
+        }
+
+        return GPG.backup()
+          .then(function savePGPData(pgpData) {
+            return SecureData.set(userId, 'pgp', pgpData);
+          })
+      },
+
+
 
       /**
        * Ensures that the given user's secure data store and accompanying crypto keys have been setup.
@@ -46,6 +67,8 @@
        * @return {Promise}
        */
       ensureUserHasSecureDataSetup: function(userId) {
+        var self = this;
+
         var defer = $q.defer();
 
         if (!userId) {
@@ -65,11 +88,8 @@
                 var user = AuthCredentials.get(userId);
 
                 return GPG.generateKeyPair(user.email, user.password, 2048)
-                  .then(function getPGPData() {
-                    return GPG.backup();
-                  })
-                  .then(function savePGPData(pgpData) {
-                    return SecureData.set(userId, 'pgp', pgpData);
+                  .then(function backup() {
+                    return self.backupGPGData(userId);
                   })
                 ;
               }

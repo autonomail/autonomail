@@ -71,7 +71,7 @@
 
 
 
-  app.controller('AddKeyFormCtrl', function($scope, RuntimeError, GPG, Log, Alerts) {
+  app.controller('AddKeyFormCtrl', function($scope, RuntimeError, GPG, UserMgr, Log, Alerts) {
     var log = Log.create('AddKeyFormCtrl');
 
     /**
@@ -92,7 +92,10 @@
       log.debug('Import GPG key...');
 
       GPG.importKey($scope.publicKey)
-        .then(function() {
+        .then(function backupData() {
+          return UserMgr.backupGPGData();
+        })
+        .then(function closeModal() {
           Alerts.info('Key successfully imported!');
           $scope.modal.close();
         })
