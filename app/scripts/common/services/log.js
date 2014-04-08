@@ -11,10 +11,10 @@
 
   app.provider('Log', function() {
 
-    var LEVEL_DEBUG = 0,
-      LEVEL_INFO = 1,
-      LEVEL_WARN = 2,
-      LEVEL_ERROR = 3;
+    var LEVEL_DEBUG = 'debug',
+      LEVEL_INFO = 'info',
+      LEVEL_WARN = 'warn',
+      LEVEL_ERROR = 'error';
 
 
     var outputDevice = console,
@@ -86,60 +86,62 @@
 
 
       /**
-       * Log a msg at DEBUG level.
-       * All arguments are together taken to constitute the message.
-       */
-      debug: function(msg) {
-        if (LEVEL_DEBUG < this.minLevel) return;
-        _log(this.category, LEVEL_DEBUG, msg, Array.prototype.slice.call(arguments, 1));
-      },
-
-      /**
-       * Log a msg at INFO level.
-       * All arguments are together taken to constitute the message.
-       */
-      info: function(msg) {
-        if (LEVEL_INFO < this.minLevel) return;
-        _log(this.category, LEVEL_INFO, msg, Array.prototype.slice.call(arguments, 1));
-      },
-
-      /**
-       * Log a msg at WARN level.
-       * All arguments are together taken to constitute the message.
-       */
-      warn: function(msg) {
-        if (LEVEL_WARN < this.minLevel) return;
-        _log(this.category, LEVEL_WARN, msg, Array.prototype.slice.call(arguments, 1));
-      },
-
-      /**
-       * Log a msg at ERROR level.
-       * All arguments are together taken to constitute the message.
-       */
-      error: function(msg) {
-        if (LEVEL_ERROR < this.minLevel) return;
-        _log(this.category, LEVEL_ERROR, msg, Array.prototype.slice.call(arguments, 1));
-      },
-
-
-      /**
-       * Set the minimum log level.
-       * @param level {Integer}
-       */
-      setLevel: function(level) {
-        this.minLevel = level;
-      },
-
-
-      /**
        * Create a child logger of this logger.
        * @param category {string} the child category name.
        * @return {Logger}
        */
       create: function(category) {
         return new Logger(category, this);
-      }
+      },
 
+
+      /**
+       * Dummy function
+       * @private
+       */
+      _noop: function() {}
+    });
+
+
+    /**
+     * Property: minimum log level.
+     */
+    Logger.prop('minLevel', {
+      get: function() {
+        return this.__minLevel;
+      },
+      set: function(level) {
+        var self = this;
+
+        // nullify all methods
+        self.debug = self.info = self.warn = self.error = self._noop;
+
+        // reconstruct methods
+        switch (level) {
+          case LEVEL_DEBUG:
+            self.debug = function(msg) {
+              _log(self.category, LEVEL_DEBUG, msg, Array.prototype.slice.call(arguments, 1));
+            }       
+          case LEVEL_INFO:
+            self.info = function(msg) {
+              _log(self.category, LEVEL_INFO, msg, Array.prototype.slice.call(arguments, 1));
+            }       
+          case LEVEL_WARN:
+            self.warn = function(msg) {
+              _log(self.category, LEVEL_WARN, msg, Array.prototype.slice.call(arguments, 1));
+            }       
+          case LEVEL_ERROR:
+            self.error = function(msg) {
+              _log(self.category, LEVEL_ERROR, msg, Array.prototype.slice.call(arguments, 1));
+            }       
+
+            this.__minLevel = level;
+
+            break;
+          default:
+            throw new Error('Invalid logging level: ' + level);
+        }
+      }
     });
 
 
@@ -159,6 +161,7 @@
       setDefaultLevel: function(level) {
         defaultMinLevel = level;
       },
+
 
       $get: function() {
         return new Logger();

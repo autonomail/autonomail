@@ -37,7 +37,9 @@
       modalInstance.result.then(function() {
         refreshKeys();
       }, function(err) {
-        log.error(err.toString());
+        if (err) {
+          log.error(err.toString());          
+        }
       });
     };
 
@@ -45,8 +47,6 @@
     UserMgr.ensureUserHasSecureDataSetup()
       .then(function() {
         return refreshKeys();        
-      })
-      .then(function(keys) {
       })
       .catch(function(err) {
         log.error(err.message);
@@ -71,7 +71,7 @@
 
 
 
-  app.controller('AddKeyFormCtrl', function($scope, RuntimeError, GPG, Log) {
+  app.controller('AddKeyFormCtrl', function($scope, RuntimeError, GPG, Log, Alerts) {
     var log = Log.create('AddKeyFormCtrl');
 
     /**
@@ -79,24 +79,33 @@
      * @return {Boolean} true if so; false otherwise.
      */
     $scope.canSubmit = function() {
-      return $scope.addKeyForm.$valid;
+      return !$scope.submitInProgress && $scope.addKeyForm.$valid;
     };  
 
     /**
      * Submit the form.
      */
     $scope.submit = function() {
+      $scope.submitInProgress = true;
+      $scope.error = null;
+
       log.debug('Import GPG key...');
 
       GPG.importKey($scope.publicKey)
-        .then($scope.modal.close)
+        .then(function() {
+          Alerts.info('Key successfully imported!');
+          $scope.modal.close();
+        })
         .catch(function(err) {
-          $scope.error = err.message;
-        });
+          $scope.error = err.toString();
+        })
+        .finally(function() {
+          $scope.submitInProgress = false;
+        })
     };
 
   });
 
 
-}(angular.module('App.user', ['App.common', 'ui.bootstrap.pagination'])));
+}(angular.module('App.user', ['App.common', 'ngSanitize'])));
   

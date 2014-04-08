@@ -4,7 +4,6 @@
     <h2>Add PGP key</h2>
 
     <form role="form" name="addKeyForm" ng-controller="AddKeyFormCtrl">
-      <span ng-show="error" class="alert alert-danger">{{error}}</span>
       <div class="form-group">
       <div class="form-group">
         <label class="sr-only" for="addKeyForm_publicKey">Public key</label>
@@ -14,6 +13,7 @@
             <span ng-show="addKeyForm.publicKey.$error.required">Please fill this in</span>
           </span>
       </div>
+      <pre ng-show="error" class="gpg-output alert alert-danger">{{ error }}</pre>
       <div class="submit">
         <button type="submit" class="btn btn-primary"
                 ng-disabled="!canSubmit()"
