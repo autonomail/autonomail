@@ -12,10 +12,7 @@
 (function(app) {
 
   app.factory('GPGError', function(RuntimeError) {
-    var GPGError = function() { RuntimeError.apply(this, arguments); };
-    GPGError.prototype = Object.create(RuntimeError);
-    GPGError.prototype.constructor = GPGError ;
-    return GPGError ;
+    return RuntimeError.define('GPGError');
   });
 
 
@@ -58,6 +55,7 @@
             // pending requests (see `_lock` and `_unlock` methods)
             self.pendingRequests = [];
 
+            self._createWorker = _.bind(self._createWorker, self);
             self._lock = _.bind(self._lock, self);
             self._unlock = _.bind(self._unlock, self);
           },
@@ -66,6 +64,7 @@
           /**
            * Fill the EGD pool with entropy.
            *
+           * This will ensure that `/dev/egd-pool` in the virtual filesystem contains enough random data. 
            * This should be called prior to worker creation.
            *
            * @return {Promise}
@@ -96,67 +95,75 @@
           },
 
 
+
+
           /**
-           * Get GPG worker.
+           * Create a GPG worker.
            *
-           * @param [options] {Object} additonal options which affect how we configure the worker.
-           * @param [options.wantToRunGPG] {Boolean} if true then worker is going to be used to run a GPG command. Default is false.
-           * @param [options.reset] {Boolean} if true then all cached workers will be flushed and recreated. Default is false.
+           * This will instantiate a new `GPGWorker` and load in the current virtual filesystem contents.
            *
-           * @return {Promise} resolves to GPGWorker instance.
+           * @return {Promise} resolves to `GPGWorker` instance.
            */
-          _getWorker: function(options) {
+          _createWorker: function() {
             var self = this;
 
-            options = options || {};
+            var worker = null;
 
-            var defer = $q.defer();
-
-            /*
-                The rule is that we cannot allow 2 GPG calls in a row on a given worker as that doesn't seem to work with the 
-                gpg2 web worker lib as it currently stands. So we shall create a new worker iff we have already made a GPG call 
-                with the current worker.
-             */
-
-            if (!self.worker || options.reset || (self.worker.runCalled() && options.wantToRunGPG)) {
-              self._ensureEntropy()            
-                .then(function createWorker() {
-                  self.worker = new GPGWorker(workerScriptUrl, log);
-                })
-                .then(function setupFS() {
-                  self.worker.mkdir('/home');
-                  self.worker.mkdir('/home/emscripten');
-                  self.worker.mkdir('/home/emscripten/.gnupg');
-                  return self.worker.waitUntilReady();
-                })
-                .then(function addSavedFileData() {
-                  for (var f in self.virtualFs) {
-                    self.worker.addData(self.virtualFs[f], f);
-                  }
-                  return self.worker.waitUntilReady();
-                })
-                .then(function done() {
-                  defer.resolve(self.worker);
-                })
-                .catch(defer.reject)
-              ;
-            } else {
-              defer.resolve(self.worker);
-            }
-
-            return defer.promise;
+            return self._ensureEntropy()            
+              .then(function createWorker() {
+                worker = new GPGWorker(workerScriptUrl, log);
+              })
+              .then(function setupFS() {
+                worker.mkdir('/home');
+                worker.mkdir('/home/emscripten');
+                worker.mkdir('/home/emscripten/.gnupg');
+                return worker.waitUntilReady();
+              })
+              .then(function loadVirtualFileSystem() {
+                for (var f in self.virtualFs) {
+                  worker.addData(self.virtualFs[f], f);
+                }
+                return worker.waitUntilReady();
+              })
+              .then(function done() {
+                return worker;
+              })
+            ;
           },
 
+
+
+
+
+          /**
+           * Destroy a GPG worker.
+           *
+           * This will save the worker's virtual filesystem.
+           *
+           * @return {Promise}
+           */
+          _destroyWorker: function(worker) {
+            var self = this;
+
+            return worker.getFiles(
+              '/home/emscripten/.gnupg/pubring.gpg',
+              '/home/emscripten/.gnupg/secring.gpg',
+              '/home/emscripten/.gnupg/trustdb.gpg',
+              '/home/emscripten/.gnupg/random_seed'
+            )
+              .then(function saveFileData(fileData) {
+                self.virtualFs = fileData;
+              })
+            ;
+          },
 
 
 
           /**
            * Request the internal queue lock.
            *
-           * We want to serve incoming API requests one at a time. To do this we queue all incoming requests. Each request must 
-           * first obtain a 'lock' using this method prior to starting its GPG operations. It must then call `_unlock` once done 
-           * to allow the next request to proceed.
-           *
+           * This is used by 
+           * 
            * @return {Promise}
            */
           _lock: function() {
@@ -180,7 +187,7 @@
            *
            * The lock will now be given to the next request in the internal request queue.
            *
-           * This method will take whatever arguments are passed to it and pass them to the resolved the promise - this 
+           * This method will take whatever arguments are passed to it and pass them to the resolved promise - this 
            * is just for convenience sake, allowing us to chain this method call with other promises.
            *
            * @return {Promise} resolves to whatever arguments were passed to this function.
@@ -203,83 +210,89 @@
 
 
 
-          /**
-           * Create file with given contents in the virtual FS.
-           */
-          _fsWriteFile: function() {
-            var self = this;
-
-            var args = Array.prototype.slice.call(arguments);
-
-            return self._getWorker()
-              .then(function writeData(worker) {
-                return worker.addData.apply(worker, args);
-              })
-            ;
-          },
-
 
           /**
-           * Get contents of given files in the virtual FS.
-           */
-          _fsGetFiles: function() {
-            var self = this;
-
-            var args = Array.prototype.slice.call(arguments);
-
-            return self._getWorker()
-              .then(function getFiles(worker) {
-                return worker.getFiles.apply(worker, args);
-              })
-            ;
-          },
-
-
-          /**
-           * Run a GPG command.
+           * Execute a GPG command.
            *
-           * @return {Promise} eventually resolves to stdout from the GPG command.
+           * This automatically loads the virtual filesystem prior to executing the command, and then saves it afterwards. It also 
+           * make sure that only one GPG command execute at a time (even if multiple calls are made to this function in parallel).
+           * 
+           * @param  {Object} [inputFiles] List of files to setup in the virtual filesystem prior to making the call. 
+           * These are specified as {path: Promise} where the `Promise` evaluates to the file contents.
+           * 
+           * @param  {Array} [gpgCommand] Parameters to pass to the GPG command-line. The parameters are parsed to check for the 
+           * `--output` parameter. If found then the named output file is automatically fetched and returned in the results once 
+           * the command has successfully executed.
+           * 
+           * @return {Promise} Resolves to an `Object` consisting of the `stdout` and output file (if any) specified in the input 
+           * parameters.
            */
-          _gpg: function() {
+          _execute: function(inputFiles, gpgCommand) {
             var self = this;
-            
-            var args = Array.prototype.slice.call(arguments),
-              worker = null;
 
-            /*
-              Because we clear out the FS when running 2 GPG commands in a row, we need to warn the caller if they're writing to 
-              a file. See _getWorker() method.
-             */
-            var outputParamIndex = args.indexOf('--output');
-            if (0 <= outputParamIndex) {
-              var fileName = (outputParamIndex < args.length - 1) ? args[outputParamIndex+1] : 'the output file';
+            inputFiles = inputFiles || {};
+            gpgCommand = gpgCommand || [];
 
-              log.warn('Ensure you save the contents of "' + fileName + '" prior to running the next GPG command');
-            }
+            var defer = $q.defer();
 
-            var commandStdout = '';
+            var outputFilePath;
+            var worker = null;
+            var results = {
+              stdout: []
+            };
 
-            return self._getWorker({ wantToRun: true })
-              .then(function runCommand(newWorker) {
+            self._lock()
+              .then(function checkForOutputFileParam() {
+                var outputParamIndex = gpgCommand.indexOf('--output');
+                if (0 <= outputParamIndex) {
+                  outputFilePath = (outputParamIndex < args.length - 1) ? args[outputParamIndex+1] : 'the output file';
+                }
+              })
+              .then(function getInputFiles() {
+                return $q.all(inputFiles);
+              })
+              .then(function writeInputFiles(_resolvedInputFiles) {
+                _.each(_resolvedInputFiles || {}, function(contents, path) {
+                  self.virtualFs[path] = contents;
+                })
+              })
+              .then(self._createWorker)
+              .then(function executeCommand(newWorker) {
                 worker = newWorker;
-                return worker.run.apply(worker, args);
-              })
-              .then(function getFilesToSave(stdout) {
-                commandStdout = stdout;
 
-                return self._fsGetFiles(
-                  '/home/emscripten/.gnupg/pubring.gpg',
-                  '/home/emscripten/.gnupg/secring.gpg',
-                  '/home/emscripten/.gnupg/trustdb.gpg',
-                  '/home/emscripten/.gnupg/random_seed'
-                )
+                if (0 < gpgCommand.length) {
+                  return worker.run.apply(worker, gpgCommand)
+                    .then(function saveStdout(stdout) {
+                      if (stdout) {
+                        results.stdout = stdout;                                              
+                      }
+                    });
+                }
               })
-              .then(function saveFileData(fileData) {
-                self.virtualFs = fileData;
-                return commandStdout;
-              });
+              .then(function fetchOutputFile(){
+                if (outputFilePath) {
+                  return self._fsGetFiles(outputFilePath)
+                    .then(function(contents) {
+                      results[outputFilePath] = contents;
+                    });
+                }
+              })
+              .then(function killWorker() {
+                return self._destroyWorker(worker);
+              })
+              .then(function returnResults(){
+                self._unlock();                
+                defer.resolve(results);
+              })
+              .catch(function(err) {
+                self._unlock();                
+                defer.reject(err);
+              })
             ;
+
+            return defer.promise;
           },
+
 
 
 
@@ -296,19 +309,17 @@
           generateKeyPair: function(emailAddress, password, keyStrength) {
             var self = this;
 
-            var defer = $q.defer();
-
             log.debug('Generating ' + keyStrength + '-bit keypair for: '  + emailAddress);
 
-            var startTime = null;
+            var startTime = moment();
 
-            self._lock()
-              .then(function createInput() {
+            var inputFiles = {
+              '/input.txt': $q.when(function() {
                 if (2048 !== keyStrength && 4096 !== keyStrength) {
                   throw new GPGError('GPG key bit size must be either 2048 or 4096');
                 }
 
-                var keyInput = [              
+                return [
                   'Key-Type: RSA',
                   'Key-Length: ' + keyStrength,
                   'Subkey-Type: RSA',
@@ -317,26 +328,17 @@
                   'Expire-Date: 0',
                   'Passphrase: ' + password,
                   '%commit'
-                ];
+                ].join("\n");
+              })
+            }
 
-                return self._fsWriteFile(keyInput.join("\n"), '/input.txt')
-              })
-              .then(function generateKey() {
-                startTime = moment();
-                return self._gpg('--batch', '--gen-key', '/input.txt');
-              })
-              .then(self._unlock)
-              .then(function allDone(data) {
+            return self._execute(inputFiles, ['--batch', '--gen-key', '/input.txt'])
+              .then(function(results) {
                 log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
-                return data;
-              })
-              .then(defer.resolve)
-              .catch(function (err) {
-                defer.reject(new GPGError('Keypair generation error', err));
+                
+                return results.stdout;                
               })
             ;
-
-            return defer.promise;
           }, // generateKeyPair()
 
 
@@ -347,39 +349,39 @@
            * @param emailAddress {string} user id.
            * @param data {string} data to encrypt.
            */
-          encryptWithPublicKey: function(emailAddress, data) {
-            var self = this;
+          // encryptWithPublicKey: function(emailAddress, data) {
+          //   var self = this;
 
-            var defer = $q.defer();
+          //   var defer = $q.defer();
 
-            log.debug('Encrypting ' + data.length + ' characters with public key for: '  + emailAddress);
+          //   log.debug('Encrypting ' + data.length + ' characters with public key for: '  + emailAddress);
 
-            var startTime = null;
+          //   var startTime = null;
 
-            self._lock()
-              .then(function createInput() {
-                return self._fsWriteFile(data, '/input.txt')
-              })
-              .then(function encrypt() {
-                startTime = moment();
-                return self._gpg('-r', emailAddress, '--output', '/encrypted.txt', '--encrypt', '/input.txt');
-              })
-              .then(function getOutput() {
-                return self._fsGetFiles('/encrypted.txt');
-              })
-              .then(self._unlock)
-              .then(function allDone(fileData) {
-                log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
-                return fileData['/encrypted.txt'];
-              })
-              .then(defer.resolve)
-              .catch(function (err) {
-                defer.reject(new GPGError('Data encryption error', err));
-              })
-            ;
+          //   self._lock()
+          //     .then(function createInput() {
+          //       return self._fsWriteFile(data, '/input.txt')
+          //     })
+          //     .then(function encrypt() {
+          //       startTime = moment();
+          //       return self._gpg('-r', emailAddress, '--output', '/encrypted.txt', '--encrypt', '/input.txt');
+          //     })
+          //     .then(function getOutput() {
+          //       return self._fsGetFiles('/encrypted.txt');
+          //     })
+          //     .then(function allDone(fileData) {
+          //       log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
+          //       return fileData['/encrypted.txt'];
+          //     })
+          //     .then(defer.resolve)
+          //     .catch(function (err) {
+          //       defer.reject(new GPGError('Data encryption error', err));
+          //     })
+          //     .finally(self._unlock)
+          //   ;
 
-            return defer.promise;
-          }, // generateKeyPair()
+          //   return defer.promise;
+          // }, // generateKeyPair()
 
 
 
@@ -392,29 +394,36 @@
           getAllKeys: function(emailAddress) {
             var self = this;
 
-            var defer = $q.defer();
-
             log.debug('Getting all keys stored in keychain of ' + emailAddress);
 
-            var startTime = null;
-
-            self._lock()
-              .then(function getAllKeys() {
-                startTime = moment();
-                return self._gpg('--list-keys', '--with-colons', '--fixed-list-mode');
-              })
-              .then(self._unlock)
-              .then(function getOutput(stdout) {
-                return GPGUtils.parseKeyList(stdout);
-              })
-              .then(defer.resolve)
-              .catch(function (err) {
-                defer.reject(new GPGError('Could not get key list', err));
+            return self._execute({}, ['--list-keys', '--with-colons', '--fixed-list-mode'])
+              .then(function getOutput(results) {
+                return GPGUtils.parseKeyList(results.stdout);
               })
             ;
 
-            return defer.promise;
           }, // getAllKeys()
+
+
+
+
+
+          /**
+           * Import a key into the user's keychain.
+           *
+           * @param {String} key The exported key in ASCII armour format.
+           */
+          importKey: function(key) {
+            var self = this;
+
+            log.debug('Importing key into keychain');
+
+            var inputFiles = {
+              '/home/emscripten/.gnupg/import.gpg': $q.when(key)
+            };
+
+            return self._execute(inputFiles, ['--import', '--verbose', '/home/emscripten/.gnupg/import.gpg']);
+          }, // importKey()
 
 
 
@@ -427,15 +436,11 @@
           backup: function() {
             var self = this;
 
-            var defer = $q.defer();
-
-            defer.resolve({
+            return $q.when({
               'pubring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
               'secring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
-              'trustdb.gpg': self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg']
+              'trustdb.gpg': self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg']              
             });
-
-            return defer.promise;
           },
 
 
@@ -451,25 +456,11 @@
           restore: function(data) {
             var self = this;
 
-            var defer = $q.defer();
+            for (var f in data) {
+              self.virtualFs['/home/emscripten/.gnupg/' + f] = data[f];
+            }
 
-            self._lock()
-              .then(function setupData() {
-                for (var f in data) {
-                  self.virtualFs['/home/emscripten/.gnupg/' + f] = data[f];
-                }
-              })
-              .then(function getFreshWorkerInstance() {
-                return self._getWorker({ reset: true });
-              })
-              .then(self._unlock)
-              .then(defer.resolve)
-              .catch(function(err) {
-                defer.reject(new GPGError('Restore data error', err));
-              })
-            ;
-
-            return defer.promise;
+            return $q.when(true);
           }
 
         }));
@@ -494,12 +485,12 @@
         self.promiseCount = 0;
         self.promises = {};
 
-        self.stdout = [];
-
         self.thread = new Worker(workerScriptUrl);
         self.thread.onmessage = function(ev) {
           self._handleWorkerMsg(ev);
         };    
+
+        self._resetWorkerCommandResult();
       },
 
 
@@ -514,7 +505,8 @@
           obj = JSON.parse(ev.data);
         }
         catch(e) {
-          return self.log.error(new GPGError('GPG worker thread returned bad data', ev.data));
+          self.workerCommand.stdout.exitOk = false;
+          return self.log.error('GPG worker thread returned bad data', ev.data);
         }
 
         // got reference id?
@@ -522,28 +514,45 @@
         if('id' in obj && (defer = self.promises[obj.id])) {
           // error occurred?
           if ('error' in obj) {
-            defer.reject(new GPGError('GPG worker thread threw error for: ' + defer.desc));
+            defer.reject(new GPGError('Errored: ' + defer.desc, self.workerCommand.stdout));
           } else {
             // does this call have notifications
             if (defer.hasUpdates) {
               defer.notify(obj);
             } 
             // this call is done
-            else {
-              defer.resolve(obj);
+            else {              
+              if (self.workerCommand.exitOk) {
+                defer.resolve(self.workerCommand.stdout);
+              } else {
+                defer.reject(new GPGError('Failed: ' + defer.desc, self.workerCommand.stdout));
+              }
             }
           }
         }
 
         if(obj.cmd) {
-          if('stdout' === obj.cmd) {
-            self.stdout.push(obj.contents);
-            self.log.debug(obj.contents);
-          } else if('stderr' === obj.cmd) {
-            self.log.error(obj.contents);
+          self.workerCommand.stdout.push(obj.contents);
+          self.log.debug(obj.contents);
+
+          // check if exit status is non-0
+          if (0 === obj.contents.indexOf('Exit Status')) {
+            self.workerCommand.exitOk = ('Exit Status: 0' === obj.contents);
           }
         }
       },
+
+
+      /**
+       * Reset object holding results of current worker command.
+       */
+      _resetWorkerCommandResult: function() {
+        this.workerCommand = {
+          stdout: [],
+          exitOk: true
+        }
+      },
+
 
 
       /**
@@ -716,6 +725,8 @@
       addData: function(contents, pseudo_path) {
         var self = this;
         
+        self.log.debug('Add data to ' + pseudo_path);
+
         var dst = self._analysePath(pseudo_path),
           defer = self._newTrackableDeferred({
             desc: 'addData to ' + pseudo_path
@@ -758,7 +769,7 @@
             });
             self.log.debug('Execute command: ' + defer.desc);
 
-            self.stdout = [];
+            self._resetWorkerCommandResult();
 
             self.thread.postMessage(JSON.stringify({
               cmd:         'run',
@@ -769,7 +780,7 @@
             return defer.promise;
           })
             .then(function returnStdoutResult() {
-              return self.stdout;
+              return self.workerCommand.stdout;
             })
         ;
       },

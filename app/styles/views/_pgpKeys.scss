@@ -61,4 +61,15 @@
 }
 
 
+.modal .addKey {
+  text-align: center;
 
+  textarea.form-control {
+    width: 100%;
+    font-size: 80%;
+  }
+
+  .gpg-output {
+    text-align: left;
+  }
+}
