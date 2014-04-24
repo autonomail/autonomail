@@ -422,7 +422,13 @@
               '/home/emscripten/.gnupg/import.gpg': $q.when(key)
             };
 
-            return self._execute(inputFiles, ['--import', '--verbose', '/home/emscripten/.gnupg/import.gpg']);
+            return self._execute(inputFiles, ['--import', '/home/emscripten/.gnupg/import.gpg'])
+              .then(function getOutput(results) {
+                return GPGUtils.parseImportedKey(results.stdout);
+              })
+              .then(function ultimatelyTrustKey(keyId) {
+                return self._execute({}, ['--lsign', keyId]);
+              });
           }, // importKey()
 
 
@@ -762,7 +768,7 @@
 
         return self.waitUntilReady()
           .then(function runCommand() {
-            args.unshift('--lock-never');
+            args = ['--yes', '--verbose', '--lock-never'].concat(args);
 
             defer = self._newTrackableDeferred({
               desc: '' + args.join(' ')
@@ -809,7 +815,7 @@
   });
 
 
-  app.factory('GPGUtils', function() {
+  app.factory('GPGUtils', function(GPGError) {
 
     // From 9.1 and 9.2 in http://www.ietf.org/rfc/rfc4880.txt
     var PGP_PK_ALGO_IDS = {
@@ -918,8 +924,29 @@
         }
 
         return keys;
+      },
+
+      /**
+       * Get ID of imported key from GPG stdout.
+       *
+       * @param {Array} stdout List of strings representing the stdout holding the key list.
+       * @return {String} Key ID.
+       */
+      parseImportedKey: function(stdout) {
+        for (var i = 0; stdout.length > i; ++i) {
+          var str = stdout[i];
+
+          var matches = str.match(/gpg: key ([A-Z0-9]+):/i);
+
+          if (matches && matches[1]) {
+            return matches[1];
+          }
+        }
+
+        throw new GPGError('Unable to obtain imported key id');
       }
-    }
+
+    };
 
   });
 
