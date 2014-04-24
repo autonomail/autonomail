@@ -422,13 +422,7 @@
               '/home/emscripten/.gnupg/import.gpg': $q.when(key)
             };
 
-            return self._execute(inputFiles, ['--import', '/home/emscripten/.gnupg/import.gpg'])
-              .then(function getOutput(results) {
-                return GPGUtils.parseImportedKey(results.stdout);
-              })
-              .then(function ultimatelyTrustKey(keyId) {
-                return self._execute({}, ['--lsign', keyId]);
-              });
+            return self._execute(inputFiles, ['--import', '/home/emscripten/.gnupg/import.gpg']);
           }, // importKey()
 
 
@@ -924,28 +918,7 @@
         }
 
         return keys;
-      },
-
-      /**
-       * Get ID of imported key from GPG stdout.
-       *
-       * @param {Array} stdout List of strings representing the stdout holding the key list.
-       * @return {String} Key ID.
-       */
-      parseImportedKey: function(stdout) {
-        for (var i = 0; stdout.length > i; ++i) {
-          var str = stdout[i];
-
-          var matches = str.match(/gpg: key ([A-Z0-9]+):/i);
-
-          if (matches && matches[1]) {
-            return matches[1];
-          }
-        }
-
-        throw new GPGError('Unable to obtain imported key id');
       }
-
     };
 
   });
