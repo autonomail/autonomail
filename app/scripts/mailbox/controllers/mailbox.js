@@ -25,7 +25,6 @@
           return false;
         };
 
-
         // TODO: watch for changes to current folder
 
       })

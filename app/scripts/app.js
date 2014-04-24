@@ -41,12 +41,12 @@
       })
       .state('pgpKeys', {
         auth: true,
-        url: '/keys',
+        url: '/k',
         templateUrl: 'app/keys/view.html'
       })
       .state('mail', {
         auth: true,
-        url: '/mail',
+        url: '/m',
         templateUrl: 'app/mailbox/index.html',
         controller: function($state) {
           $state.go('mail.folder', {
@@ -54,9 +54,14 @@
           });
         }
       })
+      .state('mail.compose', {
+        auth: true,
+        url: '/compose',
+        templateUrl: 'app/mailbox/compose.html'
+      })
       .state('mail.folder', {
         auth: true,
-        url: '/:folderId',
+        url: '/v/:folderId',
         templateUrl: 'app/mailbox/folder.html'
       })
     ;

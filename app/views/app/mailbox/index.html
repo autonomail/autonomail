@@ -4,7 +4,7 @@
     <div ng-controller="MailboxCtrl">
       <div class="col-md-1">
         <div class="compose">
-          <button type="button" class="btn btn-primary">Compose</button>
+          <button type="button" class="btn btn-primary" ui-sref="mail.compose" ng-attr-title="Compose a message">Compose</button>
         </div>
         <div class="folders">
           <div loader ng-hide="folders"></div>
