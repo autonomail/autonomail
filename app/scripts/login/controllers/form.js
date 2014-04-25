@@ -47,7 +47,6 @@
         .catch(function (err) {
           $scope.error = '' + err;
         })
-
     };
   });
 

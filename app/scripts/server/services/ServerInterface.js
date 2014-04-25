@@ -117,6 +117,25 @@
       },
 
 
+      /**
+       * Send a message.
+       * 
+       * @param {Object} msg Message and options.
+       * @param {String} msg.from Sender.
+       * @param {Array} msg.to Recipients.
+       * @param {String} msg.body Message body.
+       * @param {String} msg.subject  Message subject.
+       * @param {Array} msg.cc  CC recipients.
+       * @param {Array} msg.bcc  BCC recipients.
+       * @param {String} msg.sig PGP signature.
+       * 
+       * @return {Promise}
+       */
+      send: function(msg) {
+        return this._notYetImplemented();
+      },
+
+
 
       toString: function() {
         throw new RuntimeError('Not yet implemented');

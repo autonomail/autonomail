@@ -32,6 +32,15 @@
     <!-- Add your site or application content here -->
     <div id="content" ui-view></div>
 
+    <!-- Log viewer -->
+    <div id="log-viewer" ng-controller="LogViewerCtrl">
+        <button ng-click="toggleMessages()"
+                title="Show/hide log messages">
+            <i class="fa fa-cog"></i>
+        </button>
+        <pre ng-show="showMessages">{{ messages }}</pre>
+    </div>        
+
     <!-- build:js scripts/libs.js -->
     <script src="bower_components/jquery/jquery.js"></script>
     <script src="bower_components/lodash/dist/lodash.js"></script>
@@ -58,7 +67,7 @@
     <script src="scripts/common/modules.js"></script>
     <script src="scripts/common/underscore.string.mixins.js"></script>
     <script src="scripts/common/services/log.js"></script>
-    <script src="scripts/common/services/alerts.js"></script>
+    <script src="scripts/common/services/alert.js"></script>
     <script src="scripts/common/services/RuntimeError.js"></script>
     <script src="scripts/common/services/webWorker.js"></script>
     <script src="scripts/common/directives/loader.js"></script>    
@@ -85,6 +94,7 @@
     <script src="scripts/mailbox/directives/folderMsg.js"></script>
     <script src="scripts/mailbox/controllers/mailbox.js"></script>
     <script src="scripts/mailbox/controllers/folder.js"></script>
+    <script src="scripts/mailbox/controllers/compose.js"></script>
     <script src="scripts/mailbox/services/MailMessage.js"></script>
     <script src="scripts/mailbox/services/MailView.js"></script>
     <script src="scripts/mailbox/services/MailBox.js"></script>

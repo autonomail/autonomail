@@ -9,13 +9,13 @@
       .catch(function(err) { log.error(err); })
       .then(function getFolders(mailbox) {
         $scope.mailbox = mailbox;
+
         return $scope.mailbox.getFolders();
       })
       .then(function showFolders(folders) {
         $scope.folders = folders;
       })
       .then(function setupFolderAction() {
-
         // when user wants to open a folder
         $scope.openFolder = function(folderId) {
           // shift inner state

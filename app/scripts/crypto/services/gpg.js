@@ -244,8 +244,12 @@
             self._lock()
               .then(function checkForOutputFileParam() {
                 var outputParamIndex = gpgCommand.indexOf('--output');
+
                 if (0 <= outputParamIndex) {
-                  outputFilePath = (outputParamIndex < args.length - 1) ? args[outputParamIndex+1] : 'the output file';
+                  if (gpgCommand.length - 1 <= outputParamIndex) {
+                    throw new Error('Output file name must be specified if using --output');
+                  }
+                  outputFilePath = gpgCommand[outputParamIndex + 1]
                 }
               })
               .then(function getInputFiles() {
@@ -299,12 +303,12 @@
           /**
            * Generate a new key-pair
            * 
+           * References: 
+           *  - https://alexcabal.com/creating-the-perfect-gpg-keypair/
+           *  
            * @param emailAddress {string} user id.
            * @param password {string} user password.
            * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
-           *
-           * References: 
-           *  - https://alexcabal.com/creating-the-perfect-gpg-keypair/
            */
           generateKeyPair: function(emailAddress, password, keyStrength) {
             var self = this;
@@ -313,26 +317,28 @@
 
             var startTime = moment();
 
-            var inputFiles = {
-              '/input.txt': $q.when(function() {
-                if (2048 !== keyStrength && 4096 !== keyStrength) {
-                  throw new GPGError('GPG key bit size must be either 2048 or 4096');
-                }
+            return $q.when(function() {
+              if (2048 !== keyStrength && 4096 !== keyStrength) {
+                throw new GPGError('GPG key bit size must be either 2048 or 4096');
+              }              
+            })
+              .then(function genKey() {
+                var inputFiles = {
+                  '/input.txt': $q.when([
+                      'Key-Type: RSA',
+                      'Key-Length: ' + keyStrength,
+                      'Subkey-Type: RSA',
+                      'Subkey-Length: ' + keyStrength,
+                      'Name-Email: ' + emailAddress,
+                      'Expire-Date: 0',
+                      'Passphrase: ' + password,
+                      '%commit'
+                    ].join("\n")
+                  )
+                };
 
-                return [
-                  'Key-Type: RSA',
-                  'Key-Length: ' + keyStrength,
-                  'Subkey-Type: RSA',
-                  'Subkey-Length: ' + keyStrength,
-                  'Name-Email: ' + emailAddress,
-                  'Expire-Date: 0',
-                  'Passphrase: ' + password,
-                  '%commit'
-                ].join("\n");
+                return self._execute(inputFiles, ['--batch', '--gen-key', '/input.txt']);
               })
-            }
-
-            return self._execute(inputFiles, ['--batch', '--gen-key', '/input.txt'])
               .then(function(results) {
                 log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
                 
@@ -390,6 +396,8 @@
            * Get all keys in the user's keychain.
            *
            * @param emailAddress {string} user id.
+           *
+           * @return {Array}
            */
           getAllKeys: function(emailAddress) {
             var self = this;
@@ -404,6 +412,32 @@
 
           }, // getAllKeys()
 
+
+
+
+          /**
+           * Sign a given message.
+           *
+           * @param {String} msg Message to sign.
+           *
+           * @return {String}
+           */
+          sign: function(msg) {
+            var self = this;
+
+            log.debug('Signing message: ' + msg.length + ' characters');
+
+            return self._execute({
+              'input.txt': $q.when(function() {
+                return msg;
+              })
+            }, ['--sign', '--detach-sign', '--armor', '--output', 'input.txt.asc' ,'input.txt'])
+              .then(function getSignature(results) {
+                return results['/input.txt.asc'];
+              });
+            ;
+
+          }, // sign()
 
 
 
@@ -592,13 +626,12 @@
        * Analyse given path.
        * @return {filename: ..., path: ...}
        */
-      _analysePath: function(path_in, opt_filename) {
-        var is_absolute = (path_in[0] === '/');
+      _analysePath: function(path_in) {
         var is_path_only = (path_in[path_in.length-1] === '/');
 
         var filename, path;
         if(is_path_only) {
-          filename = opt_filename || '';
+          filename = '';
           path = path_in;
         }
         else {
@@ -754,7 +787,6 @@
        */
       run: function() {
         var self = this;
-        self._runCalled = true;
 
         var args = Array.prototype.slice.call(arguments);
 
@@ -762,7 +794,7 @@
 
         return self.waitUntilReady()
           .then(function runCommand() {
-            args = ['--yes', '--verbose', '--lock-never'].concat(args);
+            // args = ['--yes', '--verbose', '--lock-never'].concat(args);
 
             defer = self._newTrackableDeferred({
               desc: '' + args.join(' ')
@@ -783,15 +815,6 @@
               return self.workerCommand.stdout;
             })
         ;
-      },
-
-
-      /**
-       * Get whether a run() call has been made through this worker.
-       * @return {Boolean}
-       */
-      runCalled: function() {
-        return this._runCalled;
       },
 
 

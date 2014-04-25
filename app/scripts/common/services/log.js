@@ -17,8 +17,10 @@
       LEVEL_ERROR = 'error';
 
 
-    var outputDevice = console,
-      defaultMinLevel = LEVEL_DEBUG;
+    var logToConsole = false,
+      defaultMinLevel = LEVEL_DEBUG,
+      observers = [];
+
 
     /**
      * Log a message.
@@ -54,8 +56,16 @@
         args = args.concat(additionalContent);
       }
 
-      outputDevice[level].apply(outputDevice, args);
+      if (logToConsole) {
+        console[level].apply(console, args);
+      }
+
+      // notify observers
+      observers.forEach(function(obs) {
+        obs.call(obs, level, args);
+      })
     };
+
 
 
     /**
@@ -82,6 +92,15 @@
         }
 
         this.minLevel = defaultMinLevel;
+      },
+
+
+      /**
+       * Register to be notified of all logging events across all loggers.
+       * @protected
+       */
+      registerObserver: function(cb) {
+        observers.push(cb);
       },
 
 
@@ -147,11 +166,11 @@
 
     return {
       /**
-       * Set the log output device.
-       * @param device {*}
+       * Whether to write log messages to the console.
+       * @param {Boolean} val
        */
-      setOutputDevice: function(device) {
-        outputDevice = device;
+      logToConsole: function(val) {
+        logToConsole = val;
       },
 
       /**
@@ -169,6 +188,48 @@
     }
 
   });
+
+
+
+  app.controller('LogViewerCtrl', function($scope, Log) {
+    $scope.messages = '';
+
+    $scope.showMessages = false;
+
+    $scope.toggleMessages = function() {
+      $scope.showMessages = !$scope.showMessages;
+    };
+
+    // when a new log msg is available
+    Log.registerObserver(function(level, args) {
+      _.each(args, function(arg) {
+        var str = '';
+
+        // Error
+        if (arg instanceof Error) {
+          str = arg.stack.join("\n") + "\n";
+        } 
+        // Array
+        else if (arg instanceof Array) {
+          str = arg.join("\n") + "\n";          
+        }
+        // Object
+        else if (arg instanceof Object) {
+          str = arg.toString();
+        }
+        // everything else
+        else {
+          str = arg + '';
+        }
+
+        $scope.messages += str + "\n";
+      })
+    });
+
+
+
+  });
+
 
 }(angular.module('App.common', [])));
 

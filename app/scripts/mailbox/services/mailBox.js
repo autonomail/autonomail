@@ -4,7 +4,7 @@
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('Mailbox', function(Log, Server, MailView, MailMessage) {
+  app.factory('Mailbox', function(Log, Server, MailView, MailMessage, GPG) {
 
     var Mailbox = Class.extend({
 
@@ -73,6 +73,37 @@
 
 
       /**
+       * Send a message.
+       * 
+       * @param {Object} msg Message and options.
+       * @param {Array} msg.to Recipients.
+       * @param {String} msg.body Message body.
+       * @param {String} msg.subject  Message subject.
+       * @param {Array} msg.cc  CC recipients.
+       * @param {Array} msg.bcc  BCC recipients.
+       * 
+       * @return {Promise}
+       */
+      sendMessage: function(msg) {
+        var self = this;
+
+        self.log.info('Sending message', msg);
+
+        msg.from = this.userId;
+
+        // TODO: encrypt if possible
+
+        return GPG.sign(msg.body)
+          .then(function gotSignature(sig) {
+            msg.sig = sig;
+
+            return Server.send(msg);
+          });
+      },
+
+
+
+      /**
        * Get total no. of messages in current folder.
        *
        * @return {Promise} resolves to integer.
@@ -131,4 +162,4 @@
   });
 
 
-}(angular.module('App.mailbox', ['App.common', 'App.data'])));
+}(angular.module('App.mailbox', ['App.common', 'App.data', 'App.crypto'])));

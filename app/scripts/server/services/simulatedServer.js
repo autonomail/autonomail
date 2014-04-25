@@ -17,6 +17,15 @@
 
 
       /**
+       * Generate a message id.
+       * @return {String}
+       */
+      _generateId: function() {
+        return _.str.gen(1, 10).pop();
+      },
+
+
+      /**
        * Start timer to generate incoming messages and add them to user's inboxes.
        * @private
        */
@@ -28,28 +37,34 @@
         $timeout(function() {
           for (var userId in self.db.users) {
             self._setupUserMailFolders(userId);
+
             var messages = self._createInboxMessages(parseInt(Math.random() * 5));
+
             log.debug('Generated ' + messages.length + ' new inbox messages for: ' + userId);
+
             self.db.mail[userId].inbox.messages = messages.concat(self.db.mail[userId].inbox.messages);
           }
 
           if (!self.stopTimers) {
             self._startInboxMsgGenerator();
           }
-        }, 20000);
+        }, 200000);
       },
 
 
       /**
        * Create inbox messages.
        *
+       * @param {String} userId user to generate for.
        * @param num {Number} no. of messages to create. Default is 1.
        *
        * @return {Array}
        *
        * @private
        */
-      _createInboxMessages: function(num) {
+      _createInboxMessages: function(userId, num) {
+        var self = this;
+
         num = num || 1;
 
         var ret = [];
@@ -57,10 +72,10 @@
         for (var i=0; i<num; ++i) {
           ret.push(
             {
-              id: (Math.random() * 1000000).toString(),
+              id: self._generateId(),
               date: moment().toISOString(),
-              from: _.str.gen(1, 998).pop() + ' <' + _.str.gen(1, 998).pop() + '@test.com>',
-              to: 'john@test.com',
+              from: _.str.gen(1, 998).pop() + ' <alic@foo.bar>',
+              to: userId,
               /*
                From http://www.faqs.org/rfcs/rfc2822.html (section 2.1.1)
                - absolute max 998 characters (excluding CRLF) per line
@@ -317,6 +332,30 @@
         return defer.promise;
       },
 
+
+      send: function(msg) {
+        var self = this;
+
+        log.debug('Send msg to ' + msg.to);
+
+        var defer = $q.defer();
+
+        self._setupUserMailFolders(userId);
+
+        self.db.mail[userId]['sent'].messages.push({
+          id: self._generateId(),
+          date: moment().toISOString(),
+          from: msg.from,
+          to: msg.to,
+          subject: msg.subject,
+          body: msg.body,
+          sig: msg.sig
+        });
+
+        defer.resolve();
+
+        return defer.promise;
+      },
 
 
       toString: function() {

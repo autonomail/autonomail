@@ -3,6 +3,9 @@
  */
 
 (function(ns) {
+  var EMAIL_REGEX = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/ig;
+
+
   /**
    * Generate random alphanumeric strings.
    *
@@ -26,6 +29,22 @@
     }
 
     return ret;
+  };
+
+
+  /**
+   * Extract email addresses from given string.
+   *
+   * This method uses regex matcher to extract strings, allowing it to 
+   * handle cases where other strings (e.g. person names) are interleaved with 
+   * the addresses.
+   *
+   * @param {String} str The email address string.
+   * 
+   * @return {Array}
+   */
+  ns.extractEmailAddresses = function(str) {
+    return str.match(EMAIL_REGEX);
   };
 
 }(_.str));

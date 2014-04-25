@@ -1,0 +1,77 @@
+<div id="page-compose" class="container">
+  <form role="form" name="composeForm" ng-controller="ComposeFormCtrl" class="form-horizontal">
+    <span ng-show="error" class="alert alert-danger">{{error}}</span>
+
+    <div class="form-group">
+      <label for="composeForm_to" class="col-sm-2 control-label">To</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" name="to" id="composeForm_to" 
+              placeholder="Comma-separated recipients"
+              required
+              ng-model="msg.to">
+        <span ng-show="composeForm.to.$dirty && composeForm.to.$invalid" 
+            class="validation_errors alert alert-danger">
+          <span ng-show="composeForm.to.$error.required">
+            Please fill this in
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="composeForm_cc" class="col-sm-2 control-label">Cc</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" name="cc" id="composeForm_cc" 
+              placeholder="Comma-separated recipients"
+              ng-model="msg.cc">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="composeForm_bcc" class="col-sm-2 control-label">Bcc</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" name="bcc" id="composeForm_bcc" 
+              placeholder="Comma-separated recipients"
+              ng-model="msg.bcc">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="composeForm_subject" class="col-sm-2 control-label">Subject</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" name="subject" id="composeForm_subject" 
+              placeholder="Subject"
+              ng-model="msg.subject">
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="composeForm_body" class="col-sm-2 control-label">Msg</label>
+      <div class="col-sm-10">
+        <textarea rows="10" class="form-control" name="body" id="composeForm_body" 
+              placeholder="Enter your message"
+              required
+              ng-model="msg.body">
+              </textarea>
+        <span ng-show="composeForm.body.$dirty && composeForm.body.$invalid" 
+            class="validation_errors alert alert-danger">
+          <span ng-show="composeForm.body.$error.required">
+            Please fill this in
+          </span>
+        </span>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-default" 
+          ng-disabled="!canSubmit()"
+          ng-click="submit()"
+          >Send</button>
+      </div>
+    </div>
+
+  </form>
+</div>

@@ -14,7 +14,9 @@
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider, MailViewProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, LogProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider, MailViewProvider) {
+    LogProvider.logToConsole(true);
+    
     $urlRouterProvider.otherwise('/login');
 
     $stateProvider
@@ -86,17 +88,27 @@
       return !!(UserMgr.getCurrentUser());
     };
 
-    $rootScope.$on('$stateChangeStart', function(event, toState){
+    $rootScope.$on('$stateChangeStart', function(event, toState){      
       // authentication for states which need it
       if (toState.auth) {
+        event.preventDefault();
+
         UserMgr.ensureUserHasSecureDataSetup()
+          .then(function() {
+            // continue onto state, but don't broadcast 'stateChangeStart', 
+            // otherwise we'll end up in a cycle here
+            $state.go(toState.name, {
+              notify: false
+            });
+          })
           .catch(function(err) {
-            event.preventDefault();
             log.warn(err);
 
             UserMgr.postLoginState = toState.name;
 
-            $state.go('login');
+            $state.go('login', {
+              notify: false
+            });
           });
       }
     });

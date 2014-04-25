@@ -70,6 +70,33 @@ a {
 }
 
 
+/* log viewer */
+
+#log-viewer {
+  width: 100%;
+
+  pre {
+    border-top: 2px solid #666;
+    background-color: #ccc;
+    color: #000;
+    margin: 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 80%;
+    height: 20%;
+    overflow: auto;
+  }
+
+  button {
+    z-index: 100;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+
 /* form validation */
 
 .form-control {
@@ -78,6 +105,8 @@ a {
     @include single-box-shadow(#f00);
   }
 }
+
+
 
 /* tables */
 
@@ -124,3 +153,4 @@ a {
 @import "views/login";
 @import "views/mailbox";
 @import "views/pgpKeys";
+@import "views/compose";

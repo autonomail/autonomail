@@ -1,3 +1,4 @@
+
 /**
  * Manages the logged-in user.
  */
@@ -5,7 +6,7 @@
 (function(app) {
   'use strict';
 
-  app.factory('UserMgr', function(Log, $q, RuntimeError, SecureData, AuthCredentials, GPG, Server) {
+  app.factory('UserMgr', function(Log, Alert, $q, $modal, RuntimeError, SecureData, AuthCredentials, GPG, Server) {
 
     var log = Log.create('UserMgr');
 
@@ -80,6 +81,13 @@
         }
 
         if (userId) {
+          // show modal
+          var modalInstance = $modal.open({
+            templateUrl: 'app/modals/userDataInit.html',
+            keyboard: false,
+            backdrop: 'static'
+          });
+
           SecureData.get(userId, 'pgp')
             .then(function ensurePGPKeys(pgpData) {
               if (pgpData) {
@@ -90,13 +98,19 @@
                 return GPG.generateKeyPair(user.email, user.password, 2048)
                   .then(function backup() {
                     return self.backupGPGData(userId);
-                  })
+                  });
                 ;
               }
             })
             .then(defer.resolve)
             .catch(function error(err) {
+              Alert.error('An error ocurred whilst setting up your secure data.');
+
               defer.reject(err);
+            })
+            .finally(function() {
+              // hide modal
+              modalInstance.close();
             });
         }
 
@@ -117,4 +131,5 @@
   });
 
 
-}(angular.module('App.user', ['App.common', 'App.data'])));
+
+}(angular.module('App.user', ['App.common', 'App.data', 'ui.bootstrap.modal'])));

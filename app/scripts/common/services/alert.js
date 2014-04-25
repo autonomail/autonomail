@@ -5,7 +5,7 @@
   /**
    * Service to present temporary pop-up alerts to the user.
    */
-  app.factory('Alerts', function(Log) {
+  app.factory('Alert', function(Log) {
     var log = Log.create('Alerts');
 
     return new (Class.extend({
@@ -16,6 +16,7 @@
        */
       info: function(msg) {
         log.info(msg);
+
         alert(msg);
       },
 
@@ -26,11 +27,11 @@
        */
       error: function(msg) {
         log.error(msg);
+
         alert('error: ' + msg);
       }
 
     }));
   });
-
 
 }(angular.module('App.common', [])));
