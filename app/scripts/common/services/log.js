@@ -140,7 +140,7 @@
           case LEVEL_DEBUG:
             self.debug = function(msg) {
               var extraArgs = Array.prototype.slice.call(arguments, 1);
-              
+
               _log(self.category, null, LEVEL_DEBUG, msg, extraArgs);
             }       
           case LEVEL_INFO:
@@ -200,7 +200,11 @@
 
 
   app.controller('LogViewerCtrl', function($scope, Log) {
-    $scope.messages = '';
+    // maximum no. of lines to hold in log (for good DOM performance)
+    var MAX_LINES = 500;
+
+    // the log lines
+    var log = [];
 
     $scope.showMessages = false;
 
@@ -211,26 +215,33 @@
     // when a new log msg is available
     Log.registerObserver(function(level, args) {
       _.each(args, function(arg) {
-        var str = '';
+        var lines = [];
 
         // Error
         if (arg instanceof Error) {
-          str = arg.stack.join("\n") + "\n";
+          lines = arg.stack;
         } 
         // Array
         else if (arg instanceof Array) {
-          str = arg.join("\n") + "\n";          
+          lines = arg;          
         }
         // Object
         else if (arg instanceof Object) {
-          str = arg.toString();
+          lines = [arg.toString()];
         }
         // everything else
         else {
-          str = arg + '';
+          lines = [arg + ''];
         }
 
-        $scope.messages += str + "\n";
+        // naive log trimming algo
+        var overrun = log.length + lines.length - MAX_LINES;
+        if (0 < overrun) {
+          log = log.slice(overrun);
+        }
+        log = log.concat(lines);
+
+        $scope.messages = log.join("\n") + "\n";
       })
     });
 
