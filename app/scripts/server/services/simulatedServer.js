@@ -38,7 +38,7 @@
           for (var userId in self.db.users) {
             self._setupUserMailFolders(userId);
 
-            var messages = self._createInboxMessages(parseInt(Math.random() * 5));
+            var messages = self._createInboxMessages(userId, parseInt(Math.random() * 5));
 
             log.debug('Generated ' + messages.length + ' new inbox messages for: ' + userId);
 
@@ -128,7 +128,7 @@
         self.db.mail[userId] = {
           'inbox': {
             name: 'Inbox',
-            messages: self._createInboxMessages(2)
+            messages: self._createInboxMessages(userId, 2)
           },
           'sent': {
             name: 'Sent',

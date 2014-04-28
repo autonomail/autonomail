@@ -91,9 +91,10 @@ a {
   }
 
   button {
+    font-size: 50%;
     z-index: 100;
     position: fixed;
-    right: 0;
+    left: 0;
     bottom: 0;
   }
 }

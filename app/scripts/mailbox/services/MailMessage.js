@@ -4,20 +4,23 @@
   app.provider('MailMessage', function() {
 
     return {
-      $get: function(Log, $timeout) {
+      $get: function(Log, $timeout, AuthCredentials) {
 
         var MailMessage = Class.extend({
           /**
            * Constructor
            *
-           * @param msg {Object} raw message data from server.
+           * @param {String} userId User this message belongs to.
+           * @param {Object} msg raw message data from server.
            */
-          init: function(msg) {
+          init: function(userId, msg) {
             this.log = Log.create('Message(' + msg.id + ')');
             this.raw = msg;
             this.parsed = {};
             this.observers = {};
             this.log.debug('created!', this.raw);
+
+            this.owner = AuthCredentials.get(userId);
 
             this.process();
           },
@@ -42,14 +45,19 @@
               self.parsed.subject = self.raw.subject;
               self.parsed.date = self.raw.date;
 
-              self.parsed.from = {};
-              var po = self.raw.from.indexOf('<');
-              if (0 < po) {
-                self.parsed.from.name = _.str.trim(self.raw.from.substr(0, po));
-                self.parsed.from.email = _.str.trim(self.raw.from.substr(po + 1), ' >');
+              self.parsed.from = _.str.extractNamesAndEmailAddresses(
+                self.raw.from
+              ).pop();
+
+              self.parsed.to = _.str.extractNamesAndEmailAddresses(
+                self.raw.to
+              );
+
+              // type
+              if (this.owner.email === this.parsed.from.email) {
+                this.parsed.type = 'out';
               } else {
-                self.parsed.from.name = null;
-                self.parsed.from.email = _.str.trim(self.raw.from);
+                this.parsed.type = 'in';
               }
 
               self._processed = true;
@@ -69,31 +77,47 @@
         });
 
 
+        MailMessage.prop('type', {
+          set: false,
+          get: function() {
+            return this.parsed.type;
+          }
+        });
+
+
+
         MailMessage.prop('date', {
           set: false,
           get: function() {
-            return this.parsed.date || this.raw.date;
+            return this.parsed.date;
           }
         });
 
         MailMessage.prop('from', {
           set: false,
           get: function() {
-            return this.parsed.from || this.raw.from;
+            return this.parsed.from;
+          }
+        });
+
+        MailMessage.prop('to', {
+          set: false,
+          get: function() {
+            return this.parsed.to;
           }
         });
 
         MailMessage.prop('subject', {
           set: false,
           get: function() {
-            return this.parsed.subject || this.raw.subject;
+            return this.parsed.subject;
           }
         });
 
         MailMessage.prop('body', {
           set: false,
           get: function() {
-            return this.parsed.body || this.raw.body;
+            return this.parsed.body;
           }
         });
 

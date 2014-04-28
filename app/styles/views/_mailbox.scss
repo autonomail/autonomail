@@ -47,6 +47,16 @@
       .subject {
         max-width: 30%;
       }
+
+      .meta {
+        .in i {
+          color: #090;
+        }
+
+        .out i {
+          color: #009;
+        }
+      }
     }
   }
 }

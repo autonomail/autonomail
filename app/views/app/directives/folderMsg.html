@@ -1,4 +1,13 @@
-<span class="sender col-md-2">{{ from }}</span>
+<span class="meta col-md-2">
+  <span class="out" ng-show="typeOutbound">
+    <i class="fa fa-arrow-circle-up"></i>      
+    <span class="who">{{ to }}</span>
+  </span>
+  <span class="in" ng-show="!typeOutbound">
+    <i class="fa fa-arrow-circle-down"></i>      
+    <span class="who">{{ from }}</span>
+  </span>
+</span>
 <span class="subject_preview col-md-8">
   <span class="subject">{{ subject }}</span> - <span class="preview">{{ preview }}</span>
 </span>

@@ -25,6 +25,7 @@
     // wait for notifications from message
     self.notify = function(status) {
       if ('processed' === status) {
+        $scope.typeOutbound = ('out' === msg.type);
         $scope.date = moment(msg.date).format('MMM d');
         $scope.from = _.str.prune(msg.from.name || msg.from.email, 30);
         $scope.subject = _.str.prune(msg.subject, 30);

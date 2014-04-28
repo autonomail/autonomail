@@ -35,7 +35,7 @@
   /**
    * Extract email addresses from given string.
    *
-   * This method uses regex matcher to extract strings, allowing it to 
+   * This method uses a Regex to extract strings, allowing it to 
    * handle cases where other strings (e.g. person names) are interleaved with 
    * the addresses.
    *
@@ -47,5 +47,39 @@
     return str.match(EMAIL_REGEX);
   };
 
+
+  /**
+   * Extract names and email addresses from given string.
+   *
+   * This assumes that multiple name + email combinations are separated by a 
+   * comma.
+   *
+   * @param {String} str The email address string.
+   * 
+   * @return {Array} where each item is an `Object` containing the person's 
+   * name (if available) and email address.
+   */
+  ns.extractNamesAndEmailAddresses = function(str) {
+    var tokens = str.split(',');
+
+    var ret = [];
+
+    _.each(tokens, function(token) {
+      var nxt = {};
+
+      var po = token.indexOf('<');
+      if (0 < po) {
+        nxt.name = _.str.trim(token.substr(0, po));
+        nxt.email = _.str.trim(token.substr(po + 1), ' >');
+      } else {
+        nxt.name = null;
+        nxt.email = _.str.trim(token);
+      }
+      
+      ret.push(nxt);
+    });
+
+    return ret;
+  };
 }(_.str));
 
