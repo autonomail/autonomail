@@ -120,6 +120,7 @@
       /**
        * Send a message.
        * 
+       * @param emailAddress {String} user id.
        * @param {Object} msg Message and options.
        * @param {String} msg.from Sender.
        * @param {Array} msg.to Recipients.
@@ -131,7 +132,7 @@
        * 
        * @return {Promise}
        */
-      send: function(msg) {
+      send: function(emailAddress, msg) {
         return this._notYetImplemented();
       },
 

@@ -19,8 +19,11 @@
           <h1><span>autonomail</span></h1>      
         </div>
           <nav class="col-md-5 pull-right logged-in" ng-show="loggedIn()">
+            <a class="mail" ui-sref="mail" title="Mail">
+              <i class="fa fa-envelope"></i><span>Mail</span>
+            </a>
             <a class="pgp" ui-sref="pgpKeys" title="PGP keys">
-              <i class="fa fa-key fa-rotate-180"></i><span>Encryption keys</span>
+              <i class="fa fa-key fa-rotate-180"></i><span>Keys</span>
             </a>
             <a class="logout" ui-sref="logout" title="Sign out">
               <i class="fa fa-sign-out"></i><span>Logout</span>

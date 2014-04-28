@@ -2,15 +2,40 @@
 
 (function(app) {
 
-  app.controller('MailboxCtrl', function ($scope, $state, Log, UserMgr, Mail) {
+  app.controller('MailboxCtrl', function ($scope, $q, $state, Log, UserMgr, Mail) {
     var log = Log.create('MailboxCtrl');
 
-    Mail.open(UserMgr.getCurrentUser())
-      .catch(function(err) { log.error(err); })
-      .then(function getFolders(mailbox) {
-        $scope.mailbox = mailbox;
+    /** 
+     * Mailbox
+     * @type {Object}
+     * @private
+     */
+    var _mailbox = null;
 
-        return $scope.mailbox.getFolders();
+    /**
+     * Get mailbox for current user.
+     *
+     * 
+     * @return {Promise}
+     */
+    $scope.getMailbox = function() {
+      if (_mailbox) {
+        return $q.when(_mailbox);
+      } else {
+        return Mail.open(UserMgr.getCurrentUser())
+          .then(function(mailbox) {
+            _mailbox = mailbox;
+
+            return _mailbox;
+          })
+      }
+    };
+
+
+    // initialise
+    $scope.getMailbox()
+      .then(function getFolders(mailbox) {
+        return mailbox.getFolders();
       })
       .then(function showFolders(folders) {
         $scope.folders = folders;

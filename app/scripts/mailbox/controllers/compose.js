@@ -4,7 +4,7 @@
 (function(app) {
 
   app.controller('ComposeFormCtrl', function ($scope, Log) {
-    var log = Log.create('ComposeFormCtrl');
+    var log = Log.create('ComposeFormCtrl', $scope);
 
     $scope.msg = {
       to: 'alice@foo.bar',
@@ -24,17 +24,22 @@
      * Submit the form.
      */
     $scope.submit = function() {
+      $scope.error = null;
+      
       var msg = $scope.msg;
 
-      $scope.mailbox.sendMessage({
-        to: _.str.extractEmailAddresses(msg.to),
-        cc: _.str.extractEmailAddresses(msg.cc || ''),
-        bcc: _.str.extractEmailAddresses(msg.bcc || ''),
-        subject: msg.subject || '',
-        body: msg.body
-      })
+      $scope.$parent.getMailbox()
+        .then(function(mailbox) {
+          return mailbox.sendMessage({
+            to: _.str.extractEmailAddresses(msg.to),
+            cc: _.str.extractEmailAddresses(msg.cc || ''),
+            bcc: _.str.extractEmailAddresses(msg.bcc || ''),
+            subject: msg.subject || '',
+            body: msg.body            
+          });
+        })
         .catch(function(err) {
-          $scope.error = err.toString();
+          log.error('Sorry, there was an unexpected error. Please check the logs for details.', err);
         });
     };
   });

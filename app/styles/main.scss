@@ -47,13 +47,15 @@ a {
     padding-top: 1em;
     text-align: right;
 
+    a {
+      margin-left: 2em;
+    }
+
     a.pgp {
-      margin-right: 2em;
       font-size: 120%;
     }
 
     a.logout {
-      margin-right: 1em;
       font-size: 100%;
     }
   }

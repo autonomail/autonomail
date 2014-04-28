@@ -52,6 +52,11 @@
               '/home/emscripten/.gnupg/random_seed': ''
             };
 
+            // from https://github.com/manuels/unix-toolbox.js-gnupg/blob/master/demo/trustdb.gpg
+            // self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'] = atob("mQENBFGPt4UBCADDlU9Jc8mY/W1bzXPkuaybtHwYU3NYdyDMQS/1vkT1lLGJG7HtZQVyokFRi6BrWg6Yv49rtaasoEOqBLUkQyltLkCkd3o0aqlGPua4u8sn6TAH9sNKo6K5xeHXMW54RkcxedNKyqherf0yLwwf513iF27YBroH6fay7cExO3GVSuFeW8x2glCUu2kp0npZlbjOKJHjgIQ1l3sFYKC5OPPQQpA5/gsW4uiPSRxK0laNCeMiZu4JQOZYpD0gwbo4Px46APzdk3W3u0Ju1U/TFa4BQhR+1Ii/lQm+03B3oKfDFFMPBG2WBlv48n17WP23jXwhBPF6Bo7ENUiXFCGttnBJABEBAAG0K0FsaWNlIChQYXNzcGhyYXNlIGlzIGFsaWNlKSA8YWxpY2VAZm9vLmNvbT6JATgEEwECACIFAlGPt4UCGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEJ5LR3SYmgqHvgcH/0aIlaBeAtIhxx7/ams3YaO4VcYah5nkt0W5swq67l3bT6QnvRvFHaAMPKpXFSbb7oCbNl+CIUMxBSumz35cLhJVwSUMeOq3+Rp2MSqD6MG23TqZ55cqRGKw/PG68RCDMPVc962cnn97429p7c+8mhIemlOcAR9IXLYHpo0BqDEhZ+UJrU/E56iDs6ZfgWWgzXirZfoO25lIyeQlqnOjaANnlC+jvw230PBhf0ZcCtKe8GBXhGAD+mkzkOYRGP8XpkK9/kdndHZcmUEYB54YlDk4BVj8KU2zLGgLTggTF+I8A0YrH57/k/gA0Lv7rmjllUEMtzqWyaKrfytyz6Szb72wAgADuQENBFGPt4UBCADS36JCAbQyo49Gv8RicKACgUXoNjYWTsOXsjzkga8xMRJaoOAFJFgSH20LeFlJncqH301Os6nMXM9/wAFoa2PiwpLwdBhIJeQR5UL0DECUFBAcUYyq8k5/8mKunkOaWTFWEA8YQeXRmSoE1modVUZK8Zd89mU3XEPHurC0yZalBDDG0L9ZmkOTvJMzxYJJrej6ZMuPCfUXFy1keq9Nyd6WgRzU8a/MMtC1cZcXab0LzIPsITxSM+CqYxHDhp5IHcH+k4FvcRsRPEJXoe0ywdbwXmlrzPIoZrbl63K4N1Cp3/eeyxdJlPn/nXQXQ/1xSDNyXGSprPo1gaz+XZX6zOVjABEBAAGJAR8EGAECAAkFAlGPt4UCGwwACgkQnktHdJiaCoeGnwgAwvSDiCsJzna3HBrpNuCza5x0mI9hcM/veHzsslOoqOHDzgBBiZE8yYcuwWOwARD810E9Eb1T2tZbNM3heOkjVWqq0rQAbNIqCUAAkQSPyIbEYdPMqiqWDB7nkTKcEzoALVf4PuzIgBUWYMS42vmcoDhQho//lMAZZL2kIFBySjXjMd324EGatcOjNPm8OBT96OIlU6BqXBObEZpEFcpT3SxUGlEE8nU76b2rlmxxAh6UYXT9LytbuXtr2XS6b9Y49fKyC96ROHQM4s3H10ZY39SjZZz0l0oibKPLF7C4Mb6dcP1CE9SYt1Kij2Kt5q/V0VisxpoO7V/KPC7xBdkaQrACAAM=")
+            // self.virtualFs['/home/emscripten/.gnupg/secring.gpg'] = atob("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")
+            // self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg'] = atob("AWdwZwMDAQUBAgAAUY+4KwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAs4zAqpwKS/sRdPLqeS0d0mJoKhwYAAAAAAAAfAAAAAAAAAAAAAA0ALN5X1qGlQzhDDw8aVqW/lHOzKQMGAAAAAAAAAAAAAAAAAAAAAAA=")
+
             // pending requests (see `_lock` and `_unlock` methods)
             self.pendingRequests = [];
 
@@ -74,26 +79,31 @@
 
             var defer = $q.defer();
 
-            if (self.alreadySetup) {
-              defer.resolve();
-            } else {
-              Random.getRandomBytes(4096)
-                .then(function fillEGDPool(words) {
-                  var utf8str = sjcl.codec.utf8String.fromBitsRaw(words);
-                  log.debug('Adding ' + utf8str.length + ' bytes to EGD pool...');
-                  self.virtualFs['/dev/egd-pool'] = utf8str;
+            $q.when()
+              .then(function() {
+                if (self._randomData) {
+                  return self._randomData;
+                } else {
+                  return Random.getRandomBytes(4096)
+                    .then(function fillEGDPool(words) {
+                      self._randomData = sjcl.codec.utf8String.fromBitsRaw(words);
+                      
+                      log.debug('Adding ' + self._randomData.length + 
+                        ' bytes to EGD pool...');
 
-                  self.alreadySetup = true;
-                  return true;
-                })
-                .then(defer.resolve)
-                .catch(defer.reject)
-              ;
-            }
+                      return self._randomData;
+                    });
+                }
+              })
+              .then(function(randomData) {
+                self.virtualFs['/dev/egd-pool'] = randomData;
+              })
+              .then(defer.resolve)
+              .catch(defer.reject)
+            ;
 
             return defer.promise;
           },
-
 
 
 
@@ -152,6 +162,7 @@
               '/home/emscripten/.gnupg/random_seed'
             )
               .then(function saveFileData(fileData) {
+
                 self.virtualFs = fileData;
               })
             ;
@@ -275,7 +286,7 @@
               })
               .then(function fetchOutputFile(){
                 if (outputFilePath) {
-                  return self._fsGetFiles(outputFilePath)
+                  return worker.getFile(outputFilePath)
                     .then(function(contents) {
                       results[outputFilePath] = contents;
                     });
@@ -313,13 +324,14 @@
           generateKeyPair: function(emailAddress, password, keyStrength) {
             var self = this;
 
-            log.debug('Generating ' + keyStrength + '-bit keypair for: '  + emailAddress);
+            log.debug('Generating ' + keyStrength + '-bit keypair for '  + 
+                emailAddress + ' with passphrase ' + password);
 
             var startTime = moment();
 
             return $q.when(function() {
-              if (2048 !== keyStrength && 4096 !== keyStrength) {
-                throw new GPGError('GPG key bit size must be either 2048 or 4096');
+              if (2048 >= keyStrength) {
+                throw new GPGError('GPG key bit length must be >= 2048');
               }              
             })
               .then(function genKey() {
@@ -327,17 +339,19 @@
                   '/input.txt': $q.when([
                       'Key-Type: RSA',
                       'Key-Length: ' + keyStrength,
+                      'Key-Usage: sign',
                       'Subkey-Type: RSA',
                       'Subkey-Length: ' + keyStrength,
+                      'Subkey-Usage: encrypt',
                       'Name-Email: ' + emailAddress,
-                      'Expire-Date: 0',
+                      'Expire-Date: 5y',
                       'Passphrase: ' + password,
                       '%commit'
                     ].join("\n")
                   )
                 };
 
-                return self._execute(inputFiles, ['--batch', '--gen-key', '/input.txt']);
+                return self._execute(inputFiles, ['--gen-key', '/input.txt']);
               })
               .then(function(results) {
                 log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
@@ -346,49 +360,6 @@
               })
             ;
           }, // generateKeyPair()
-
-
-
-          /**
-           * Encrypt given data with user's public key.
-           *
-           * @param emailAddress {string} user id.
-           * @param data {string} data to encrypt.
-           */
-          // encryptWithPublicKey: function(emailAddress, data) {
-          //   var self = this;
-
-          //   var defer = $q.defer();
-
-          //   log.debug('Encrypting ' + data.length + ' characters with public key for: '  + emailAddress);
-
-          //   var startTime = null;
-
-          //   self._lock()
-          //     .then(function createInput() {
-          //       return self._fsWriteFile(data, '/input.txt')
-          //     })
-          //     .then(function encrypt() {
-          //       startTime = moment();
-          //       return self._gpg('-r', emailAddress, '--output', '/encrypted.txt', '--encrypt', '/input.txt');
-          //     })
-          //     .then(function getOutput() {
-          //       return self._fsGetFiles('/encrypted.txt');
-          //     })
-          //     .then(function allDone(fileData) {
-          //       log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
-          //       return fileData['/encrypted.txt'];
-          //     })
-          //     .then(defer.resolve)
-          //     .catch(function (err) {
-          //       defer.reject(new GPGError('Data encryption error', err));
-          //     })
-          //     .finally(self._unlock)
-          //   ;
-
-          //   return defer.promise;
-          // }, // generateKeyPair()
-
 
 
 
@@ -419,21 +390,32 @@
            * Sign a given message.
            *
            * @param {String} msg Message to sign.
+           * @param emailAddress {string} user id.
+           * @param password {string} user password.
            *
            * @return {String}
            */
-          sign: function(msg) {
+          sign: function(emailAddress, password, msg) {
             var self = this;
 
             log.debug('Signing message: ' + msg.length + ' characters');
 
             return self._execute({
-              'input.txt': $q.when(function() {
-                return msg;
-              })
-            }, ['--sign', '--detach-sign', '--armor', '--output', 'input.txt.asc' ,'input.txt'])
+              '/input.txt': $q.when(msg)
+            }, [  
+                  '--default-key', emailAddress, 
+                  '--passphrase', password,
+                  '--detach-sign', 
+                  '--armor', 
+                  '--output', '/input.txt.asc',
+                  '/input.txt'
+              ])
               .then(function getSignature(results) {
-                return results['/input.txt.asc'];
+                var sig = results['/input.txt.asc'];
+
+                log.debug('PGP signature: ', sig);
+
+                return sig;
               });
             ;
 
@@ -453,10 +435,10 @@
             log.debug('Importing key into keychain');
 
             var inputFiles = {
-              '/home/emscripten/.gnupg/import.gpg': $q.when(key)
+              '/import.gpg': $q.when(key)
             };
 
-            return self._execute(inputFiles, ['--import', '/home/emscripten/.gnupg/import.gpg']);
+            return self._execute(inputFiles, ['--import', '/import.gpg']);
           }, // importKey()
 
 
@@ -472,7 +454,7 @@
 
             return $q.when({
               'pubring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
-              'secring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
+              'secring.gpg': self.virtualFs['/home/emscripten/.gnupg/secring.gpg'],
               'trustdb.gpg': self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg']              
             });
           },
@@ -489,6 +471,8 @@
            */
           restore: function(data) {
             var self = this;
+
+            log.debug('Restore virtual filesystem to given state');
 
             for (var f in data) {
               self.virtualFs['/home/emscripten/.gnupg/' + f] = data[f];
@@ -794,12 +778,12 @@
 
         return self.waitUntilReady()
           .then(function runCommand() {
-            // args = ['--yes', '--verbose', '--lock-never'].concat(args);
+            args = ['--yes', '--verbose', '--lock-never', '--batch'].concat(args);
 
             defer = self._newTrackableDeferred({
               desc: '' + args.join(' ')
             });
-            self.log.debug('Execute command: ' + defer.desc);
+            self.log.debug('gpg2 ' + defer.desc);
 
             self._resetWorkerCommandResult();
 
@@ -874,10 +858,13 @@
         switch (caps[j]) {
           case 's':
             key.caps.sign = true;
+            break;
           case 'c':
             key.caps.certify = true;
+            break;
           case 'e':
             key.caps.encrypt = true;
+            break;
         }
       }
 

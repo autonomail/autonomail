@@ -81,38 +81,35 @@
   app.run(function($rootScope, $state, Log, UserMgr, Random) {
     var log = Log.create('App');
 
+    // start entropy collector
     Random.startEntropyCollection();
 
-    // this will get flipped whenever user successfully logs in
-    $rootScope.loggedIn = function() {
-      return !!(UserMgr.getCurrentUser());
-    };
 
-    $rootScope.$on('$stateChangeStart', function(event, toState){      
-      // authentication for states which need it
-      if (toState.auth) {
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
+      log.debug('State transition: ' + toState.name);
+
+      // authentication for new states which need it
+      if (toState.auth && !UserMgr.getCurrentUser()) {
         event.preventDefault();
 
-        UserMgr.ensureUserHasSecureDataSetup()
-          .then(function() {
-            // continue onto state, but don't broadcast 'stateChangeStart', 
-            // otherwise we'll end up in a cycle here
-            $state.go(toState.name, {
-              notify: false
-            });
-          })
-          .catch(function(err) {
-            log.warn(err);
+        log.debug('Ask user to login');
+        
+        UserMgr.postLoginState = toState.name;
 
-            UserMgr.postLoginState = toState.name;
-
-            $state.go('login', {
-              notify: false
-            });
-          });
+        $state.go('login');
       }
     });
 
+    $rootScope.$on('$stateChangeError', 
+      function(event, toState, toParams, fromState, fromParams, error) {
+        log.error('State transition error', toState.name, error);
+      }
+    );
+
+
+    $rootScope.loggedIn = function() {
+      return !!(UserMgr.getCurrentUser());
+    }
   });
 
 }(angular));

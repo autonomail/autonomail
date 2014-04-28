@@ -333,7 +333,7 @@
       },
 
 
-      send: function(msg) {
+      send: function(userId, msg) {
         var self = this;
 
         log.debug('Send msg to ' + msg.to);

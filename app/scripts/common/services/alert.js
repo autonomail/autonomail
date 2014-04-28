@@ -13,9 +13,10 @@
       /** 
        * Show an information alert.
        * @param  {String} msg The alert msg.
+       * @param  {Array} [...args] Additional args to pass to logger.
        */
       info: function(msg) {
-        log.info(msg);
+        log.info(msg, Array.prototype.slice(arguments, 1));
 
         alert(msg);
       },
@@ -23,10 +24,11 @@
 
       /** 
        * Show an error alert.
-       * @param  {String} msg The alert msg.
+       * @param {String} msg The alert msg.
+       * @param  {Array} [...args] Additional args to pass to logger.
        */
       error: function(msg) {
-        log.error(msg);
+        log.error(msg, Array.prototype.slice(arguments, 1));
 
         alert('error: ' + msg);
       }

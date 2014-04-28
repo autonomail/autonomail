@@ -33,7 +33,8 @@
       Server.login($scope.user)
         .then(function setCurrentUser(){
           var userId = AuthCredentials.set($scope.user);
-          UserMgr.setCurrentUser(userId);
+
+          return UserMgr.setCurrentUser(userId);
         })
         .then(function saveUsernameForNextTime() {
           return Storage.set('lastUser', {

@@ -4,7 +4,7 @@
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('Mailbox', function(Log, Server, MailView, MailMessage, GPG) {
+  app.factory('Mailbox', function(Log, Server, MailView, MailMessage, GPG, AuthCredentials) {
 
     var Mailbox = Class.extend({
 
@@ -91,13 +91,17 @@
 
         msg.from = this.userId;
 
-        // TODO: encrypt if possible
+        // get credentials
+        var userMeta = AuthCredentials.get(self.userId);
 
-        return GPG.sign(msg.body)
+        // TODO: encrypt
+
+        // sign
+        return GPG.sign(userMeta.email, userMeta.password, msg.body)
           .then(function gotSignature(sig) {
             msg.sig = sig;
 
-            return Server.send(msg);
+            return Server.send(self.userId, msg);
           });
       },
 

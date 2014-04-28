@@ -11,6 +11,7 @@
 
   app.provider('Log', function() {
 
+    // these  map to `console` methods
     var LEVEL_DEBUG = 'debug',
       LEVEL_INFO = 'info',
       LEVEL_WARN = 'warn',
@@ -31,23 +32,8 @@
      * @param additionalContent {Array} additional content
      * @private
      */
-    var _log = function(category, level, msg, additionalContent) {
+    var _log = function(category, viewScope, level, msg, additionalContent) {
       category = 0 < category.length ? category.join('.') + ': ' : '';
-
-      switch (level) {
-        case LEVEL_DEBUG:
-          level = 'debug';
-          break;
-        case LEVEL_INFO:
-          level = 'info';
-          break;
-        case LEVEL_WARN:
-          level = 'warn';
-          break;
-        case LEVEL_ERROR:
-          level = 'error';
-          break;
-      }
 
       var levelStr = ('[' + level.toUpperCase() + ']     ').slice(0,8);
 
@@ -58,6 +44,11 @@
 
       if (logToConsole) {
         console[level].apply(console, args);
+      }
+
+      // view scope
+      if (viewScope) {
+        viewScope.error = msg;
       }
 
       // notify observers
@@ -75,8 +66,9 @@
     var Logger = Class.extend({
       /**
        * @param category {string} the category to log messages under.
-       * @param [options] {Object} options.
-       * @param [options.parent] {Logger} the parent logger category. Default is null.
+       * @param {Object} [options] options.
+       * @param {Logger} [options.parent] the parent logger category. Default is null.
+       * @param {Object} [options.viewScope] view scope. The `error` property of this scope will be set to any error message which occurs.
        */
       init: function(category, options) {
         options = options || {};
@@ -89,6 +81,10 @@
 
         if (options.parent) {
           this.category = options.parent.category.concat(this.category);
+        }
+
+        if (options.viewScope) {
+          this.viewScope = options.viewScope;
         }
 
         this.minLevel = defaultMinLevel;
@@ -106,11 +102,15 @@
 
       /**
        * Create a child logger of this logger.
-       * @param category {string} the child category name.
+       * @param {String} category the child category name.
+       * @param {Object} [viewScope] view scope. The `error` property of this scope will be set to any error message which occurs.
        * @return {Logger}
        */
-      create: function(category) {
-        return new Logger(category, this);
+      create: function(category, viewScope) {
+        return new Logger(category, {
+          parent: this,
+          viewScope: viewScope
+        });
       },
 
 
@@ -139,19 +139,27 @@
         switch (level) {
           case LEVEL_DEBUG:
             self.debug = function(msg) {
-              _log(self.category, LEVEL_DEBUG, msg, Array.prototype.slice.call(arguments, 1));
+              var extraArgs = Array.prototype.slice.call(arguments, 1);
+              
+              _log(self.category, null, LEVEL_DEBUG, msg, extraArgs);
             }       
           case LEVEL_INFO:
             self.info = function(msg) {
-              _log(self.category, LEVEL_INFO, msg, Array.prototype.slice.call(arguments, 1));
+              var extraArgs = Array.prototype.slice.call(arguments, 1);
+              
+              _log(self.category, null, LEVEL_INFO, msg, extraArgs);
             }       
           case LEVEL_WARN:
             self.warn = function(msg) {
-              _log(self.category, LEVEL_WARN, msg, Array.prototype.slice.call(arguments, 1));
+              var extraArgs = Array.prototype.slice.call(arguments, 1);
+              
+              _log(self.category, null, LEVEL_WARN, msg, extraArgs);
             }       
           case LEVEL_ERROR:
             self.error = function(msg) {
-              _log(self.category, LEVEL_ERROR, msg, Array.prototype.slice.call(arguments, 1));
+              var extraArgs = Array.prototype.slice.call(arguments, 1);
+              
+              _log(self.category, self.viewScope, LEVEL_ERROR, msg, extraArgs);
             }       
 
             this.__minLevel = level;

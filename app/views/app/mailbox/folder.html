@@ -1,4 +1,5 @@
 <div class="messages" ng-controller="FolderCtrl">
+  <span ng-show="error" class="alert alert-danger">{{error}}</span>
   <div class="actions">
     <button class="refresh" type="button" class="btn btn-default" ng-click="view.refresh(true)"><i class="fa fa-refresh"></i></button>
   </div>
