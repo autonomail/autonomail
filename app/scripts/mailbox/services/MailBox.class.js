@@ -63,7 +63,7 @@
               return _.map(result.messages, function(msg) {
                 // re-use cached messages
                 if (!self._cache.messages[msg.id]) {
-                  self._cache.messages[msg.id] = new MailMessage(self.userId, msg);
+                  self._cache.messages[msg.id] = new MailMessage(self, msg);
                 }
                 return self._cache.messages[msg.id];
               });

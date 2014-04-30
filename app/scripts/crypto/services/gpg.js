@@ -385,41 +385,139 @@
 
 
 
-
           /**
-           * Sign a given message.
+           * Check whether valid public key for given user exists.
            *
-           * @param {String} msg Message to sign.
-           * @param emailAddress {string} user id.
-           * @param password {string} user password.
+           * A key is valid iff it is not expired or revocated.
            *
-           * @return {String}
+           * @param emailAddress {string} user id to check.
+           *
+           * @return {Array}
            */
-          sign: function(emailAddress, password, msg) {
+          hasPublicKey: function(emailAddress) {
             var self = this;
 
-            log.debug('Signing message: ' + msg.length + ' characters');
+            var defer = $q.defer();
+
+            log.debug('Checking for public key for ' + emailAddress);
+
+            self._execute({}, [
+              '--list-keys', 
+              '--with-colons', 
+              '--fixed-list-mode',
+              emailAddress
+            ])
+              .then(function keyFound() {
+                defer.resolve(true);
+              })
+              .catch(function(err) {
+                var stdout = err.data[0];
+                if (stdout[stdout.length-1].indexOf('No public key')) {
+                  defer.resolve(false);
+                } else {
+                  defer.reject(err);
+                }
+              })
+            ;
+
+            return defer.promise;
+
+          }, // hasPublicKey()
+
+
+
+          /**
+           * Encrypt message to given recipients.
+           *
+           * It assumes that public keys are available for all recipients and 
+           * will sign the message in addition to encrypting it.
+           * 
+           * @param {String} from Sender id/email.
+           * @param {String} passphrase Sender key passphrase.
+           * @param {String} msg Message to send.
+           * @param {String} ... Recipient id/email as each argument.
+           *
+           * @return {Promise} Resolves to PGP message string.
+           */
+          encrypt: function(from, passphrase, msg) {
+            var self = this;
+
+            var recipients = _.slice(arguments, 3);
+
+            log.debug('Encrypting message of ' + msg.length + 
+              ' characters for ' + recipients.length);
 
             return self._execute({
-              '/input.txt': $q.when(msg)
+              '/msg.txt': $q.when(msg)
+            }, 
+              _.chain(recipients)
+                .map(function(r) {
+                  return ['--recipient', r];
+                })
+                .flatten()
+                .value()
+              .concat(
+                [  
+                  '--default-key', emailAddress, 
+                  '--passphrase', password,
+                  '--armor', 
+                  '--output', '/msg.enc',
+                  '--detach-sign',
+                  '--encrypt',
+                  '--encrypt-to', emailAddress, // so that sender can read it
+                  '/msg.txt'
+                ]
+              )
+            )
+              .then(function getOutput(results) {
+                var txt = results['/msg.enc'];
+
+                log.debug('PGP msg: ', txt);
+
+                return txt;
+              })
+            ;
+
+          }, // encrypt()
+
+
+
+          /**
+           * Sign message.
+           *
+           * @param {String} from Sender id/email.
+           * @param {String} passphrase Sender key passphrase.
+           * @param {String} msg Message to send.
+           *
+           * @return {Promise} Resolves to PGP signature string.
+           */
+          sign: function(from, passphrase, msg) {
+            var self = this;
+
+            log.debug('Signing message of ' + msg.length + ' characters');
+
+            return self._execute({
+              '/msg.txt': $q.when(msg)
             }, [  
                   '--default-key', emailAddress, 
                   '--passphrase', password,
-                  '--detach-sign', 
                   '--armor', 
-                  '--output', '/input.txt.asc',
-                  '/input.txt'
-              ])
-              .then(function getSignature(results) {
-                var sig = results['/input.txt.asc'];
+                  '--output', '/msg.sig',
+                  '--detach-sign',
+                  '/msg.txt'
+              ]
+            )
+              .then(function getOutput(results) {
+                var txt = results['/msg.sig'];
 
-                log.debug('PGP signature: ', sig);
+                log.debug('PGP sig: ', txt);
 
-                return sig;
+                return txt;
               });
             ;
 
           }, // sign()
+
 
 
 

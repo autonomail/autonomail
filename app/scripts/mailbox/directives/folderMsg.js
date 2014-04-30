@@ -17,6 +17,7 @@
 
     var msg = $scope.$parent.messages[$scope.id];
 
+    $scope.to = '...';
     $scope.from = '...';
     $scope.subject = '...';
     $scope.preview = '...';
@@ -25,8 +26,9 @@
     // wait for notifications from message
     self.notify = function(status) {
       if ('processed' === status) {
-        $scope.typeOutbound = ('out' === msg.type);
         $scope.date = moment(msg.date).format('MMM d');
+        $scope.typeOutbound = ('out' === msg.type);
+        $scope.to = ($scope.typeOutbound ? 'Me' : msg.toStr);
         $scope.from = _.str.prune(msg.from.name || msg.from.email, 30);
         $scope.subject = _.str.prune(msg.subject, 30);
         $scope.preview = _.str.prune(msg.body, 70);

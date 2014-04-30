@@ -1,5 +1,5 @@
 /**
- * underscore.string additions.
+ * underscore.string mixins.
  */
 
 (function(ns) {
@@ -41,7 +41,7 @@
    *
    * @param {String} str The email address string.
    * 
-   * @return {Array}
+   * @return {Array} The list of email addresses matched.
    */
   ns.extractEmailAddresses = function(str) {
     return str.match(EMAIL_REGEX);
@@ -67,6 +67,12 @@
     _.each(tokens, function(token) {
       var nxt = {};
 
+      // must contain valid email address
+      var matchedAddresses = token.match(EMAIL_REGEX);
+      if (!matchedAddresses || 1 !== matchedAddresses.length) {
+        return;
+      }
+
       var po = token.indexOf('<');
       if (0 < po) {
         nxt.name = _.str.trim(token.substr(0, po));
@@ -76,7 +82,7 @@
         nxt.email = _.str.trim(token);
       }
       
-      ret.push(nxt);
+      ret.push(nxt);        
     });
 
     return ret;
