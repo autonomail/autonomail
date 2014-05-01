@@ -39,9 +39,8 @@
       /**
        * Get list of GPG identities for which we have public keys.
        *
-       * We'll cache the results so we only want it to be called once. In case 
-       * it gets called multiple times in quick succession let's use a timer 
-       * to ensure GPG only actually gets called once.
+       * In case it gets called multiple times in quick succession let's use a 
+       * timer to ensure GPG only actually gets called once.
        * 
        * @return {Promise}
        */
@@ -56,23 +55,17 @@
 
         self._gpgIdentitiesTimer = $timeout(function() {
 
-          $q.when()
-            .then(function() {
-              if (!self._cachedGPGIdentities) {
-                return GPG.getAllKeys()
-                  .then(function extractIdentities(keys) {
-                    self._cachedGPGIdentities = _.chain(keys)
-                      .pluck('identities')  // [[{}]]
-                      .flatten() // [{}]
-                      .pluck('text') // []
-                      .value();
-                  });
-              }
+          return GPG.getAllKeys()
+            .then(function extractIdentities(keys) {
+              return _.chain(keys)
+                .pluck('identities')  // [[{}]]
+                .flatten() // [{}]
+                .pluck('text') // []
+                .value();
             })
-            .then(function done() {
-              defer.resolve(self._cachedGPGIdentities);
-            })
-            .catch(defer.reject);
+            .then(defer.resolve)
+            .catch(defer.reject)
+          ;
 
         }, 100, false);
 
@@ -105,14 +98,14 @@
                 _.str.extractNamesAndEmailAddresses(self._raw[field] || '');
 
               // check to see if we have a public key for each address
-              _.each(self.processed[field], function(recipient) {
+              _.each(self._processed[field], function(recipient) {
                 var checkStr = '<' + recipient.email + '>';
 
                 var found = _.find(gpgIdentities, function(identity) {
                   return 0 <= identity.indexOf(checkStr);
                 });
 
-                recipient.havePublicKey = (undefined === found);
+                recipient.havePublicKey = (undefined !== found);
 
                 if (!recipient.havePublicKey) {
                   self._missingKeys[field].push(recipient.email);
@@ -154,6 +147,29 @@
      * Processed inputs, i.e. emails parsed, encrypted, signed, etc.
      */
     OutboundMessage.prop('processed', { internal: '_processed' });
+
+    /**
+     * Get whether message can be encrypted.
+     */
+    OutboundMessage.prop('canEncrypt', { 
+      get: function() {
+        return 0 === (this._missingKeys.to.length +
+          this._missingKeys.cc.length + 
+          this._missingKeys.bcc.length);
+      }
+    });
+
+
+    /**
+     * Get whether message can be sent.
+     */
+    OutboundMessage.prop('canSend', { 
+      get: function() {
+        return 0 < _.get(this._processed, 'to.length');
+      }
+    });
+
+
 
     /**
      * Current message state.

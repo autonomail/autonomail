@@ -2,7 +2,15 @@
 
 
 #page-mailbox {
-  padding: 1.5em 1em 1em;
+  .visible-xs {
+    .folder-buttons {
+      width: 100%;
+
+      button {
+        width: 25%;
+      }
+    }
+  }
 
   .folders {
     margin-top: 2em;
@@ -60,6 +68,16 @@
     }
   }
 }
+
+
+@media (min-width: $screen-sm) {
+  #page-mailbox {
+    padding: 1.5em 1em 1em;
+  }
+}
+
+
+
 
 
 

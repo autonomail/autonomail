@@ -9,8 +9,6 @@
     var outboundMessage = new OutboundMessage();
 
     $scope.msg = outboundMessage.raw;
-    $scope.msg.to = 'alice@foo.bar';
-    $scope.msg.body = 'Hello world!';
 
     $scope.missingKeys = outboundMessage.missingKeys;
 
@@ -30,12 +28,22 @@
 
 
 
+
+    /**
+     * Check whether the message can be encrypted.
+     */
+    $scope.canEncrypt = function() {
+      return outboundMessage.canEncrypt;
+    };
+
+
+
     /**
      * Check whether the form can be submitted
      * @returns {$dirty|*|$valid}
      */
     $scope.canSubmit = function() {
-      return $scope.composeForm.$valid;
+      return $scope.composeForm.$valid && outboundMessage.canSend;
     };
 
 
@@ -63,5 +71,5 @@
     };
   });
 
-}(angular.module('App.mailbox', ['App.common', 'App.user', 'ui.bootstrap.pagination', 'ui.bootstrap.pagination', 'ui.event'])));
+}(angular.module('App.mailbox', ['App.common', 'App.user', 'ui.validate', 'ui.bootstrap.pagination', 'ui.bootstrap.pagination', 'ui.event'])));
 

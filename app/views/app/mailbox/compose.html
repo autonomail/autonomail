@@ -7,16 +7,16 @@
       <div class="col-sm-10">
         <input type="text" class="form-control" name="to" id="composeForm_to" 
               placeholder="Comma-separated recipients"
-              required
               ng-model="msg.to"
-              ui-event="{ keypress: recipientsUpdated($event) }">
+              ui-event="{ keypress: recipientsUpdated($event) }"
+              required>
         <span ng-show="composeForm.to.$dirty && composeForm.to.$invalid" 
             class="validation_errors alert alert-danger">
           <span ng-show="composeForm.to.$error.required">
-            Please fill this in
+            Please enter recipients
           </span>
         </span>
-        <span ng-show="missingKeys.to" class="alert alert-danger">
+        <span ng-show="missingKeys.to" class="alert alert-warning">
           Public keys missing for:
           <ul>
             <li ng-repeat="email in missingKeys.to">{{email}}</li>
@@ -43,7 +43,7 @@
             <input type="text" class="form-control" name="cc" id="composeForm_cc" 
                   placeholder="Comma-separated recipients"
                   ng-model="msg.cc">
-            <span ng-show="missingKeys.cc" class="alert alert-danger">
+            <span ng-show="missingKeys.cc" class="alert alert-warning">
               Public keys missing for:
               <ul>
                 <li ng-repeat="email in missingKeys.cc">{{email}}</li>
@@ -58,7 +58,7 @@
             <input type="text" class="form-control" name="bcc" id="composeForm_bcc" 
                   placeholder="Comma-separated recipients"
                   ng-model="msg.bcc">
-            <span ng-show="missingKeys.bcc" class="alert alert-danger">
+            <span ng-show="missingKeys.bcc" class="alert alert-warning">
               Public keys missing for:
               <ul>
                 <li ng-repeat="email in missingKeys.bcc">{{email}}</li>
@@ -90,12 +90,25 @@
         <span ng-show="composeForm.body.$dirty && composeForm.body.$invalid" 
             class="validation_errors alert alert-danger">
           <span ng-show="composeForm.body.$error.required">
-            Please fill this in
+            Please enter some text
           </span>
         </span>
       </div>
     </div>
 
+
+    <div class="form-group message-crypto" ng-show="canSubmit()">
+      <div ng-show="canEncrypt()" class="alert alert-success">
+        <i class="fa fa-lock fa-2x"></i>
+        <span>Message will be <strong>signed</strong> and <strong>encrypted</strong>. Enjoy your privacy.</span>
+      </div>
+      <div ng-show="!canEncrypt()" class="alert alert-danger">
+        <i class="fa fa-unlock-alt fa-2x"></i>
+        <span>
+          Message will be <strong>signed</strong> but <strong>NOT encrypted</strong>. You do not have public keys for all the recipients.
+        </span>
+      </div>
+    </div>
 
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">

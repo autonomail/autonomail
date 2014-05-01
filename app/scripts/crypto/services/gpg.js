@@ -63,6 +63,9 @@
             self._createWorker = _.bind(self._createWorker, self);
             self._lock = _.bind(self._lock, self);
             self._unlock = _.bind(self._unlock, self);
+
+            // to cache execution results
+            self._cache = {};
           },
 
 
@@ -327,6 +330,8 @@
             log.debug('Generating ' + keyStrength + '-bit keypair for '  + 
                 emailAddress + ' with passphrase ' + password);
 
+            self._clearCaches('keys');
+
             var startTime = moment();
 
             return $q.when(function() {
@@ -366,63 +371,30 @@
           /**
            * Get all keys in the user's keychain.
            *
-           * @param emailAddress {string} user id.
-           *
            * @return {Array}
            */
-          getAllKeys: function(emailAddress) {
+          getAllKeys: function() {
             var self = this;
 
-            log.debug('Getting all keys stored in keychain of ' + emailAddress);
+            log.debug('Getting all keys stored in keychain');
 
-            return self._execute({}, ['--list-keys', '--with-colons', '--fixed-list-mode'])
-              .then(function getOutput(results) {
-                return GPGUtils.parseKeyList(results.stdout);
-              })
-            ;
-
-          }, // getAllKeys()
-
-
-
-          /**
-           * Check whether valid public key for given user exists.
-           *
-           * A key is valid iff it is not expired or revocated.
-           *
-           * @param emailAddress {string} user id to check.
-           *
-           * @return {Array}
-           */
-          hasPublicKey: function(emailAddress) {
-            var self = this;
-
-            var defer = $q.defer();
-
-            log.debug('Checking for public key for ' + emailAddress);
-
-            self._execute({}, [
-              '--list-keys', 
-              '--with-colons', 
-              '--fixed-list-mode',
-              emailAddress
-            ])
-              .then(function keyFound() {
-                defer.resolve(true);
-              })
-              .catch(function(err) {
-                var stdout = err.data[0];
-                if (stdout[stdout.length-1].indexOf('No public key')) {
-                  defer.resolve(false);
+            return $q.when()
+              .then(function checkCache() {
+                if (!self._getCache('keys')) {
+                  return self._execute({}, ['--list-keys', '--with-colons', '--fixed-list-mode'])
+                    .then(function getOutput(results) {
+                      self._setCache('keys', GPGUtils.parseKeyList(results.stdout));
+                    });
                 } else {
-                  defer.reject(err);
+                  log.debug('...fetch from cache');
                 }
               })
+              .then(function done() {
+                return self._getCache('keys');
+              })
             ;
+          }, // getAllKeys()
 
-            return defer.promise;
-
-          }, // hasPublicKey()
 
 
 
@@ -532,6 +504,8 @@
 
             log.debug('Importing key into keychain');
 
+            self._clearCaches('keys');
+
             var inputFiles = {
               '/import.gpg': $q.when(key)
             };
@@ -577,6 +551,37 @@
             }
 
             return $q.when(true);
+          },
+
+
+          /**
+           * Get cached data.
+           * @param  {String} key Key.
+           * @return {*} data.
+           */
+          _getCache: function(key) {
+            return this._cache[key];
+          },
+
+
+          /**
+           * Set cached data.
+           * @param  {String} key Key.
+           * @param {*} data Value
+           */
+          _setCache: function(key, data) {
+            return this._cache[key] = data;
+          },
+
+
+          /**
+           * Clear cached data.
+           * @param  {String} key1 Name of first cache to clear. Subsequent arguments name other cache keys.
+           */
+          _clearCaches: function(key1) {
+            _.each(arguments, function(key) {
+              delete this._cache[key];
+            });
           }
 
         }));

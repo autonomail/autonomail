@@ -27,37 +27,19 @@ a {
 /* site header */
 
 #site-header {
-  h1 {
-    max-height: 4em;
-    margin: 1em;
-    padding-left: 1.3em;
+  padding: 0.8em;
+
+  .navbar {
+    margin: 0; 
+  }
+
+  .navbar-brand {
+    color: #fff;
+    margin-left: 0.5em;
+    padding-left: 2.3em;
     background: image-url('logo.png', false, false) no-repeat left center;
     background-size: contain;
     font-size: 160%;
-
-    span:nth-child(2) {
-      color: #666;
-    }
-    span:nth-child(3) {
-      color: #999;
-    }
-  }
-
-  nav {
-    padding-top: 1em;
-    text-align: right;
-
-    a {
-      margin-left: 2em;
-    }
-
-    a.pgp {
-      font-size: 120%;
-    }
-
-    a.logout {
-      font-size: 100%;
-    }
   }
 
 }
