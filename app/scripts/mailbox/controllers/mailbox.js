@@ -44,7 +44,7 @@
         // when user wants to open a folder
         $scope.openFolder = function(folderId) {
           // shift inner state
-          $state.go('mail.folder', {
+          $state.go('user.mail.folder', {
             folderId: folderId
           });
           return false;

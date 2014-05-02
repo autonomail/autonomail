@@ -25,7 +25,14 @@
        * @return {Promise}
        */
       setCurrentUser: function(userId) {
-        return this._ensureUserHasSecureDataSetup(userId)
+        var self = this;
+
+        return $q.when()
+          .then(function setupData() {
+            if (userId) {
+              return self._ensureUserHasSecureDataSetup(userId);
+            }
+          })
           .then(function() {
             currentUser = userId;
           });

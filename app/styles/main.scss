@@ -24,6 +24,20 @@ a {
 
 
 
+/* logo */
+.logo {
+  text-align: center;
+
+  h1.logo-brand {
+    margin: 1em 0;
+    display: inline-block;
+    color: #fff;
+    padding-left: 1.3em;
+    background: image-url('logo.png', false, false) no-repeat left center;
+    background-size: contain;
+  }
+}
+
 /* site header */
 
 #site-header {

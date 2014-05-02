@@ -22,49 +22,50 @@
     $stateProvider
       .state('login', {
         url: '/login',
-        templateUrl: 'app/login/form.html'
+        templateUrl: 'app/anon/login.html'
       })
       .state('logout', {
         url: '/logout',
         controller: function(UserMgr, $state) {
-          UserMgr.setCurrentUser(null);
-          $state.go('login');
+          UserMgr.setCurrentUser(null)
+            .then(function showLoginPage() {
+              $state.go('login');
+            });
         }
       })
       .state('signup', {
         url: '/signup',
-        templateUrl: 'app/signup/index.html',
-        controller: function($state) {
-          $state.go('signup.form');
-        }
+        templateUrl: 'app/anon/signup.html'
       })
-      .state('signup.form', {
-        templateUrl: 'app/signup/form.html'
+      .state('user', {
+        auth: true,
+        url: '/u',
+        templateUrl: 'app/user/index.html'
       })
-      .state('pgpKeys', {
+      .state('user.keys', {
         auth: true,
         url: '/k',
-        templateUrl: 'app/keys/view.html'
+        templateUrl: 'app/user/keys.html'
       })
-      .state('mail', {
+      .state('user.mail', {
         auth: true,
         url: '/m',
-        templateUrl: 'app/mailbox/index.html',
+        templateUrl: 'app/user/mail/index.html',
         controller: function($state) {
-          $state.go('mail.folder', {
+          $state.go('user.mail.folder', {
             folderId: 'inbox'
           });
         }
       })
-      .state('mail.compose', {
+      .state('user.mail.compose', {
         auth: true,
-        url: '/compose',
-        templateUrl: 'app/mailbox/compose.html'
+        url: '/c',
+        templateUrl: 'app/user/mail/compose.html'
       })
-      .state('mail.folder', {
+      .state('user.mail.folder', {
         auth: true,
-        url: '/v/:folderId',
-        templateUrl: 'app/mailbox/folder.html'
+        url: '/f/:folderId',
+        templateUrl: 'app/user/mail/folder.html'
       })
     ;
 

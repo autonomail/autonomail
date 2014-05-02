@@ -1,28 +1,14 @@
 #page-signup {
   padding: 1em;
+  text-align: center;
 
-  h2 {
-    margin-bottom: 1em;
-  }
-
-  form {
-    .terms, .submit {
-      display: inline-block;
-      width: 50%;
-    }
-
-    .submit {
-      margin-top: 1em;
-      text-align: center;
-
-      button[type=submit] {
-        display: inline-block;
-      }
-    }
-
+  a.login {
+    display: block;
+    margin: 3em 0 0;
   }
 
   #signupForm_username + .post-label  {
+    position: relative;
     font-size: 150%;
     font-style: italic;
 
@@ -35,14 +21,21 @@
     }
   }
 
+  .terms.checkbox {
+    display: inline-block;
+  }
 
+}
 
-  #signup_process {
-    .description {
-      font-size: 140%;
+@media (max-width: $screen-xs-max) {
+  #page-signup {
+    .form-control {
+      width: 90%;
     }
   }
 }
+
+
 
 
 
