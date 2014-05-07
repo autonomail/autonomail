@@ -14,7 +14,9 @@
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, LogProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider, MailViewProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, LogProvider, 
+        ServerProvider, StorageProvider, GPGProvider, MailViewProvider) 
+  {
     LogProvider.logToConsole(true);
     
     $urlRouterProvider.otherwise('/login');
@@ -70,7 +72,6 @@
     ;
 
     // web workers
-    WebWorkerProvider.addImportScript('/scripts/webworker-imports.generated.js');
     GPGProvider.setWorkerScript('/scripts/gpg2-worker.generated.js');
 
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);

@@ -92,7 +92,7 @@
             } else {
               var user = AuthCredentials.get(userId);
 
-              return GPG.generateKeyPair(user.email, user.password, 2048)
+              return GPG.generateKeyPair(user.email, user.passphrase, 2048)
                 .then(function backup() {
                   return self.backupGPGData(userId);
                 });

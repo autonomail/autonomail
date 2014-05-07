@@ -7,8 +7,8 @@
     $scope.user = {
       domain: 'autonomail.com',
       name: 'username1',
-      password: 'password1',
-      confirm: 'password1',
+      passphrase: 'this is my world',
+      confirm: 'this is my world',
       agree: true
     };
 
@@ -22,37 +22,29 @@
 
 
     /**
-     * Check that password contents are valid.
-     * @param password {string} the password user entered.
+     * Check that passphrase contents are valid.
+     * @param passphrase {string} the passphrase user entered.
      * @returns {boolean} true if ok; false otherwise.
      */
-    $scope.validatePasswordContents = function(password) {
-      var hasLetter = false,
-        hasNumber = false;
+    $scope.validatePassphraseContents = function(passphrase) {
+      try {
+        Passphrase.check(passphrase);
+        return true;
+      } catch (err) {
+        $scope.signupForm.passphrase.$error.contentsErrorMsg = err.message;
 
-      if (!password || password.length === 0) return true;
-
-      for (var i=0; i<password.length; ++i) {
-        var charCode = password.charAt(i).toLowerCase().charCodeAt(0);
-        if (97 <= charCode & 122 >= charCode) {
-          hasLetter = true;
-        }
-        if (48 <= charCode && 57 >= charCode) {
-          hasNumber = true;
-        }
+        return false;
       }
-
-      return hasLetter && hasNumber;
     };
 
 
     /**
-     * Check that user confirmed the password correctly.
+     * Check that user confirmed the passphrase correctly.
      * @param confirm {string} what the user entered.
      * @returns {boolean} true if confirmation was good.
      */
-    $scope.validatePasswordConfirmation = function(confirm) {
-      return confirm === $scope.user.password;
+    $scope.validatePassphraseConfirmation = function(confirm) {
+      return confirm === $scope.user.passphrase;
     };
 
     /**

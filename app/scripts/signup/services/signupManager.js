@@ -22,7 +22,7 @@
 
         AuthCredentials.set(formData.email, {
           username: formData.name,
-          password: formData.password
+          passphrase: formData.passphrase
         });
       },
 

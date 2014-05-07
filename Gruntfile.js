@@ -216,12 +216,6 @@ module.exports = function (grunt) {
       options: {
         separator: ';'
       },
-      webworkerMain: {
-        src: [
-          '<%= yeoman.app %>/bower_components/parallel.js/lib/eval.js',
-        ],
-        dest: '<%= yeoman.app %>/scripts/webworker.generated.js'
-      },
       webworkerImports: {
         src: [
           '<%= yeoman.app %>/bower_components/sjcl/sjcl.js',
@@ -404,7 +398,6 @@ module.exports = function (grunt) {
 
 
   grunt.registerTask('webworker', [
-    'concat:webworkerMain',
     'concat:webworkerImports',
     'concat:gpg'
   ]);

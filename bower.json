@@ -8,7 +8,6 @@
     "angular-sanitize": "1.2.0-rc.3",
     "angular-ui-router": "~0.2.10",
     "angular-ui-utils": "https://github.com/angular-ui/ui-utils.git#ce95fd61a4ff0a387019b72c81b0f54767a9a6bb",
-    "parallel.js": "https://github.com/adambom/parallel.js.git#0e455b15dc9a5d2149436f9483e0cce826c67ce4",
     "angular-bootstrap": "https://github.com/angular-ui/bootstrap.git#304a662a0a8d3fe622f14a45e8e0bb80b25abe47",
     "sjcl": "git@github.com:hiddentao/sjcl.git",
     "unix-toolbox.js-gnupg": "https://github.com/manuels/unix-toolbox.js-gnupg.git#e5818f5da6badf40259284492cd1491246784c7b",
@@ -17,7 +16,9 @@
     "lodash": "~2.3.0",
     "font-awesome": "~4.0.3",
     "underscore.string": "~2.3.3",
-    "angular-strap": "~2.0.0"
+    "angular-strap": "~2.0.0",
+    "passphrase": "https://github.com/autonomail/passphrase.git#~1.1.0",
+    "catiline": "~2.9.3"
   },
   "devDependencies": {
     "angular-mocks": "1.2.0-rc.3",

@@ -579,8 +579,10 @@
            * @param  {String} key1 Name of first cache to clear. Subsequent arguments name other cache keys.
            */
           _clearCaches: function(key1) {
+            var self = this;
+
             _.each(arguments, function(key) {
-              delete this._cache[key];
+              delete self._cache[key];
             });
           }
 

@@ -2,12 +2,17 @@
 
 (function(app) {
 
+  app.factory('CryptoError', function(RuntimeError) {
+    return RuntimeError.define('CryptoError');
+  });
+
 
   /**
    * General encryptinon service using SJCL. For PGP encryption see the GPG service.
    */
-  app.factory('Encrypt', function(Log, $q, RuntimeError, Random, WebWorker) {
-    var log = Log.create('Encrypt');
+  app.factory('Crypto', function(Log, $q, CryptoError, Random, WebWorker) {
+    var log = Log.create('Crypto');
+
 
     /**
      * When deriving a key from a user password, keep iterating until the given amount of time has elapsed.
@@ -19,7 +24,7 @@
     return new (Class.extend({
 
       /**
-       * Generate a new secure password key from given user password and salt.
+       * Generate a new secure encryption key from given user password and salt.
        *
        * @param password {string} user password.
        *
@@ -28,20 +33,14 @@
       deriveNewKey: function(password) {
         var self = this;
 
-        var defer = $q.defer();
-
-        Random.getRandomBytes()
+        return Random.getRandomBytes()
           .then(function deriveKey(salt) {
             return self.deriveKey(password, {
               salt: sjcl.codec.hex.fromBits(salt),
               requiredStrengthMs: REQUIRED_STRENGTH_MS
             });
           })
-          .then(defer.resolve)
-          .catch(defer.reject)
         ;
-
-        return defer.promise;
       },
 
 
@@ -61,41 +60,56 @@
       deriveKey: function(password, algorithmParams) {
         log.debug('Deriving key from: ', password, algorithmParams);
 
-        return WebWorker.run('deriveKey', function(data) {
-          var
-            iterations = data.iterations || 10000,
-            saltBits = sjcl.codec.hex.toBits(data.salt),
-            timeElapsedMs = 0,
-            key = null;
+        var worker = new WebWorker('deriveKey', function(data, cb) {
+          try {
+            var
+              iterations = data.iterations || 10000,
+              saltBits = sjcl.codec.hex.toBits(data.salt),
+              timeElapsedMs = 0,
+              key = null;
 
-          do {
-            // check time taken for previous calculation
-            if (key) {
-              if (0 === timeElapsedMs) {    // just in case it's super fast
-                iterations *= 2;
-              } else {
-                iterations = parseInt(iterations * data.requiredStrengthMs / timeElapsedMs, 10) + 1;
+            do {
+              // check time taken for previous calculation
+              if (key) {
+                if (0 === timeElapsedMs) {    // just in case it's super fast
+                  iterations *= 2;
+                } else {
+                  iterations = parseInt(iterations * data.requiredStrengthMs / timeElapsedMs, 10) + 1;
+                }
               }
-            }
 
-            var startTime = new Date();
-            key = sjcl.misc.pbkdf2(data.password, saltBits, iterations, null, sjcl.misc.hmac512);
-            timeElapsedMs = new Date().getTime() - startTime.getTime();
+              var startTime = new Date();
+              key = sjcl.misc.pbkdf2(data.password, saltBits, iterations, null, sjcl.misc.hmac512);
+              timeElapsedMs = new Date().getTime() - startTime.getTime();
 
-          } while (data.requiredStrengthMs && data.requiredStrengthMs > timeElapsedMs);
+            } while (data.requiredStrengthMs && data.requiredStrengthMs > timeElapsedMs);
 
-          return {
-            authKey: sjcl.codec.hex.fromBits(key.slice(0, key.length / 2)),
-            secureDataKey: sjcl.codec.hex.fromBits(key.slice(key.length / 2)),
-            salt: data.salt,
-            iterations: iterations
-          };
-        }, {
+            cb(null, {
+              authKey: sjcl.codec.hex.fromBits(key.slice(0, key.length / 2)),
+              secureDataKey: sjcl.codec.hex.fromBits(key.slice(key.length / 2)),
+              salt: data.salt,
+              iterations: iterations
+            });
+          } catch (err) {
+            cb(err);
+          }
+        });
+
+        var defer = $q.defer();
+
+        worker.run({
           password: password,
           salt: algorithmParams.salt,
           iterations: algorithmParams.iterations,
-          requiredStrengthMs: algorithmParams.requiredStrengthMs
-        });
+          requiredStrengthMs: algorithmParams.requiredStrengthMs          
+        })
+          .then(defer.resolve)
+          .catch(function(err) {
+            defer.reject(new CryptoError('Key derivation failed: ' + err));
+          })
+        ;
+
+        return defer.promise;
       },
 
 
@@ -115,22 +129,35 @@
           return $q.reject(new RuntimeError('Encryption password must be 256 bits'));
         }
 
-        return Random.getRandomBytes(16)
+        var defer = $q.defer();
+
+        Random.getRandomBytes(16)
           .then(function doEncryption(iv) {
 
-            return WebWorker.run('encrypt', function(data) {
-              return sjcl.encrypt_b64(data.password, data.plaintext, data.iv);
-            }, {
+            var worker = new WebWorker('encrypt', function(data, cb) {
+              try {
+                var r = 
+                  sjcl.encrypt_b64(data.password, data.plaintext, data.iv);
+                cb(null, r);
+              } catch (err) {
+                cb(err);
+              }
+            });
+
+            return worker.run({
               password: password,
               plaintext: plaintext,
-              iv: iv
+              iv: iv              
             });
 
           })
-          .then(function (cipherText) {
-            return cipherText;
-          });
+          .then(defer.resolve)
+          .catch(function(err) {
+            defer.reject(new CryptoError('Encryption failed: ' + err));
+          })
         ;
+
+        return defer.promise;
       },
 
 
@@ -152,16 +179,30 @@
           return $q.reject(new RuntimeError('Decryption password must be 256 bits'));
         }
 
-        return WebWorker.run('decrypt', function(data) {
-          return sjcl.decrypt_b64(data.password, data.ciphertext);
-        }, {
-            password: password,
-            ciphertext: ciphertext
+        var worker = new WebWorker('decrypt', function(data, cb) {
+          try {
+            var r = sjcl.decrypt_b64(data.password, data.ciphertext);
+            cb(null, r);
+          } catch (err) {
+            cb(err);
           }
-        )
+        });
+
+        var defer = $q.defer();
+
+        worker.run({
+          password: password,
+          ciphertext: ciphertext
+        })
           .then(function parse(plaintext) {
-            return JSON.parse(plaintext);
-          });
+            defer.resolve(JSON.parse(plaintext))
+          })
+          .catch(function(err) {
+            defer.reject(new CryptoError('Decryption failed: ' + err));
+          })
+        ;
+
+        return defer.promise;
       },
 
 
