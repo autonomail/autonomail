@@ -222,6 +222,19 @@
 
 
 
+      /**
+       * Clear cached data for given user id.
+       *
+       * This next time we wish to get/set this user's secure data we will have 
+       * to reload it from storage prior.
+       */
+      clearCache: function(userId) {
+        log.debug('Clearing cache for ' + userId);
+
+        delete cachedSecureData[userId];
+        delete cachedSecureDataKey[userId];
+      },
+
 
 
       /**

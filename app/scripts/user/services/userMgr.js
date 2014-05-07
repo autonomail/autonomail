@@ -29,9 +29,13 @@
 
         return $q.when()
           .then(function setupData() {
+            if (currentUser) {
+              SecureData.clearCache(currentUser);              
+            }
+
             if (userId) {
               return self._ensureUserHasSecureDataSetup(userId);
-            }
+            } 
           })
           .then(function() {
             currentUser = userId;

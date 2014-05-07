@@ -122,11 +122,13 @@
        * @return {Promise} resolves to cipherText
        */
       encrypt: function(key, data) {
+        log.debug('Encrypting with key: ' + key);
+
         var plaintext = JSON.stringify(data),
           password = sjcl.codec.hex.toBits(key);
 
         if (8 !== password.length) {
-          return $q.reject(new RuntimeError('Encryption password must be 256 bits'));
+          return $q.reject(new CryptoError('Encryption password must be 256 bits'));
         }
 
         var defer = $q.defer();
@@ -173,10 +175,12 @@
        * @return {Promise} resolves to JS object/string (the plaintext).
        */
       decrypt: function(key, ciphertext) {
+        log.debug('Decrypting with key: ' + key);
+
         var password = sjcl.codec.hex.toBits(key);
 
         if (8 !== password.length) {
-          return $q.reject(new RuntimeError('Decryption password must be 256 bits'));
+          return $q.reject(new CryptoError('Decryption password must be 256 bits'));
         }
 
         var worker = new WebWorker('decrypt', function(data, cb) {
