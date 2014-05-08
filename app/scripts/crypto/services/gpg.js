@@ -48,8 +48,7 @@
               ].join("\n"),
               // we need to create these files to ensure our getFiles() always succeed
               '/home/emscripten/.gnupg/pubring.gpg': '',
-              '/home/emscripten/.gnupg/secring.gpg': '',
-              '/home/emscripten/.gnupg/random_seed': ''
+              '/home/emscripten/.gnupg/secring.gpg': ''
             };
 
             // from https://github.com/manuels/unix-toolbox.js-gnupg/blob/master/demo/trustdb.gpg
@@ -87,7 +86,7 @@
                 if (self._randomData) {
                   return self._randomData;
                 } else {
-                  return Random.getRandomBytes(4096)
+                  return Random.getRandomBytes(16384)
                     .then(function fillEGDPool(words) {
                       self._randomData = sjcl.codec.utf8String.fromBitsRaw(words);
                       
@@ -158,17 +157,24 @@
           _destroyWorker: function(worker) {
             var self = this;
 
-            return worker.getFiles(
+            var defer = $q.defer();
+
+            worker.getFiles(
               '/home/emscripten/.gnupg/pubring.gpg',
               '/home/emscripten/.gnupg/secring.gpg',
-              '/home/emscripten/.gnupg/trustdb.gpg',
-              '/home/emscripten/.gnupg/random_seed'
+              '/home/emscripten/.gnupg/trustdb.gpg'
             )
               .then(function saveFileData(fileData) {
-
                 self.virtualFs = fileData;
               })
+              .then(defer.resolve)
+              .catch(function(err) {
+                log.error('Error fetching files form virtual FS', err);
+                defer.reject(err);
+              })
             ;
+
+            return defer.promise;
           },
 
 
@@ -321,14 +327,14 @@
            *  - https://alexcabal.com/creating-the-perfect-gpg-keypair/
            *  
            * @param emailAddress {string} user id.
-           * @param password {string} user password.
+           * @param passphrase {string} user passphrase.
            * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
            */
-          generateKeyPair: function(emailAddress, password, keyStrength) {
+          generateKeyPair: function(emailAddress, passphrase, keyStrength) {
             var self = this;
 
             log.debug('Generating ' + keyStrength + '-bit keypair for '  + 
-                emailAddress + ' with passphrase ' + password);
+                emailAddress + ' with passphrase ' + passphrase);
 
             self._clearCaches('keys');
 
@@ -350,7 +356,7 @@
                       'Subkey-Usage: encrypt',
                       'Name-Email: ' + emailAddress,
                       'Expire-Date: 5y',
-                      'Passphrase: ' + password,
+                      'Passphrase: ' + passphrase,
                       '%commit'
                     ].join("\n")
                   )
@@ -414,7 +420,7 @@
           encrypt: function(from, passphrase, msg) {
             var self = this;
 
-            var recipients = _.slice(arguments, 3);
+            var recipients = _.rest(arguments, 3);
 
             log.debug('Encrypting message of ' + msg.length + 
               ' characters for ' + recipients.length);
@@ -430,13 +436,13 @@
                 .value()
               .concat(
                 [  
-                  '--default-key', emailAddress, 
-                  '--passphrase', password,
+                  '--default-key', from, 
+                  '--passphrase', self._sanitizePassphrase(passphrase),
                   '--armor', 
                   '--output', '/msg.enc',
                   '--detach-sign',
                   '--encrypt',
-                  '--encrypt-to', emailAddress, // so that sender can read it
+                  '--encrypt-to', from, // so that sender can read it
                   '/msg.txt'
                 ]
               )
@@ -471,8 +477,8 @@
             return self._execute({
               '/msg.txt': $q.when(msg)
             }, [  
-                  '--default-key', emailAddress, 
-                  '--passphrase', password,
+                  '--default-key', from, 
+                  '--passphrase', self._sanitizePassphrase(passphrase),
                   '--armor', 
                   '--output', '/msg.sig',
                   '--detach-sign',
@@ -584,6 +590,17 @@
             _.each(arguments, function(key) {
               delete self._cache[key];
             });
+          },
+
+
+          /**
+           * Sanitize a passphrase for use in GPG command-line call.
+           * 
+           * @param  {String} passphrase The pass phrase.
+           * @return {String}
+           */
+          _sanitizePassphrase: function(passphrase) {
+            return passphrase.trim();
           }
 
         }));

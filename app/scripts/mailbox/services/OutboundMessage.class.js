@@ -2,16 +2,19 @@
   'use strict';
 
 
-  app.factory('OutboundMessage', function($q, $timeout, GPG, Log) {
+  app.factory('OutboundMessage', function($q, $timeout, GPG, Log, 
+    AuthCredentials, RuntimeError) {
 
-    var OutboundMessage = Class.extend({
+    var OutboundMessage = Events.extend({
       /**
        * Constructor
-       *
-       * @override
        */
       init: function() {
-        this.log = Log.create('OutboundMessage');
+        this._super();
+
+        this._id = _.str.id();
+
+        this.log = Log.create('OutboundMessage[' + this._id + ']');
         this.log.debug('created');
         
         this._raw = {
@@ -30,7 +33,7 @@
 
         this._processed = {};
 
-        this._state = 'created';
+        this._setState('ready');
       },
 
 
@@ -43,6 +46,7 @@
        * timer to ensure GPG only actually gets called once.
        * 
        * @return {Promise}
+       * @private
        */
       _getIdentitiesWithPublicKeys: function() {
         var self = this;
@@ -86,7 +90,10 @@
       process: function() {
         var self = this;
 
-        self._processed = {};
+        self._processed = {
+          body: self._raw.body,       // will eventually hold ciphertext
+          bodyPlain: self._raw.body   // plaintext body
+        };
 
         return self._getIdentitiesWithPublicKeys()
           .then(function checkPublicKeys(gpgIdentities) {
@@ -112,27 +119,130 @@
                 }
               });
             });
+          })
+          .catch(function(err) {
+            self._setState('error', err);
           });
       },
 
 
-      /**
-       * Get plain object version of this message and its internal state.
-       * 
-       * @return {Object}
-       * @override
-       */
-      toPlainObject: function() {
-        return {
-          raw: this.raw,
-          processed: this.processed,
-          sendState: this.sendState
-        }
-      }
 
+      /**
+       * Send this message.
+       *
+       * @param {Mailbox} mailbox The mailbox which owns this message.
+       */
+      send: function(mailbox) {
+        var self = this;
+
+        mailbox.enqueueOutbound(this);
+      },
+
+
+
+
+      /**
+       * Send this message - should be called by the Mailbox only.
+       *
+       * Each step in the process results in a `state` update and a 
+       * notification being sent to all registered observers.
+       *
+       * @param {Mailbox} mailbox The mailbox which owns this message.
+       * 
+       * @package
+       */
+      _send: function(mailbox) {
+        var self = this;
+
+        if (!self.canSend) {
+          self.log.error('Cannot be sent in current state: ' + self._state);
+          return;
+        }
+
+        self.process()
+          .then(function signOrEncrypt() {
+            var userMeta = AuthCredentials.get(mailbox.userId);
+
+            if (!self.canEncrypt) {
+              self._setState('signing');
+
+              return GPG.sign(userMeta.email, userMeta.passphrase, 
+                self.processed.body)
+                  .then(function gotSig(sig) {
+                    self._processed.sig = sig;
+                  });
+
+            } else {
+              self._setState('encrypting');
+
+              var recipients = 
+                self.processed.to.concat(self.processed.cc, self.processed.bcc);
+
+              // get unique recipient email addresses
+              recipients = _.uniq( _.pluck(recipients, 'email') );
+
+              var args = [userMeta.email, userMeta.passphrase, 
+                  self.processed.body].concat(recipients);
+
+              return GPG.encrypt.apply(GPG, args)
+                .then(function gotCiphertext(cipherText) {
+                  self._processed.body = cipherText;
+                });
+            }
+
+          })
+          .then(function sendIt() {
+            self._setState('sending');
+
+            var finalMsg = _.pick(
+              self._processed, 'to', 'cc', 'bcc', 'subject', 'body', 'sig'
+            );
+
+            ['to', 'cc', 'bcc'].forEach(function(f) {
+              finalMsg[f] = _.pluck(finalMsg[f], 'email');
+            });
+
+            return mailbox._sendMessage(finalMsg);
+          })
+          .then(function allDone() {
+            self._setState('sent');
+          })
+          .catch(function(err) {
+            self.log.error(err);
+            self._setState('error', err);
+          })
+        ;
+      },
+
+
+
+      /**
+       * Set message state and notify observers.
+       *
+       * Observers of the `stateChange` event will be notified.
+       *
+       * Additional arguments will get passed to state change observers.
+       * 
+       * @param {String} state The new state to set.
+       * @private
+       */
+      _setState: function(state) {
+        this.log.info('State change: ' + state);
+
+        this._state = state;
+
+        var args = ['stateChange', state].concat(_.rest(arguments, 1));
+        this.emit.apply(this, args);
+      }
     });
 
+
     
+    /**
+     * Raw message inputs.
+     */
+    OutboundMessage.prop('id', { internal: '_id' });
+
     /**
      * Raw message inputs.
      */
@@ -153,9 +263,10 @@
      */
     OutboundMessage.prop('canEncrypt', { 
       get: function() {
-        return 0 === (this._missingKeys.to.length +
-          this._missingKeys.cc.length + 
-          this._missingKeys.bcc.length);
+        return (0 < _.get(this._processed, 'to.length'))
+          && (0 === (this._missingKeys.to.length +
+            this._missingKeys.cc.length + 
+            this._missingKeys.bcc.length));
       }
     });
 
@@ -165,7 +276,8 @@
      */
     OutboundMessage.prop('canSend', { 
       get: function() {
-        return 0 < _.get(this._processed, 'to.length');
+        return (0 < _.get(this._processed, 'to.length'))
+          && ('ready' === this._state || 'error' === this._state);
       }
     });
 

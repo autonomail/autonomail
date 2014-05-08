@@ -4,7 +4,7 @@
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('Mailbox', function(Log, Server, MailView, MailMessage, GPG, AuthCredentials) {
+  app.factory('Mailbox', function($timeout, Log, Server, MailView, MailMessage, GPG, AuthCredentials) {
 
     var Mailbox = Class.extend({
 
@@ -23,6 +23,47 @@
         self._cache = {
           messages: {}
         };
+
+        self._queue = {
+          outbound: []
+        };
+        self._startQueueTimers();
+      },
+
+
+      /**
+       * Start queue processing timers.
+       */
+      _startQueueTimers: function() {
+        var self = this;
+
+        $timeout(function() {
+          if (0 < self._queue.outbound.length) {
+            var msg = self._queue.outbound.shift();
+
+            self.log.debug('Processing outbound msg: ' + msg.id);
+
+            msg._send(self);
+          }
+
+          if (!self._shutdown) {
+            self._startQueueTimers();
+          }
+        }, 100);
+      },
+
+
+
+      /**
+       * Add given message to outbound message queue.
+       *
+       * This is the preferred way for adding outbound messages to be processed 
+       * by the mailbox.
+       * 
+       * @param  {OutboundMessage} outboundMsg The outbound message.
+       */
+      enqueueOutbound: function(outboundMsg) {
+        this._queue.outbound.push(outboundMsg);
       },
 
 
@@ -72,37 +113,29 @@
       },
 
 
+
       /**
        * Send a message.
        * 
        * @param {Object} msg Message and options.
-       * @param {Array} msg.to Recipients.
-       * @param {String} msg.body Message body.
+       * @param {Array} msg.to Recipient email addresses.
+       * @param {Array} msg.cc CC recipient email addresses.
+       * @param {Array} msg.bcc BCC recipient email addresses.
        * @param {String} msg.subject  Message subject.
-       * @param {Array} msg.cc  CC recipients.
-       * @param {Array} msg.bcc  BCC recipients.
+       * @param {String} msg.body Message body.
+       * @param {String} [msg.sig] PGP signature to attach.
        * 
        * @return {Promise}
+       * @package
        */
-      sendMessage: function(msg) {
+      _sendMessage: function(msg) {
         var self = this;
 
         self.log.info('Sending message', msg);
 
         msg.from = this.userId;
 
-        // get credentials
-        var userMeta = AuthCredentials.get(self.userId);
-
-        // TODO: encrypt
-
-        // sign
-        return GPG.sign(userMeta.email, userMeta.password, msg.body)
-          .then(function gotSignature(sig) {
-            msg.sig = sig;
-
-            return Server.send(self.userId, msg);
-          });
+        return Server.send(self.userId, msg);
       },
 
 
@@ -125,9 +158,9 @@
        * @return {Promise}
        */
       close: function() {
-        var defer = $q.defer();
-        defer.resolve();
-        return defer.promise;
+        self._shutdown = true;
+
+        return $q.when();
       },
 
 

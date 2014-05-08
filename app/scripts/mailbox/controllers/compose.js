@@ -3,7 +3,7 @@
 
 (function(app) {
 
-  app.controller('ComposeFormCtrl', function ($scope, Log, OutboundMessage) {
+  app.controller('ComposeFormCtrl', function ($state, $scope, Log, OutboundMessage) {
     var log = Log.create('ComposeFormCtrl', $scope);
 
     var outboundMessage = new OutboundMessage();
@@ -15,17 +15,15 @@
     $scope.showCcBcc = false;
 
 
-
     // watch to, cc and bcc fields
     _.each(['to', 'cc', 'bcc'], function(fieldName) {
       $scope.$watch(function() {
-        return $scope.msg[fieldName]
+        return $scope.msg[fieldName];
       }, function(newValue) {
         // process()-ing checks to see if any public keys are missing
         outboundMessage.process();
       });
     });
-
 
 
 
@@ -55,20 +53,28 @@
       
       var msg = $scope.msg;
 
-      // $scope.$parent.getMailbox()
-      //   .then(function(mailbox) {
-      //     return mailbox.sendMessage({
-      //       to: _.str.extractEmailAddresses(msg.to),
-      //       cc: _.str.extractEmailAddresses(msg.cc || ''),
-      //       bcc: _.str.extractEmailAddresses(msg.bcc || ''),
-      //       subject: msg.subject || '',
-      //       body: msg.body            
-      //     });
-      //   })
-      //   .catch(function(err) {
-      //     log.error('Sorry, there was an unexpected error. Please check the logs for details.', err);
-      //   });
+      $scope.$parent.getMailbox()
+        .then(function gotMailbox(mailbox) {
+          outboundMessage.send(mailbox);
+        })
+        .catch(function(err) {
+          log.error('Error sending message. Please see logs for details.', err);
+        });
     };
+
+
+
+    outboundMessage.on('stateChange', function(eventType, state, err) {
+      // failed?
+      if ('error' === state) {
+        log.error('Error sending message. Please see logs for details.', err);
+      } 
+      // done?
+      else if ('sent' === state) {
+        $state.go('user.mail');                  
+      }
+    });
+
   });
 
 }(angular.module('App.mailbox', ['App.common', 'App.user', 'ui.validate', 'ui.bootstrap.pagination', 'ui.bootstrap.pagination', 'ui.event'])));
