@@ -154,12 +154,12 @@
       _send: function(mailbox) {
         var self = this;
 
-        if (!self.canSend) {
-          self.log.error('Cannot be sent in current state: ' + self._state);
-          return;
-        }
-
         self.process()
+          .then(function processed() {
+            if (!self.canSend) {
+              throw new Error('Cannot be sent in current state: ' + self._state);
+            }
+          })
           .then(function signOrEncrypt() {
             var userMeta = AuthCredentials.get(mailbox.userId);
 
