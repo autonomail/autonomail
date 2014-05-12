@@ -3,7 +3,7 @@
 
 (function(app) {
 
-  app.controller('LoggedInCtrl', function ($scope, Mail, UserMgr) {
+  app.controller('LoggedInCtrl', function ($scope, Log, Mail, UserMgr) {
     var log = Log.create('LoggedInCtrl', $scope);
 
     var userId = UserMgr.getCurrentUser();

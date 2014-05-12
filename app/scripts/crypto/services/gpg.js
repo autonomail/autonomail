@@ -473,8 +473,7 @@
           decrypt: function(msg) {
             var self = this;
 
-            log.debug('Decrypting message of ' + msg.length + 
-              ' characters for ' + recipients.length);
+            log.debug('Decrypting message of ' + msg.length);
 
             return self._execute({
               '/msg.txt.asc': $q.when(msg)
@@ -486,8 +485,7 @@
             )
               .then(function getOutput(results) {
                 return results['/msg.txt'];
-              })
-            ;
+              });
 
           }, // decrypt()
 
@@ -1182,7 +1180,7 @@
 
     //     return true;
     //   },
-    // };
+    };
 
   });
 

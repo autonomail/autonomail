@@ -69,7 +69,10 @@
             self.db.mail[userId].inbox.messages = messages.concat(self.db.mail[userId].inbox.messages);
           }
 
-          if (!self.stopTimers) {
+          var numMessages = self.db.mail[userId].inbox.messages.length;
+
+          // max. 30 messages
+          if (!self.stopTimers && 30 > numMessages) {
             self._startInboxMsgGenerator();
           }
         }, 20000);
@@ -108,7 +111,7 @@
                - preferred max of 78 characters (excluding CRLF) per line
                */
               subject: _.str.gen(5, 998).join("\r\n"),
-              body: _.str.gen(40, 998).join("\r\n"),
+              body: _.str.gen(4000, 998).join("\r\n"),
               flags: {
                 read: false
               }

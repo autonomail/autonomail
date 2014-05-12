@@ -13,6 +13,8 @@
        * @param userId {string} the user whose mailbox we wish to access.
        */
       init: function(userId) {
+        this._super();
+        
         var self = this;
 
         self.userId = userId;
