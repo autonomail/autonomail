@@ -12,12 +12,8 @@
       init: function() {
         this._super();
 
-        this._id = _.str.id();
-
-        this.log = Log.create('OutboundMessage[' + this._id + ']');
-        this.log.debug('created');
-        
         this._raw = {
+          id: _.str.id(),
           to: '',
           cc: '',
           bcc: '',
@@ -32,6 +28,9 @@
         };
 
         this._processed = {};
+
+        this.log = Log.create('OutboundMessage[' + this.id + ']');
+        this.log.debug('created');
 
         this._setState('ready');
       },
@@ -87,12 +86,13 @@
        * 
        * @return {Promise}
        */
-      process: function() {
+      processUserInputs: function() {
         var self = this;
 
         self._processed = {
-          body: self._raw.body,       // will eventually hold ciphertext
-          bodyPlain: self._raw.body   // plaintext body
+          id: self._raw.id,
+          subject: self._raw.subject,
+          body: self._raw.body,
         };
 
         return self._getIdentitiesWithPublicKeys()
@@ -198,6 +198,8 @@
               self._processed, 'to', 'cc', 'bcc', 'subject', 'body', 'sig'
             );
 
+            // only want email addresses - this both simplifies the list and 
+            // helps maintain privacy of people's names
             ['to', 'cc', 'bcc'].forEach(function(f) {
               finalMsg[f] = _.pluck(finalMsg[f], 'email');
             });

@@ -41,7 +41,9 @@ a {
 /* site header */
 
 #site-header {
-  padding: 0.8em;
+  position: fixed;
+  width: 100%;
+  height: $header-height;
 
   .navbar {
     margin: 0; 
@@ -50,21 +52,70 @@ a {
   .navbar-brand {
     color: #fff;
     margin-left: 0.5em;
-    padding-left: 2.3em;
+    padding-left: 1.2em;
     background: image-url('logo.png', false, false) no-repeat left center;
-    background-size: contain;
+    background-size: 12% 50%;
     font-size: 160%;
   }
 
 }
 
 
+#small-screen-nav {
+  width: 100%;
+  height: $header-height-xs;
+
+  ul {
+    margin: 0;
+
+    li {
+      position: inherit;
+      float: left;
+      width: 15%;
+
+      &:nth-child(1) {
+        width: 70%;
+        a {
+          text-align: left;
+        }
+      }
+
+      a {
+        font-size: 140%;
+        text-align: center;
+      }
+    }
+  }
+
+  button {
+    position: relative;
+    float: left;
+    @include border-radius(0px);
+    margin: 0;
+    width: 17%;
+
+    &:nth-child(6) {
+      width: 15%;
+    }
+  }
+}
+
+
 /* main content */
 
 #content {
+  position: fixed;
+  top: $header-height;
+  width: 100%;
   background-color: #fff;
   color: #000;
   min-height: 400px;
+}
+
+@media (max-width: $screen-xs-max) {
+  #content {
+    top: $header-height-xs;
+  }
 }
 
 

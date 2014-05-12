@@ -4,9 +4,9 @@
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('Mailbox', function($timeout, Log, Server, MailView, MailMessage, GPG, AuthCredentials) {
+  app.factory('Mailbox', function($timeout, Log, Server, MailView, Message, GPG, AuthCredentials) {
 
-    var Mailbox = Class.extend({
+    var Mailbox = Events.extend({
 
       /**
        * Constructor.
@@ -90,7 +90,7 @@
        * @param [options.expectedFirstId] {Number} expected id of first message in results.
        * @param [options.expectedLastId] {Number} expected id of last message in results.
        *
-       * @return {Promise} resolves to [ MailMessage, MailMessage, ... ] or { noChange: true }
+       * @return {Promise} resolves to [ Message, Message, ... ] or { noChange: true }
        */
       getMessages: function(from, count, options) {
         var self = this;
@@ -104,7 +104,7 @@
               return _.map(result.messages, function(msg) {
                 // re-use cached messages
                 if (!self._cache.messages[msg.id]) {
-                  self._cache.messages[msg.id] = new MailMessage(self, msg);
+                  self._cache.messages[msg.id] = new Message(self, msg);
                 }
                 return self._cache.messages[msg.id];
               });
@@ -135,6 +135,11 @@
 
         msg.from = this.userId;
 
+        msg.flags = {
+          outbound: true,
+          read: true
+        };
+
         return Server.send(self.userId, msg);
       },
 
@@ -159,6 +164,7 @@
        */
       close: function() {
         self._shutdown = true;
+        this.emit('shutdown');
 
         return $q.when();
       },
@@ -192,7 +198,14 @@
     /**
      * Mailbox current folder.
      */
-    Mailbox.prop('folder', { set: true });
+    Mailbox.prop('folder', { 
+      internal: '_folder',
+      set: function(val) {
+        this._folder = val;
+        
+        this.emit('setFolder', val);
+      }
+    });
 
 
     return Mailbox;

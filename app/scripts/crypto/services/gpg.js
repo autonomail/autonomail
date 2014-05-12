@@ -460,6 +460,42 @@
 
 
 
+
+          /**
+           * Decrypt message.
+           *
+           * It assumes that public keys are available for the sender.
+           * 
+           * @param {String} msg Message.
+           *
+           * @return {Promise} Resolves to plaintxt message string.
+           */
+          decrypt: function(msg) {
+            var self = this;
+
+            log.debug('Decrypting message of ' + msg.length + 
+              ' characters for ' + recipients.length);
+
+            return self._execute({
+              '/msg.txt.asc': $q.when(msg)
+            }, 
+              [  
+                '--output', '/msg.txt',
+                '/msg.txt.asc'
+              ]
+            )
+              .then(function getOutput(results) {
+                return results['/msg.txt'];
+              })
+            ;
+
+          }, // decrypt()
+
+
+
+
+
+
           /**
            * Sign message.
            *
@@ -499,6 +535,37 @@
 
 
 
+          /**
+           * Verify signature of a signed message.
+           *
+           * @param {String} msg Message.
+           * @param {String} sig Signature to verify.
+           *
+           * @return {Promise} Resolves to true if good signature; false otherwise.
+           */
+          verify: function(msg, sig) {
+            var self = this;
+
+            log.debug('Verify signature for message of ' + msg.length + ' characters');
+
+            return self._execute({
+              '/msg.txt': $q.when(msg),
+              '/msg.txt.gpg': $q.when(sig)
+            }, [  
+                  '--verify', from, 
+                  '/msg.txt.gpg',
+                  '/msg.txt'
+              ]
+            )
+              .then(function getOutput(results) {
+                return GPGUtils.isGoodSignature(results.stdout);
+              });
+            ;
+
+          }, // verify()
+
+
+
 
           /**
            * Import a key into the user's keychain.
@@ -518,6 +585,7 @@
 
             return self._execute(inputFiles, ['--import', '/import.gpg']);
           }, // importKey()
+
 
 
 
@@ -1050,8 +1118,71 @@
         }
 
         return keys;
-      }
-    };
+      },
+
+
+
+      /**
+       * Check that GPG verified input as a Good Signature
+       * 
+       * @param {Array} stdout List of strings representing the stdout.
+       * @return {Boolean} true if good signature, false otherwise
+       */
+      isGoodSignature: function(stdout) {
+        return 0 === stdout.pop().indexOf('gpg: Good signature from');
+      },
+
+
+
+      /**
+       * TODO: do we really want to support this? Even the RFC recommends detached signing
+       * 
+       * Get whether the given text is clear-signed.
+       *
+       * Clear-signed means that the PGP signature is inline.
+       * 
+       * @param  {String}  txt The text.
+       * @return {Boolean}     True if so; false otherwise.
+       */
+    //   isClearSigned: function(txt) {
+    //     var tokens = txt.split("\n");
+
+    //     if (7 > tokens.length) {
+    //       return false;
+    //     }
+
+    //     /* See http://tools.ietf.org/html/rfc4880#section-7 */
+
+    //     if (0 !== tokens[0].indexOf('----- BEGIN PGP SIGNED MESSAGE -----')) {
+    //       return false;
+    //     }
+
+    //     if (0 !== tokens[1].indexOf('Hash:')) {
+    //       return false;
+    //     }
+
+    //     var sigFound = 0;
+
+    //     for (var j=2; tokens.length>j; ++j) {
+    //       if (0 === sigFound) {
+    //         if (0 === tokens[j].indexOf('----- BEGIN PGP SIGNATURE -----')) {
+    //           sigFound++;
+    //         }
+    //       } 
+    //       else if (1 === sigFound) {
+    //         if (0 === tokens[j].indexOf('----- END PGP SIGNATURE -----')) {
+    //           sigFound++;
+    //         }            
+    //       }
+    //     }
+
+    //     if (2 > sigFound) {
+    //       return false;
+    //     }
+
+    //     return true;
+    //   },
+    // };
 
   });
 

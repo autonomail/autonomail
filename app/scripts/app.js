@@ -55,7 +55,7 @@
         templateUrl: 'app/user/mail/index.html',
         controller: function($state) {
           $state.go('user.mail.folder', {
-            folderId: 'inbox'
+            id: 'inbox'
           });
         }
       })
@@ -66,7 +66,7 @@
       })
       .state('user.mail.folder', {
         auth: true,
-        url: '/f/:folderId',
+        url: '/f/:id',
         templateUrl: 'app/user/mail/folder.html'
       })
     ;

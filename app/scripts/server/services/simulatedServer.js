@@ -21,8 +21,32 @@
        * @return {String}
        */
       _generateId: function() {
-        return _.str.gen(1, 10).pop();
+        return _.str.id();
       },
+
+
+
+      /**
+       * Generate a dummy email address.
+       * @return {String}
+       */
+      _generateDummyEmailAddress: function() {
+        var components = _.str.gen(2, 10),
+          tld = _.str.gen(1, 3).pop();
+
+        return components[0] + '@' + components[1] + '.' + tld;
+      },
+
+
+
+      /**
+       * Generate a dummy name and email address.
+       * @return {String}
+       */
+      _generateDummyNameEmailAddress: function() {
+        return _.str.gen(1, 998).pop() + ' <' + this._generateDummyEmailAddress() + '>';
+      },
+
 
 
       /**
@@ -48,7 +72,7 @@
           if (!self.stopTimers) {
             self._startInboxMsgGenerator();
           }
-        }, 200000);
+        }, 20000);
       },
 
 
@@ -74,15 +98,20 @@
             {
               id: self._generateId(),
               date: moment().toISOString(),
-              from: _.str.gen(1, 998).pop() + ' <alic@foo.bar>',
-              to: userId,
+              from: self._generateDummyNameEmailAddress(),
+              to: [userId],
+              cc: [self._generateDummyEmailAddress()],
+              bcc: [self._generateDummyNameEmailAddress()],
               /*
                From http://www.faqs.org/rfcs/rfc2822.html (section 2.1.1)
                - absolute max 998 characters (excluding CRLF) per line
                - preferred max of 78 characters (excluding CRLF) per line
                */
               subject: _.str.gen(5, 998).join("\r\n"),
-              body: _.str.gen(40, 998).join("\r\n")
+              body: _.str.gen(40, 998).join("\r\n"),
+              flags: {
+                read: false
+              }
             }
           );
         }
@@ -130,7 +159,7 @@
             name: 'Inbox',
             messages: self._createInboxMessages(userId, 2)
           },
-          'sent': {
+          'outbox': {
             name: 'Sent',
             messages: []
           },

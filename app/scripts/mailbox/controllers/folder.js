@@ -3,7 +3,7 @@
 (function(app) {
 
   app.controller('FolderCtrl', function ($stateParams, $scope, Log, Alert) {
-    var folderId = $stateParams.folderId;
+    var folderId = $stateParams.id;
 
     var log = Log.create('FolderCtrl(' + folderId + ')', $scope);
 

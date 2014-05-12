@@ -2,16 +2,6 @@
 
 
 #page-mailbox {
-  .visible-xs {
-    .folder-buttons {
-      width: 100%;
-
-      button {
-        width: 25%;
-      }
-    }
-  }
-
   .folders {
     margin-top: 2em;
 
@@ -33,7 +23,6 @@
 
   .messages {
     overflow: hidden;
-    padding-left: 3em;
 
     .actions {
       @include clearfix;
@@ -73,10 +62,13 @@
 @media (min-width: $screen-sm) {
   #page-mailbox {
     padding: 1.5em 1em 1em;
+  
+    .messages {
+      padding-left: 3em;
+    }
   }
+
 }
-
-
 
 
 

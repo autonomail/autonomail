@@ -6,7 +6,7 @@
    * Service to present temporary pop-up alerts to the user.
    */
   app.factory('Alert', function(Log) {
-    var log = Log.create('Alerts');
+    var log = Log.create('Alert');
 
     return new (Class.extend({
 
@@ -18,6 +18,7 @@
       info: function(msg) {
         log.info(msg, Array.prototype.slice(arguments, 1));
 
+        
         alert(msg);
       },
 

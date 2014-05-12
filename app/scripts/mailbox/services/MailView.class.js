@@ -13,7 +13,7 @@
    * Instead we use Object property setters - this is much more efficient than polling.
    */
   app.provider('MailView', function() {
-    var fetchIntervalMs = 60000; // 60 seconds
+    var fetchIntervalMs = 30; // 30 seconds
 
     return {
       /**

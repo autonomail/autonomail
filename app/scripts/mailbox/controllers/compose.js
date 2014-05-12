@@ -3,7 +3,7 @@
 
 (function(app) {
 
-  app.controller('ComposeFormCtrl', function ($state, $scope, Log, OutboundMessage) {
+  app.controller('ComposeFormCtrl', function ($state, $scope, Log, Alert, OutboundMessage) {
     var log = Log.create('ComposeFormCtrl', $scope);
 
     var outboundMessage = new OutboundMessage();
@@ -20,8 +20,7 @@
       $scope.$watch(function() {
         return $scope.msg[fieldName];
       }, function(newValue) {
-        // process()-ing checks to see if any public keys are missing
-        outboundMessage.process();
+        outboundMessage.processUserInputs();
       });
     });
 
@@ -71,6 +70,8 @@
       } 
       // done?
       else if ('sent' === state) {
+        Alert.info('Sending message...');
+
         $state.go('user.mail');                  
       }
     });
