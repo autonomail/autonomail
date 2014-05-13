@@ -36,8 +36,93 @@
     }
 
     .message-table {
+      li {
+        padding: 0;
+        border-bottom: 1px solid #999;
+
+        & > div {
+          padding: 0.5em 0;
+
+          &.secure {
+            background-color: $pgp-secure-color;
+          }
+        }
+      }
+
+      .meta {
+        width: 7%;
+        display: block;
+        float: left;
+        font-size: 160%;
+        text-align: center;
+        vertical-align: middle;
+
+        .error {
+          color: $alert-danger-text;
+        }
+      }
+
+      .content {
+        position: relative;
+        display: inline-block;
+        width: 91%;
+
+        .progress-messages {
+          .alert {
+            padding: 0.1em 0.3em;
+          }
+        }
+
+        .progress-indicators {
+          color: #666;
+          display: block;
+          float: right;
+          clear: right;
+
+          i {
+            @include animation(blink, 3s, ease-out, infinite);
+          }
+        }
+
+        .processed {
+          @include clearfix;
+
+          .date {
+            display: block;
+            float: right;
+            margin: 0.2em 0.2em 0 0;
+            z-index: 1000;
+          }
+
+          .from, .subject, .preview {
+            display: block;
+            float: left;
+            clear: left;
+            width: 80%;
+            overflow: hidden;
+            height: 1.3em;  
+            margin-top: 0.1em;          
+          }
+
+          .from {
+            font-size: 120%;
+            font-weight: bold;
+          }
+
+          .subject {
+            color: #666;
+            font-weight: bold;
+          }
+
+          .preview {
+            margin-top: 0.8em;
+            color: #666;
+          }
+        }
+      }
+
       .preview {
-        max-width: 70%;
+        max-width: 80%;
         color: #777;
       }
 

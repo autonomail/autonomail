@@ -63,7 +63,7 @@
 
 
 
-    outboundMessage.on('stateChange', function(eventType, state, err) {
+    outboundMessage.on('stateChange', function(state, err) {
       // failed?
       if ('error' === state) {
         log.error('Error sending message. Please see logs for details.', err);

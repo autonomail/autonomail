@@ -1133,6 +1133,18 @@
 
 
       /**
+       * Get whether given string is PGP encrypted.
+       * 
+       * @param {String} str The string.
+       * @return {Boolean} true if so, false otherwise
+       */
+      isEncrypted: function(str) {
+        return 0 === str.indexOf('----- BEGIN PGP MESSAGE -----');
+      },
+
+
+
+      /**
        * TODO: do we really want to support this? Even the RFC recommends detached signing
        * 
        * Get whether the given text is clear-signed.

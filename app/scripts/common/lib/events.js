@@ -45,13 +45,13 @@
     /**
      * Emit an event.
      *
-     * The callbacks get invoked with the event type along with any 
-     * additional arguments that are passed in here.
+     * The callbacks get invoked withwith any additional arguments that 
+     * are passed in here.
      * 
      * @param  {String} eventType Event type to observe.
      */
     emit: function(eventType) {
-      var args = arguments;
+      var args = Array.prototype.slice.call(arguments,1);
 
       var observers = this._observers[eventType];
 
@@ -61,7 +61,9 @@
 
       observers.forEach(function(o) {
         try {
-          o.apply(null, args);            
+          setTimeout(function() {
+            o.apply(null, args);
+          }, 0);
         } catch (err) {
           console.error(err.toString(), err);
         }

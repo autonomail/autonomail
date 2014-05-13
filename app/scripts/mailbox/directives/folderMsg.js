@@ -17,24 +17,48 @@
 
     var msg = $scope.$parent.messages[$scope.id];
 
-    $scope.to = '...';
-    $scope.from = '...';
-    $scope.subject = '...';
-    $scope.preview = '...';
-    $scope.date = '...';
+    // watch for state changes
+    _.each(['processing', 'error'], function(s) {
+      msg.on(s, function() {
+        $scope.state = s;
+      });
+    });
 
-    // wait for notifications from message
-    self.notify = function(status) {
-      if ('processed' === status) {
-        $scope.date = moment(msg.date).format('MMM d');
-        $scope.typeOutbound = ('out' === msg.type);
-        $scope.to = ($scope.typeOutbound ? 'Me' : msg.toStr);
-        $scope.from = _.str.prune(msg.from.name || msg.from.email, 30);
-        $scope.subject = _.str.prune(msg.subject, 30);
-        $scope.preview = _.str.prune(msg.body, 70);
-      }
-    };
-    msg.registerObserver(self);
+    _.each(['verifying', 'decrypting'], function(s) {
+      msg.on(s, function() {
+        $scope.processingState = s;
+      });
+    });
+
+    // when basic stuff loaded
+    msg.on('loadedBasicInfo', function() {
+      var data = msg.processed;
+
+      $scope.date = moment(data.date).format('MMM d');
+      $scope.typeOutbound = msg.isOutbound;
+      $scope.to = data.to;
+      $scope.from = data.from;
+      $scope.subject = _.str.prune(data.subject, 30);
+    });
+
+    // when loading body
+    msg.on('loadingBody', function(charsLoaded) {
+      $scope.processingState = 'loadingBody';
+      $scope.loadedSoFar = (charsLoaded || 0) * 2;  // each char is UTF-16
+    });
+
+    // once loaded preview
+    msg.on('loadedPreview', function(charsLoaded) {
+      $scope.preview = _.str.prune(msg.processed.preview, 70);
+    });
+
+    // once processed
+    msg.on('processed', function(charsLoaded) {
+      $scope.processingState = null;
+      $scope.state = 'processed';
+      $scope.msgType = msg.decryptedBody ? 'secure' : 'insecure';
+    });
+
     msg.process(); // process the msg
   });
 

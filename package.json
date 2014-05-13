@@ -1,7 +1,9 @@
 {
   "name": "autonomail-client",
   "version": "0.1.0",
-  "dependencies": {},
+  "dependencies": {
+    "stream-browserify": "^1.0.0"
+  },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-copy": "~0.4.1",
@@ -41,7 +43,10 @@
     "karma-ng-html2js-preprocessor": "~0.1.0",
     "karma-mocha": "~0.1.0",
     "grunt-angular-templates": "~0.4.2",
-    "grunt-shell": "~0.5.0"
+    "grunt-shell": "~0.5.0",
+    "browserify": "^3.46.1",
+    "grunt-browserify": "^2.0.8",
+    "remapify": "^0.1.6"
   },
   "engines": {
     "node": ">=0.8.0"

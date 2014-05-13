@@ -75,7 +75,7 @@
           if (!self.stopTimers && 30 > numMessages) {
             self._startInboxMsgGenerator();
           }
-        }, 20000);
+        }, 200000);
       },
 
 
@@ -312,7 +312,11 @@
             ret = [];
 
           for (var i=from; ret.length < count && i<mail.length; ++i) {
-            ret.push(mail[i]);
+            var msg = _.extend({}, mail[i], {
+              body: new ReadableStringStream(mail[i].body)
+            });
+
+            ret.push(msg);
           }
 
           if (0 < ret.length) {

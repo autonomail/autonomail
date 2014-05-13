@@ -45,7 +45,7 @@
         $scope.openFolder = function(folderId) {
           // shift inner state
           $state.go('user.mail.folder', {
-            folderId: folderId
+            id: folderId
           });
           return false;
         };

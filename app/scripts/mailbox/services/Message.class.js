@@ -6,16 +6,36 @@
     return {
       $get: function(Log, $q, $timeout, GPG, GPGUtils) {
 
+
         var Message = Events.extend({
 
           /**
            * Constructor
+           *
+           * @param {Mailbox} mailBox The owning mailbox.
+           * @param {Object} rawMsg Message from server.
+           * @param {String} rawMsg.id Unique id.
+           * @param {String} rawMsg.date ISO date string.
+           * @param {String} rawMsg.from Sender email address.
+           * @param {Array} rawMsg.to Recipient email addresses.
+           * @param {Array} rawMsg.cc CC recipient email addresses.
+           * @param {Array} rawMsg.bcc BCC recipient email addresses.
+           * @param {String} rawMsg.subject  Message subject.
+           * @param {Stream} rawMsg.body Message body.
+           * @param {String} [rawMsg.sig] PGP/MIME signature attachment.
+           * @param {Object} rawMsg.flags Additional flags.
+           * @param {Boolean} rawMsg.flags.read If it has been read.
+           * @param {Boolean} rawMsg.flags.outbound If it's an outbound msg.
            */
           init: function(mailBox, rawMsg) {
             this._super();
 
             this._raw = rawMsg;
             this._processed = {};
+
+            this._rawBody = null; // will hold the full raw body
+            this._fullBodyLoaded = false;
+            this._fullDecryptedBody = null; // will hold the full decrypted body
 
             this.log = Log.create('Message[' + this.id + ']');
             this.log.debug('created');
@@ -65,12 +85,18 @@
           },
 
 
+
+
+
+
+
+
+
           /**
            * Process the raw inputs.
            *
-           * For the to, cc and bcc fields this check to see if any public keys 
-           * are missing (the `missingKey` field will get set accordingly).
-           * 
+           * This function can be called multiple times.
+           *
            * @return {Promise}
            */
           process: function() {
@@ -78,35 +104,83 @@
 
             self._setState('processing');
 
-            self._processed = {
-              id: self._raw.id,
-              from: self._raw.from,
-              to: self._raw.to,
-              cc: self._raw.cc,
-              bcc: self._raw.bcc,
-              body: '',
-            };
+            $q.when()
+              .then(function basicFields() {
+                if (self._processed['date']) return;
 
-            return self._getIdentitiesWithPublicKeys()
-              .then(function checkIfCryptoPossible(gpgIdentities) {
-                var fromEmail = 
-                  _.str.extractEmailAddresses(self._processed.from).pop();
+                _.each(['date', 'from', 'to', 'cc', 
+                    'bcc', 'subject'], function(f) {
+                    self._processed[f] = self._raw[f];
+                  }
+                );
 
-                var haveKey = _.find(gpgIdentities, fromEmail);
+                self._setState('loadedBasicInfo');
+              })
+              .then(function getFullBody() {
+                if (self._fullBodyLoaded) return;
 
-                self._canVerifyOrDecrypt = !self._raw.sig || haveKey;
+                self._processed.preview = '';
 
-                self._needsVerification = !!self._raw.sig;
+                var defer = $q.defer();
 
-                self._needsDecryption = GPGUtils_.str.startsWith(
-                  self._raw.body, '----- BEGIN PGP MESSAGE -----');
+                self._setState('loadingBody');
+
+                self._raw.body.on('data', function(d) {
+                  d = d.toString();
+
+                  // add to preview (upto 1KB)
+                  if (!self._fullPreviewLoaded) {
+                    self._processed.preview += d;
+
+                    if (1024 <= self._processed.preview.length) {
+                      self._fullPreviewLoaded = true;
+
+                      self._setState('loadedPreview');
+                    }
+                  }
+
+                  // add to raw body
+                  self._rawBody += d.toString();
+
+                  self._setState('loadingBody', self._rawBody.length);
+                });
+
+                self._raw.body.on('end', function() {
+                  self._fullBodyLoaded = true;
+                  
+                  self._setState('loadedBody', self._rawBody.length);
+
+                  defer.resolve();
+                });
+
+                self._raw.body.on('error', function(err) {
+                  defer.reject(err);
+                });
+
+                return defer.promise;
+              })
+              .then(function checkIfCryptoNeeded() {
+                return self._getIdentitiesWithPublicKeys()
+                  .then(function(gpgIdentities) {
+                    var fromEmail = 
+                      _.str.extractEmailAddresses(self._processed.from).pop();
+
+                    var haveKey = _.find(gpgIdentities, fromEmail);
+
+                    self._canVerifyOrDecrypt = !self._raw.sig || haveKey;
+
+                    self._needsVerification = !!self._raw.sig;
+
+                    self._needsDecryption = 
+                      GPGUtils.isEncrypted(self._processed.preview);
+                  });
               })
               .then(function verify() {
                 if (!self._needsVerification || !self._canVerifyOrDecrypt) return;
 
-                self._setState('verifySig');
+                self._setState('verifying');
 
-                return GPG.verify(self._raw.body, self._raw.sig)
+                return GPG.verify(self._fullBody, self._raw.sig)
                   .then(function verifyResult(isGood) {
                     self._goodSignature = isGood;
                   });
@@ -116,21 +190,19 @@
 
                 self._setState('decrypting');
 
-                return GPG.decrypt(self._raw.body)
+                return GPG.decrypt(self._fullBody)
                   .then(function decrypted(msg) {
-                    self._goodDecryption = true;
-                    self._processed.body = msg;
+                    self._fullDecryptedBody = msg;
                   })
                   .catch(function(err) {
                     self.log('Decryption failure', err);
-                    self._goodDecryption = false;
                   });
               })
               .then(function finished() {
                 self._setState('processed');
               })
               .catch(function(err) {
-                self._setState('error', err);
+                self._setState('error', err.stack);
               });
           },
 
@@ -147,12 +219,19 @@
            * @private
            */
           _setState: function(state) {
-            this.log.info('State change: ' + state);
+            var self = this;
 
-            this._state = state;
+            var args = arguments;
 
-            var args = ['stateChange', state].concat(_.rest(arguments, 1));
-            this.emit.apply(this, args);
+            self._state = state;
+
+            if ('error' === state) {
+              self.log.error(args);
+            } else {
+              self.log.info('State change: ' + state);
+            }
+
+            self.emit.apply(self, args);              
           }
         });
 
@@ -161,17 +240,57 @@
         /**
          * Raw message inputs.
          */
-        Message.prop('id', { internal: '_id' });
+        Message.prop('id', { 
+          get: function() {
+            return this._raw.id;
+          }
+        });
 
-        /**
-         * Raw message inputs.
-         */
-        Message.prop('raw', { internal: '_raw' });
 
         /**
          * Processed inputs, i.e. emails parsed, encrypted, signed, etc.
          */
         Message.prop('processed', { internal: '_processed' });
+
+        /**
+         * Get decrypted message body.
+         *
+         * @return {String} Returns null if not decrypted yet.
+         */
+        Message.prop('decryptedBody', {
+          get: function() {
+            return self._fullDecryptedBody;
+          }
+        });
+
+        /**
+         * Get raw message body.
+         *
+         * @return {Stream}
+         */
+        Message.prop('rawBody', {
+          get: function() {
+            return self._rawBody;
+          }
+        });
+
+        /**
+         * Get whether msg is an outbound one.
+         */
+        Message.prop('isOutbound', {
+          get: function() {
+            return !!this._raw.flags.outbound;
+          }
+        });
+
+        /**
+         * Get/set whether msg has been read.
+         */
+        Message.prop('hasBeenRead', {
+          get: function() {
+            return !!this._raw.flags.read;
+          }
+        });
 
         /**
          * Get whether message can be PGP verified/decrypted.

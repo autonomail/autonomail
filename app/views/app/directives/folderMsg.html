@@ -1,14 +1,37 @@
-<span class="meta col-md-2">
-  <span class="out" ng-show="typeOutbound">
-    <i class="fa fa-arrow-circle-up"></i>      
-    <span class="who">{{ to }}</span>
-  </span>
-  <span class="in" ng-show="!typeOutbound">
-    <i class="fa fa-arrow-circle-down"></i>      
-    <span class="who">{{ from }}</span>
-  </span>
-</span>
-<span class="subject_preview col-md-8">
-  <span class="subject">{{ subject }}</span> - <span class="preview">{{ preview }}</span>
-</span>
-<span class="date col-md-1 col-md-offset-1">{{ date }} </span>
+<div ng-class="msgType">
+  <div class="meta">
+    <div ng-show="'processed' === state">
+      <i class="private fa fa-lock" ng-show="isPrivate"></i>
+      <i class="not-private fa fa-unlock" ng-show="!isPrivate"></i>   
+    </div>
+    <div ng-show="'processing' === state">
+      <i class="fa fa-cog fa-spin"></i>
+    </div>
+    <div class="error" ng-show="'error' === state">
+      <i class="fa fa-warning"></i>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="processed">
+      <div class="date" ng-show="date">{{ date }}</div>
+      <div class="from" ng-show="from">{{ from }}</div>
+      <div class="subject" ng-show="subject">{{ subject }}</div>
+      <div class="preview" ng-show="preview">{{ preview }}</div>
+
+      <div class="progress-indicators">
+        <i class="fa fa-download"  ng-show="'loadingBody' === processingState"></i>
+        <i class="fa fa-unlock" ng-show="'decrypting' === processingState"></i>
+      </div>
+    </div>
+
+    <div class="progress-messages">
+      <div class="alert alert-danger" ng-show="'error' === state">
+        Sorry, an error occurred while processing this message.
+      </div>
+    </div>
+
+  </div>  
+</div>
+

@@ -135,6 +135,8 @@
 
         self.log.info('Sending message', msg);
 
+        msg.date = moment().toISOString();
+        
         msg.from = this.userId;
 
         msg.flags = {
