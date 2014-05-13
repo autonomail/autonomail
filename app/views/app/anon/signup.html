@@ -1,0 +1,72 @@
+<div id="page-signup" class="container">
+  
+  <div class="logo" ng-include src="'app/anon/_logo.html'"></div>
+
+  <form role="form" name="signupForm" ng-controller="SignupFormCtrl">
+    <div ng-show="error" class="alert alert-danger">{{error}}</div>
+    <div class="form-group">
+      <label class="sr-only" for="signupForm_username">Username</label>
+      <input type="text" class="form-control" name="username" id="signupForm_username" placeholder="Username"
+             ng-model="user.name"
+             ng-minlength="4"
+             ng-maxlength="32"
+             required
+             ui-validate="{available: 'validateNameAvailable($value)'}"
+          >
+          <div ng-show="signupForm.username.$dirty && signupForm.username.$invalid" class="validation_errors alert alert-danger">
+            <div ng-show="signupForm.username.$error.required">Please fill this in</div>
+            <div ng-show="signupForm.username.$error.minlength">Atleast 4 characters required</div>
+            <div ng-show="signupForm.username.$error.maxlength">No more than 32 characters allowed</div>
+            <div ng-show="signupForm.username.$error.available">Sorry, this username is not available</div>
+          </div>
+    </div>
+    <div class="form-group">
+      <label class="sr-only" for="signupForm_passphrase">Passphrase</label>
+      <input type="password" class="form-control" name="passphrase" id="signupForm_passphrase" placeholder="Enter a passphrase"
+             ng-model="user.passphrase"
+             ng-maxlength="128"
+             required
+             ui-validate="{contents: 'validatePassphraseContents($value)'}"
+          >
+              <div ng-show="signupForm.passphrase.$dirty && signupForm.passphrase.$invalid" class="validation_errors alert alert-danger">
+                <div ng-show="signupForm.passphrase.$error.required">Please fill this in</div>
+                <div ng-show="signupForm.passphrase.$error.maxlength">No more than 128 characters allowed</div>
+                <div ng-show="signupForm.passphrase.$error.contents">{{ signupForm.passphrase.$error.contentsErrorMsg }}</div>
+              </div>
+    </div>
+    <div class="form-group">
+      <label class="sr-only" for="signupForm_confirm">Confirm Passphrase</label>
+      <input type="password" class="form-control" name="confirm" id="signupForm_confirm" placeholder="Re-enter the passphrase"
+             ng-model="user.confirm"
+             ui-validate="{match: 'validatePassphraseConfirmation($value)'}"
+          >
+              <div ng-show="signupForm.confirm.$dirty && signupForm.confirm.$invalid" class="validation_errors alert alert-danger">
+                <div ng-show="signupForm.confirm.$error.match">Must match the passphrase</div>
+              </div>
+    </div>
+    <div class="form-group">
+      <div class="terms checkbox">
+        <label>
+          <input type="checkbox" name="agree" id="signupForm_agree"
+                 ng-model="user.agree"
+                 required
+              > I agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>.
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="submit">
+        <button type="submit" class="btn btn-primary"
+                ng-disabled="!canSubmit()"
+                ng-click="submit()"
+            >Sign up</button>
+      </div>
+    </div>
+  </form>
+
+  <a class="login" ui-sref="login">Already signed up? Login.</a>
+
+</div>
+
+
+

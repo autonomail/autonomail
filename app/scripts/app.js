@@ -14,55 +14,64 @@
     'App.signup'
   ]);
 
-  app.config(function ($stateProvider, $urlRouterProvider, ServerProvider, StorageProvider, WebWorkerProvider, GPGProvider, MailViewProvider) {
+  app.config(function ($stateProvider, $urlRouterProvider, LogProvider, 
+        ServerProvider, StorageProvider, GPGProvider, MailViewProvider) 
+  {
+    LogProvider.logToConsole(true);
+    
     $urlRouterProvider.otherwise('/login');
 
     $stateProvider
       .state('login', {
         url: '/login',
-        templateUrl: 'app/login/form.html'
+        templateUrl: 'app/anon/login.html'
       })
       .state('logout', {
         url: '/logout',
         controller: function(UserMgr, $state) {
-          UserMgr.setCurrentUser(null);
-          $state.go('login');
+          UserMgr.setCurrentUser(null)
+            .then(function showLoginPage() {
+              $state.go('login');
+            });
         }
       })
       .state('signup', {
         url: '/signup',
-        templateUrl: 'app/signup/index.html',
-        controller: function($state) {
-          $state.go('signup.form');
-        }
+        templateUrl: 'app/anon/signup.html'
       })
-      .state('signup.form', {
-        templateUrl: 'app/signup/form.html'
-      })
-      .state('pgpKeys', {
+      .state('user', {
         auth: true,
-        url: '/keys',
-        templateUrl: 'app/keys/view.html'
+        url: '/u',
+        templateUrl: 'app/user/index.html'
       })
-      .state('mail', {
+      .state('user.keys', {
         auth: true,
-        url: '/mail',
-        templateUrl: 'app/mailbox/index.html',
+        url: '/k',
+        templateUrl: 'app/user/keys.html'
+      })
+      .state('user.mail', {
+        auth: true,
+        url: '/m',
+        templateUrl: 'app/user/mail/index.html',
         controller: function($state) {
-          $state.go('mail.folder', {
-            folderId: 'inbox'
+          $state.go('user.mail.folder', {
+            id: 'inbox'
           });
         }
       })
-      .state('mail.folder', {
+      .state('user.mail.compose', {
         auth: true,
-        url: '/:folderId',
-        templateUrl: 'app/mailbox/folder.html'
+        url: '/c',
+        templateUrl: 'app/user/mail/compose.html'
+      })
+      .state('user.mail.folder', {
+        auth: true,
+        url: '/f/:id',
+        templateUrl: 'app/user/mail/folder.html'
       })
     ;
 
     // web workers
-    WebWorkerProvider.addImportScript('/scripts/webworker-imports.generated.js');
     GPGProvider.setWorkerScript('/scripts/gpg2-worker.generated.js');
 
     ServerProvider.setBackend(ServerProvider.BACKEND_TYPES.SIMULATION);
@@ -74,28 +83,35 @@
   app.run(function($rootScope, $state, Log, UserMgr, Random) {
     var log = Log.create('App');
 
+    // start entropy collector
     Random.startEntropyCollection();
 
-    // this will get flipped whenever user successfully logs in
-    $rootScope.loggedIn = function() {
-      return !!(UserMgr.getCurrentUser());
-    };
 
-    $rootScope.$on('$stateChangeStart', function(event, toState){
-      // authentication for states which need it
-      if (toState.auth) {
-        UserMgr.ensureUserHasSecureDataSetup()
-          .catch(function(err) {
-            event.preventDefault();
-            log.warn(err);
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
+      log.debug('State transition: ' + toState.name);
 
-            UserMgr.postLoginState = toState.name;
+      // authentication for new states which need it
+      if (toState.auth && !UserMgr.getCurrentUser()) {
+        event.preventDefault();
 
-            $state.go('login');
-          });
+        log.debug('Ask user to login');
+        
+        UserMgr.postLoginState = toState.name;
+
+        $state.go('login');
       }
     });
 
+    $rootScope.$on('$stateChangeError', 
+      function(event, toState, toParams, fromState, fromParams, error) {
+        log.error('State transition error', toState.name, error);
+      }
+    );
+
+
+    $rootScope.loggedIn = function() {
+      return !!(UserMgr.getCurrentUser());
+    }
   });
 
 }(angular));

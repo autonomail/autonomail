@@ -1,0 +1,59 @@
+/*
+    Animation
+
+    See:
+    * https://gist.github.com/Integralist/3931680
+    * http://sassmeister.com/gist/8458511
+ */
+
+@mixin animation ($animation, $duration, $transition, $iteration) {
+  -webkit-animation-name: $animation;
+  -webkit-animation-duration: $duration;
+  -webkit-animation-timing-function: $transition;
+  -webkit-animation-iteration-count: $iteration;
+  -moz-animation-name: $animation;
+  -moz-animation-duration: $duration;
+  -moz-animation-timing-function: $transition;
+  -moz-animation-iteration-count: $iteration;
+  -o-animation-name: $animation;
+  -o-animation-duration: $duration;
+  -o-animation-timing-function: $transition;
+  -o-animation-iteration-count: $iteration;
+  animation-name: $animation;
+  animation-duration: $duration;
+  animation-timing-function: $transition;
+  animation-iteration-count: $iteration;
+}
+
+
+
+@mixin keyframe ($animation_name) {
+    @-webkit-keyframes #{$animation_name} {
+        @content;
+    }
+ 
+    @-moz-keyframes #{$animation_name} {
+        @content;
+    }
+ 
+    @-o-keyframes #{$animation_name} {
+        @content;
+    }
+ 
+    @keyframes #{$animation_name} {
+        @content;
+    }
+}
+
+
+@include keyframe (blink) {
+  0% {
+    opacity: 1
+  }
+  50% {
+    opacity: 0
+  }
+  100% {
+    opacity: 1
+  }
+}

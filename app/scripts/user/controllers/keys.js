@@ -2,9 +2,10 @@
 
 (function(app) {
 
-  app.controller('KeysCtrl', function (GPG, UserMgr, AuthCredentials, $scope, $modal, Log) {
+  app.controller('KeysCtrl', function (GPG, UserMgr, SecureData, AuthCredentials, $scope, $modal, Log) {
     $scope.userId = UserMgr.getCurrentUser();
-    var log = Log.create('KeysCtrl(' + $scope.userId + ')');
+
+    var log = Log.create('KeysCtrl(' + $scope.userId + ')', $scope);
 
     $scope.user = AuthCredentials.get($scope.userId);
 
@@ -13,7 +14,10 @@
      * @return {Promise}
      */
     var refreshKeys = function() {
+      $scope.error = null;
+
       log.debug('Fetching GPG keys...');
+
       return GPG.getAllKeys($scope.user.email)
         .then(function(keys) {
           $scope.keys = keys;          
@@ -25,6 +29,8 @@
      * Add a PGP key.
      */
     $scope.addKey = function() {
+      $scope.error = null;
+
       // show a modal
       var modalInstance = $modal.open({
         templateUrl: 'app/modals/addKey.html',
@@ -44,12 +50,9 @@
     };
 
 
-    UserMgr.ensureUserHasSecureDataSetup()
-      .then(function() {
-        return refreshKeys();        
-      })
+    refreshKeys()      
       .catch(function(err) {
-        log.error(err.message);
+        log.error('Sorry, there was an unexpected error. Please check the logs for details.', err);
       });
   });
 
@@ -71,7 +74,7 @@
 
 
 
-  app.controller('AddKeyFormCtrl', function($scope, RuntimeError, GPG, UserMgr, Log, Alerts) {
+  app.controller('AddKeyFormCtrl', function($scope, RuntimeError, GPG, UserMgr, Log, Alert) {
     var log = Log.create('AddKeyFormCtrl');
 
     /**
@@ -93,10 +96,10 @@
 
       GPG.importKey($scope.publicKey)
         .then(function backupData() {
-          return UserMgr.backupGPGData();
+          return UserMgr.backupGPGData(UserMgr.getCurrentUser());
         })
         .then(function closeModal() {
-          Alerts.info('Key successfully imported!');
+          Alert.info('Key successfully imported!');
           $scope.modal.close();
         })
         .catch(function(err) {

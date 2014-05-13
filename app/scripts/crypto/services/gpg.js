@@ -48,9 +48,13 @@
               ].join("\n"),
               // we need to create these files to ensure our getFiles() always succeed
               '/home/emscripten/.gnupg/pubring.gpg': '',
-              '/home/emscripten/.gnupg/secring.gpg': '',
-              '/home/emscripten/.gnupg/random_seed': ''
+              '/home/emscripten/.gnupg/secring.gpg': ''
             };
+
+            // from https://github.com/manuels/unix-toolbox.js-gnupg/blob/master/demo/trustdb.gpg
+            // self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'] = atob("mQENBFGPt4UBCADDlU9Jc8mY/W1bzXPkuaybtHwYU3NYdyDMQS/1vkT1lLGJG7HtZQVyokFRi6BrWg6Yv49rtaasoEOqBLUkQyltLkCkd3o0aqlGPua4u8sn6TAH9sNKo6K5xeHXMW54RkcxedNKyqherf0yLwwf513iF27YBroH6fay7cExO3GVSuFeW8x2glCUu2kp0npZlbjOKJHjgIQ1l3sFYKC5OPPQQpA5/gsW4uiPSRxK0laNCeMiZu4JQOZYpD0gwbo4Px46APzdk3W3u0Ju1U/TFa4BQhR+1Ii/lQm+03B3oKfDFFMPBG2WBlv48n17WP23jXwhBPF6Bo7ENUiXFCGttnBJABEBAAG0K0FsaWNlIChQYXNzcGhyYXNlIGlzIGFsaWNlKSA8YWxpY2VAZm9vLmNvbT6JATgEEwECACIFAlGPt4UCGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEJ5LR3SYmgqHvgcH/0aIlaBeAtIhxx7/ams3YaO4VcYah5nkt0W5swq67l3bT6QnvRvFHaAMPKpXFSbb7oCbNl+CIUMxBSumz35cLhJVwSUMeOq3+Rp2MSqD6MG23TqZ55cqRGKw/PG68RCDMPVc962cnn97429p7c+8mhIemlOcAR9IXLYHpo0BqDEhZ+UJrU/E56iDs6ZfgWWgzXirZfoO25lIyeQlqnOjaANnlC+jvw230PBhf0ZcCtKe8GBXhGAD+mkzkOYRGP8XpkK9/kdndHZcmUEYB54YlDk4BVj8KU2zLGgLTggTF+I8A0YrH57/k/gA0Lv7rmjllUEMtzqWyaKrfytyz6Szb72wAgADuQENBFGPt4UBCADS36JCAbQyo49Gv8RicKACgUXoNjYWTsOXsjzkga8xMRJaoOAFJFgSH20LeFlJncqH301Os6nMXM9/wAFoa2PiwpLwdBhIJeQR5UL0DECUFBAcUYyq8k5/8mKunkOaWTFWEA8YQeXRmSoE1modVUZK8Zd89mU3XEPHurC0yZalBDDG0L9ZmkOTvJMzxYJJrej6ZMuPCfUXFy1keq9Nyd6WgRzU8a/MMtC1cZcXab0LzIPsITxSM+CqYxHDhp5IHcH+k4FvcRsRPEJXoe0ywdbwXmlrzPIoZrbl63K4N1Cp3/eeyxdJlPn/nXQXQ/1xSDNyXGSprPo1gaz+XZX6zOVjABEBAAGJAR8EGAECAAkFAlGPt4UCGwwACgkQnktHdJiaCoeGnwgAwvSDiCsJzna3HBrpNuCza5x0mI9hcM/veHzsslOoqOHDzgBBiZE8yYcuwWOwARD810E9Eb1T2tZbNM3heOkjVWqq0rQAbNIqCUAAkQSPyIbEYdPMqiqWDB7nkTKcEzoALVf4PuzIgBUWYMS42vmcoDhQho//lMAZZL2kIFBySjXjMd324EGatcOjNPm8OBT96OIlU6BqXBObEZpEFcpT3SxUGlEE8nU76b2rlmxxAh6UYXT9LytbuXtr2XS6b9Y49fKyC96ROHQM4s3H10ZY39SjZZz0l0oibKPLF7C4Mb6dcP1CE9SYt1Kij2Kt5q/V0VisxpoO7V/KPC7xBdkaQrACAAM=")
+            // self.virtualFs['/home/emscripten/.gnupg/secring.gpg'] = atob("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")
+            // self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg'] = atob("AWdwZwMDAQUBAgAAUY+4KwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAs4zAqpwKS/sRdPLqeS0d0mJoKhwYAAAAAAAAfAAAAAAAAAAAAAA0ALN5X1qGlQzhDDw8aVqW/lHOzKQMGAAAAAAAAAAAAAAAAAAAAAAA=")
 
             // pending requests (see `_lock` and `_unlock` methods)
             self.pendingRequests = [];
@@ -58,6 +62,9 @@
             self._createWorker = _.bind(self._createWorker, self);
             self._lock = _.bind(self._lock, self);
             self._unlock = _.bind(self._unlock, self);
+
+            // to cache execution results
+            self._cache = {};
           },
 
 
@@ -74,26 +81,31 @@
 
             var defer = $q.defer();
 
-            if (self.alreadySetup) {
-              defer.resolve();
-            } else {
-              Random.getRandomBytes(4096)
-                .then(function fillEGDPool(words) {
-                  var utf8str = sjcl.codec.utf8String.fromBitsRaw(words);
-                  log.debug('Adding ' + utf8str.length + ' bytes to EGD pool...');
-                  self.virtualFs['/dev/egd-pool'] = utf8str;
+            $q.when()
+              .then(function() {
+                if (self._randomData) {
+                  return self._randomData;
+                } else {
+                  return Random.getRandomBytes(16384)
+                    .then(function fillEGDPool(words) {
+                      self._randomData = sjcl.codec.utf8String.fromBitsRaw(words);
+                      
+                      log.debug('Adding ' + self._randomData.length + 
+                        ' bytes to EGD pool...');
 
-                  self.alreadySetup = true;
-                  return true;
-                })
-                .then(defer.resolve)
-                .catch(defer.reject)
-              ;
-            }
+                      return self._randomData;
+                    });
+                }
+              })
+              .then(function(randomData) {
+                self.virtualFs['/dev/egd-pool'] = randomData;
+              })
+              .then(defer.resolve)
+              .catch(defer.reject)
+            ;
 
             return defer.promise;
           },
-
 
 
 
@@ -145,16 +157,24 @@
           _destroyWorker: function(worker) {
             var self = this;
 
-            return worker.getFiles(
+            var defer = $q.defer();
+
+            worker.getFiles(
               '/home/emscripten/.gnupg/pubring.gpg',
               '/home/emscripten/.gnupg/secring.gpg',
-              '/home/emscripten/.gnupg/trustdb.gpg',
-              '/home/emscripten/.gnupg/random_seed'
+              '/home/emscripten/.gnupg/trustdb.gpg'
             )
               .then(function saveFileData(fileData) {
                 self.virtualFs = fileData;
               })
+              .then(defer.resolve)
+              .catch(function(err) {
+                log.error('Error fetching files form virtual FS', err);
+                defer.reject(err);
+              })
             ;
+
+            return defer.promise;
           },
 
 
@@ -244,8 +264,12 @@
             self._lock()
               .then(function checkForOutputFileParam() {
                 var outputParamIndex = gpgCommand.indexOf('--output');
+
                 if (0 <= outputParamIndex) {
-                  outputFilePath = (outputParamIndex < args.length - 1) ? args[outputParamIndex+1] : 'the output file';
+                  if (gpgCommand.length - 1 <= outputParamIndex) {
+                    throw new Error('Output file name must be specified if using --output');
+                  }
+                  outputFilePath = gpgCommand[outputParamIndex + 1]
                 }
               })
               .then(function getInputFiles() {
@@ -271,7 +295,7 @@
               })
               .then(function fetchOutputFile(){
                 if (outputFilePath) {
-                  return self._fsGetFiles(outputFilePath)
+                  return worker.getFile(outputFilePath)
                     .then(function(contents) {
                       results[outputFilePath] = contents;
                     });
@@ -299,40 +323,47 @@
           /**
            * Generate a new key-pair
            * 
-           * @param emailAddress {string} user id.
-           * @param password {string} user password.
-           * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
-           *
            * References: 
            *  - https://alexcabal.com/creating-the-perfect-gpg-keypair/
+           *  
+           * @param emailAddress {string} user id.
+           * @param passphrase {string} user passphrase.
+           * @param keyStrength {Integer} key strength in bit size (only 2048 or 4096 are accepted).
            */
-          generateKeyPair: function(emailAddress, password, keyStrength) {
+          generateKeyPair: function(emailAddress, passphrase, keyStrength) {
             var self = this;
 
-            log.debug('Generating ' + keyStrength + '-bit keypair for: '  + emailAddress);
+            log.debug('Generating ' + keyStrength + '-bit keypair for '  + 
+                emailAddress + ' with passphrase ' + passphrase);
+
+            self._clearCaches('keys');
 
             var startTime = moment();
 
-            var inputFiles = {
-              '/input.txt': $q.when(function() {
-                if (2048 !== keyStrength && 4096 !== keyStrength) {
-                  throw new GPGError('GPG key bit size must be either 2048 or 4096');
-                }
+            return $q.when(function() {
+              if (2048 >= keyStrength) {
+                throw new GPGError('GPG key bit length must be >= 2048');
+              }              
+            })
+              .then(function genKey() {
+                var inputFiles = {
+                  '/input.txt': $q.when([
+                      'Key-Type: RSA',
+                      'Key-Length: ' + keyStrength,
+                      'Key-Usage: sign',
+                      'Subkey-Type: RSA',
+                      'Subkey-Length: ' + keyStrength,
+                      'Subkey-Usage: encrypt',
+                      'Name-Email: ' + emailAddress,
+                      'Expire-Date: 5y',
+                      'Passphrase: ' + passphrase,
+                      '%commit'
+                    ].join("\n")
+                  )
+                };
 
-                return [
-                  'Key-Type: RSA',
-                  'Key-Length: ' + keyStrength,
-                  'Subkey-Type: RSA',
-                  'Subkey-Length: ' + keyStrength,
-                  'Name-Email: ' + emailAddress,
-                  'Expire-Date: 0',
-                  'Passphrase: ' + password,
-                  '%commit'
-                ].join("\n");
+                return self._execute(inputFiles, ['--gen-key', '/input.txt']);
               })
-            }
-
-            return self._execute(inputFiles, ['--batch', '--gen-key', '/input.txt'])
               .then(function(results) {
                 log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
                 
@@ -344,66 +375,192 @@
 
 
           /**
-           * Encrypt given data with user's public key.
+           * Get all keys in the user's keychain.
            *
-           * @param emailAddress {string} user id.
-           * @param data {string} data to encrypt.
+           * @return {Array}
            */
-          // encryptWithPublicKey: function(emailAddress, data) {
-          //   var self = this;
+          getAllKeys: function() {
+            var self = this;
 
-          //   var defer = $q.defer();
+            log.debug('Getting all keys stored in keychain');
 
-          //   log.debug('Encrypting ' + data.length + ' characters with public key for: '  + emailAddress);
-
-          //   var startTime = null;
-
-          //   self._lock()
-          //     .then(function createInput() {
-          //       return self._fsWriteFile(data, '/input.txt')
-          //     })
-          //     .then(function encrypt() {
-          //       startTime = moment();
-          //       return self._gpg('-r', emailAddress, '--output', '/encrypted.txt', '--encrypt', '/input.txt');
-          //     })
-          //     .then(function getOutput() {
-          //       return self._fsGetFiles('/encrypted.txt');
-          //     })
-          //     .then(function allDone(fileData) {
-          //       log.debug('Time taken: ' + moment().diff(startTime, 'seconds') + ' seconds');
-          //       return fileData['/encrypted.txt'];
-          //     })
-          //     .then(defer.resolve)
-          //     .catch(function (err) {
-          //       defer.reject(new GPGError('Data encryption error', err));
-          //     })
-          //     .finally(self._unlock)
-          //   ;
-
-          //   return defer.promise;
-          // }, // generateKeyPair()
+            return $q.when()
+              .then(function checkCache() {
+                if (!self._getCache('keys')) {
+                  return self._execute({}, ['--list-keys', '--with-colons', '--fixed-list-mode'])
+                    .then(function getOutput(results) {
+                      self._setCache('keys', GPGUtils.parseKeyList(results.stdout));
+                    });
+                } else {
+                  log.debug('...fetch from cache');
+                }
+              })
+              .then(function done() {
+                return self._getCache('keys');
+              })
+            ;
+          }, // getAllKeys()
 
 
 
 
           /**
-           * Get all keys in the user's keychain.
+           * Encrypt message to given recipients.
            *
-           * @param emailAddress {string} user id.
+           * It assumes that public keys are available for all recipients and 
+           * will sign the message in addition to encrypting it.
+           * 
+           * @param {String} from Sender id/email.
+           * @param {String} passphrase Sender key passphrase.
+           * @param {String} msg Message to send.
+           * @param {String} ... Recipient id/email as each argument.
+           *
+           * @return {Promise} Resolves to PGP message string.
            */
-          getAllKeys: function(emailAddress) {
+          encrypt: function(from, passphrase, msg) {
             var self = this;
 
-            log.debug('Getting all keys stored in keychain of ' + emailAddress);
+            var recipients = _.rest(arguments, 3);
 
-            return self._execute({}, ['--list-keys', '--with-colons', '--fixed-list-mode'])
+            log.debug('Encrypting message of ' + msg.length + 
+              ' characters for ' + recipients.length);
+
+            return self._execute({
+              '/msg.txt': $q.when(msg)
+            }, 
+              _.chain(recipients)
+                .map(function(r) {
+                  return ['--recipient', r];
+                })
+                .flatten()
+                .value()
+              .concat(
+                [  
+                  '--default-key', from, 
+                  '--passphrase', self._sanitizePassphrase(passphrase),
+                  '--armor', 
+                  '--output', '/msg.enc',
+                  '--detach-sign',
+                  '--encrypt',
+                  '--encrypt-to', from, // so that sender can read it
+                  '/msg.txt'
+                ]
+              )
+            )
               .then(function getOutput(results) {
-                return GPGUtils.parseKeyList(results.stdout);
+                var txt = results['/msg.enc'];
+
+                log.debug('PGP msg: ', txt);
+
+                return txt;
               })
             ;
 
-          }, // getAllKeys()
+          }, // encrypt()
 
+
+
+
+          /**
+           * Decrypt message.
+           *
+           * It assumes that public keys are available for the sender.
+           * 
+           * @param {String} msg Message.
+           *
+           * @return {Promise} Resolves to plaintxt message string.
+           */
+          decrypt: function(msg) {
+            var self = this;
+
+            log.debug('Decrypting message of ' + msg.length);
+
+            return self._execute({
+              '/msg.txt.asc': $q.when(msg)
+            }, 
+              [  
+                '--output', '/msg.txt',
+                '/msg.txt.asc'
+              ]
+            )
+              .then(function getOutput(results) {
+                return results['/msg.txt'];
+              });
+
+          }, // decrypt()
+
+
+
+
+
+
+          /**
+           * Sign message.
+           *
+           * @param {String} from Sender id/email.
+           * @param {String} passphrase Sender key passphrase.
+           * @param {String} msg Message to send.
+           *
+           * @return {Promise} Resolves to PGP signature string.
+           */
+          sign: function(from, passphrase, msg) {
+            var self = this;
+
+            log.debug('Signing message of ' + msg.length + ' characters');
+
+            return self._execute({
+              '/msg.txt': $q.when(msg)
+            }, [  
+                  '--default-key', from, 
+                  '--passphrase', self._sanitizePassphrase(passphrase),
+                  '--armor', 
+                  '--output', '/msg.sig',
+                  '--detach-sign',
+                  '/msg.txt'
+              ]
+            )
+              .then(function getOutput(results) {
+                var txt = results['/msg.sig'];
+
+                log.debug('PGP sig: ', txt);
+
+                return txt;
+              });
+            ;
+
+          }, // sign()
+
+
+
+
+          /**
+           * Verify signature of a signed message.
+           *
+           * @param {String} msg Message.
+           * @param {String} sig Signature to verify.
+           *
+           * @return {Promise} Resolves to true if good signature; false otherwise.
+           */
+          verify: function(msg, sig) {
+            var self = this;
+
+            log.debug('Verify signature for message of ' + msg.length + ' characters');
+
+            return self._execute({
+              '/msg.txt': $q.when(msg),
+              '/msg.txt.gpg': $q.when(sig)
+            }, [  
+                  '--verify', from, 
+                  '/msg.txt.gpg',
+                  '/msg.txt'
+              ]
+            )
+              .then(function getOutput(results) {
+                return GPGUtils.isGoodSignature(results.stdout);
+              });
+            ;
+
+          }, // verify()
 
 
 
@@ -418,12 +575,15 @@
 
             log.debug('Importing key into keychain');
 
+            self._clearCaches('keys');
+
             var inputFiles = {
-              '/home/emscripten/.gnupg/import.gpg': $q.when(key)
+              '/import.gpg': $q.when(key)
             };
 
-            return self._execute(inputFiles, ['--import', '/home/emscripten/.gnupg/import.gpg']);
+            return self._execute(inputFiles, ['--import', '/import.gpg']);
           }, // importKey()
+
 
 
 
@@ -438,7 +598,7 @@
 
             return $q.when({
               'pubring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
-              'secring.gpg': self.virtualFs['/home/emscripten/.gnupg/pubring.gpg'],
+              'secring.gpg': self.virtualFs['/home/emscripten/.gnupg/secring.gpg'],
               'trustdb.gpg': self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg']              
             });
           },
@@ -456,11 +616,57 @@
           restore: function(data) {
             var self = this;
 
+            log.debug('Restore virtual filesystem to given state');
+
             for (var f in data) {
               self.virtualFs['/home/emscripten/.gnupg/' + f] = data[f];
             }
 
             return $q.when(true);
+          },
+
+
+          /**
+           * Get cached data.
+           * @param  {String} key Key.
+           * @return {*} data.
+           */
+          _getCache: function(key) {
+            return this._cache[key];
+          },
+
+
+          /**
+           * Set cached data.
+           * @param  {String} key Key.
+           * @param {*} data Value
+           */
+          _setCache: function(key, data) {
+            return this._cache[key] = data;
+          },
+
+
+          /**
+           * Clear cached data.
+           * @param  {String} key1 Name of first cache to clear. Subsequent arguments name other cache keys.
+           */
+          _clearCaches: function(key1) {
+            var self = this;
+
+            _.each(arguments, function(key) {
+              delete self._cache[key];
+            });
+          },
+
+
+          /**
+           * Sanitize a passphrase for use in GPG command-line call.
+           * 
+           * @param  {String} passphrase The pass phrase.
+           * @return {String}
+           */
+          _sanitizePassphrase: function(passphrase) {
+            return passphrase.trim();
           }
 
         }));
@@ -592,13 +798,12 @@
        * Analyse given path.
        * @return {filename: ..., path: ...}
        */
-      _analysePath: function(path_in, opt_filename) {
-        var is_absolute = (path_in[0] === '/');
+      _analysePath: function(path_in) {
         var is_path_only = (path_in[path_in.length-1] === '/');
 
         var filename, path;
         if(is_path_only) {
-          filename = opt_filename || '';
+          filename = '';
           path = path_in;
         }
         else {
@@ -754,7 +959,6 @@
        */
       run: function() {
         var self = this;
-        self._runCalled = true;
 
         var args = Array.prototype.slice.call(arguments);
 
@@ -762,12 +966,12 @@
 
         return self.waitUntilReady()
           .then(function runCommand() {
-            args = ['--yes', '--verbose', '--lock-never'].concat(args);
+            args = ['--yes', '--verbose', '--lock-never', '--batch'].concat(args);
 
             defer = self._newTrackableDeferred({
               desc: '' + args.join(' ')
             });
-            self.log.debug('Execute command: ' + defer.desc);
+            self.log.debug('gpg2 ' + defer.desc);
 
             self._resetWorkerCommandResult();
 
@@ -783,15 +987,6 @@
               return self.workerCommand.stdout;
             })
         ;
-      },
-
-
-      /**
-       * Get whether a run() call has been made through this worker.
-       * @return {Boolean}
-       */
-      runCalled: function() {
-        return this._runCalled;
       },
 
 
@@ -851,10 +1046,13 @@
         switch (caps[j]) {
           case 's':
             key.caps.sign = true;
+            break;
           case 'c':
             key.caps.certify = true;
+            break;
           case 'e':
             key.caps.encrypt = true;
+            break;
         }
       }
 
@@ -918,7 +1116,82 @@
         }
 
         return keys;
-      }
+      },
+
+
+
+      /**
+       * Check that GPG verified input as a Good Signature
+       * 
+       * @param {Array} stdout List of strings representing the stdout.
+       * @return {Boolean} true if good signature, false otherwise
+       */
+      isGoodSignature: function(stdout) {
+        return 0 === stdout.pop().indexOf('gpg: Good signature from');
+      },
+
+
+
+      /**
+       * Get whether given string is PGP encrypted.
+       * 
+       * @param {String} str The string.
+       * @return {Boolean} true if so, false otherwise
+       */
+      isEncrypted: function(str) {
+        return 0 === str.indexOf('----- BEGIN PGP MESSAGE -----');
+      },
+
+
+
+      /**
+       * TODO: do we really want to support this? Even the RFC recommends detached signing
+       * 
+       * Get whether the given text is clear-signed.
+       *
+       * Clear-signed means that the PGP signature is inline.
+       * 
+       * @param  {String}  txt The text.
+       * @return {Boolean}     True if so; false otherwise.
+       */
+    //   isClearSigned: function(txt) {
+    //     var tokens = txt.split("\n");
+
+    //     if (7 > tokens.length) {
+    //       return false;
+    //     }
+
+    //     /* See http://tools.ietf.org/html/rfc4880#section-7 */
+
+    //     if (0 !== tokens[0].indexOf('----- BEGIN PGP SIGNED MESSAGE -----')) {
+    //       return false;
+    //     }
+
+    //     if (0 !== tokens[1].indexOf('Hash:')) {
+    //       return false;
+    //     }
+
+    //     var sigFound = 0;
+
+    //     for (var j=2; tokens.length>j; ++j) {
+    //       if (0 === sigFound) {
+    //         if (0 === tokens[j].indexOf('----- BEGIN PGP SIGNATURE -----')) {
+    //           sigFound++;
+    //         }
+    //       } 
+    //       else if (1 === sigFound) {
+    //         if (0 === tokens[j].indexOf('----- END PGP SIGNATURE -----')) {
+    //           sigFound++;
+    //         }            
+    //       }
+    //     }
+
+    //     if (2 > sigFound) {
+    //       return false;
+    //     }
+
+    //     return true;
+    //   },
     };
 
   });

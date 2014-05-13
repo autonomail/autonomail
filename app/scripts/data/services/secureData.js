@@ -5,7 +5,7 @@
 (function(app) {
   'use strict';
 
-  app.factory('SecureData', function(Log, $q, RuntimeError, Storage, Encrypt, AuthCredentials, Server) {
+  app.factory('SecureData', function(Log, $q, RuntimeError, Storage, Crypto, AuthCredentials, Server) {
     var log = Log.create('SecureData');
     
 
@@ -87,13 +87,13 @@
         } else {
           var storageData = {};
 
-          Encrypt.deriveNewKey(auth.password)
+          Crypto.deriveNewKey(auth.passphrase)
             .then(function createSkeletonSecureData(keyData) {
               storageData.salt = keyData.salt;
               storageData.iterations = keyData.iterations;
               cachedSecureDataKey[userId] = keyData.secureDataKey;
 
-              return Encrypt.encrypt(keyData.secureDataKey, {});
+              return Crypto.encrypt(keyData.secureDataKey, {});
             })
             .then(function setStorageItem(encryptedSecureData) {
               storageData.secureData = encryptedSecureData;
@@ -135,7 +135,7 @@
           if (!auth) {
             return $q.reject(new RuntimeError('No auth credentials found for: ' + userId));
           } else {
-            return Encrypt.deriveKey(auth.password, {
+            return Crypto.deriveKey(auth.passphrase, {
               salt: storedData.salt,
               iterations: storedData.iterations
             })
@@ -206,7 +206,7 @@
                 });
             })
             .then(function decryptSecureData(params) {
-              return Encrypt.decrypt(params.key, params.data);
+              return Crypto.decrypt(params.key, params.data);
             })
             .then(function cacheDecryptedData(decryptedSecureData) {
               cachedSecureData[userId] = decryptedSecureData;
@@ -221,6 +221,19 @@
       },
 
 
+
+      /**
+       * Clear cached data for given user id.
+       *
+       * This next time we wish to get/set this user's secure data we will have 
+       * to reload it from storage prior.
+       */
+      clearCache: function(userId) {
+        log.debug('Clearing cache for ' + userId);
+
+        delete cachedSecureData[userId];
+        delete cachedSecureDataKey[userId];
+      },
 
 
 
@@ -281,7 +294,7 @@
               });
           })
           .then(function encryptData(params) {
-            return Encrypt.encrypt(params.key, cachedSecureData[userId])
+            return Crypto.encrypt(params.key, cachedSecureData[userId])
               .then(function save(encryptedSecureData) {
                 params.data.secureData = encryptedSecureData;
                 return params.data;

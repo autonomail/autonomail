@@ -216,12 +216,6 @@ module.exports = function (grunt) {
       options: {
         separator: ';'
       },
-      webworkerMain: {
-        src: [
-          '<%= yeoman.app %>/bower_components/parallel.js/lib/eval.js',
-        ],
-        dest: '<%= yeoman.app %>/scripts/webworker.generated.js'
-      },
       webworkerImports: {
         src: [
           '<%= yeoman.app %>/bower_components/sjcl/sjcl.js',
@@ -237,6 +231,20 @@ module.exports = function (grunt) {
         dest: '<%= yeoman.app %>/scripts/gpg2-worker.generated.js'
       }
     },
+
+    browserify: {
+      stream: {
+        options: {
+          bundleOptions: {
+            standalone: 'Stream'
+          }
+        },
+        files: {
+          '<%= yeoman.app %>/scripts/stream-browserify.generated.js': ['node_modules/stream-browserify/index.js'],
+        }
+      },
+    },
+
     useminPrepare: {
       html: '<%= yeoman.app %>/index.html',
       options: {
@@ -404,7 +412,6 @@ module.exports = function (grunt) {
 
 
   grunt.registerTask('webworker', [
-    'concat:webworkerMain',
     'concat:webworkerImports',
     'concat:gpg'
   ]);
@@ -418,6 +425,7 @@ module.exports = function (grunt) {
     grunt.task.run([
       'shell',
       'webworker',
+      'browserify',
       'clean:server',
       'concurrent:server',
       'autoprefixer',
@@ -430,6 +438,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'shell',
     'webworker',
+    'browserify',
     'clean:server',
     'concurrent:test',
     'autoprefixer',
@@ -439,6 +448,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'shell',
+    'webworker',
+    'browserify',
     'clean:dist',
     'useminPrepare',
     'concurrent:dist',

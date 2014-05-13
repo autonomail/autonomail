@@ -1,0 +1,12 @@
+<div class="messages" ng-controller="FolderCtrl">
+  <span ng-show="error" class="alert alert-danger">{{error}}</span>
+
+  <div class="message-table standard-table">
+    <div loader ng-hide="messages"></div>
+    <ul ng-show="messages">
+      <li ng-repeat="id in msgIds" folder-msg></li>
+    </ul>
+  </div>
+</div>
+
+

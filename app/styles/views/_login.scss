@@ -1,20 +1,17 @@
 #page-login {
   padding: 1em;
+  text-align: center;
 
-  h2 {
-    margin-bottom: 1em;
+  a.signup {
+    display: block;
+    margin: 3em 0 0;
   }
+}
 
-  #loginForm_username + .post-label  {
-    font-size: 150%;
-    font-style: italic;
-
-    span:nth-child(1) {
-      color: #ccc;
-      margin: 0 0.1em;
-    }
-    span:nth-child(2) {
-      color: #666;
+@media (max-width: $screen-xs-max) {
+  #page-login {
+    .form-control {
+      width: 90%;
     }
   }
 }

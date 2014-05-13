@@ -4,15 +4,17 @@
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('Mailbox', function(Log, Server, MailView, MailMessage) {
+  app.factory('Mailbox', function($timeout, Log, Server, MailView, Message, GPG, AuthCredentials) {
 
-    var Mailbox = Class.extend({
+    var Mailbox = Events.extend({
 
       /**
        * Constructor.
        * @param userId {string} the user whose mailbox we wish to access.
        */
       init: function(userId) {
+        this._super();
+        
         var self = this;
 
         self.userId = userId;
@@ -23,6 +25,47 @@
         self._cache = {
           messages: {}
         };
+
+        self._queue = {
+          outbound: []
+        };
+        self._startQueueTimers();
+      },
+
+
+      /**
+       * Start queue processing timers.
+       */
+      _startQueueTimers: function() {
+        var self = this;
+
+        $timeout(function() {
+          if (0 < self._queue.outbound.length) {
+            var msg = self._queue.outbound.shift();
+
+            self.log.debug('Processing outbound msg: ' + msg.id);
+
+            msg._send(self);
+          }
+
+          if (!self._shutdown) {
+            self._startQueueTimers();
+          }
+        }, 100);
+      },
+
+
+
+      /**
+       * Add given message to outbound message queue.
+       *
+       * This is the preferred way for adding outbound messages to be processed 
+       * by the mailbox.
+       * 
+       * @param  {OutboundMessage} outboundMsg The outbound message.
+       */
+      enqueueOutbound: function(outboundMsg) {
+        this._queue.outbound.push(outboundMsg);
       },
 
 
@@ -49,7 +92,7 @@
        * @param [options.expectedFirstId] {Number} expected id of first message in results.
        * @param [options.expectedLastId] {Number} expected id of last message in results.
        *
-       * @return {Promise} resolves to [ MailMessage, MailMessage, ... ] or { noChange: true }
+       * @return {Promise} resolves to [ Message, Message, ... ] or { noChange: true }
        */
       getMessages: function(from, count, options) {
         var self = this;
@@ -63,13 +106,47 @@
               return _.map(result.messages, function(msg) {
                 // re-use cached messages
                 if (!self._cache.messages[msg.id]) {
-                  self._cache.messages[msg.id] = new MailMessage(msg);
+                  self._cache.messages[msg.id] = new Message(self, msg);
                 }
                 return self._cache.messages[msg.id];
               });
             }
           });
       },
+
+
+
+      /**
+       * Send a message.
+       * 
+       * @param {Object} msg Message and options.
+       * @param {Array} msg.to Recipient email addresses.
+       * @param {Array} msg.cc CC recipient email addresses.
+       * @param {Array} msg.bcc BCC recipient email addresses.
+       * @param {String} msg.subject  Message subject.
+       * @param {String} msg.body Message body.
+       * @param {String} [msg.sig] PGP signature to attach.
+       * 
+       * @return {Promise}
+       * @package
+       */
+      _sendMessage: function(msg) {
+        var self = this;
+
+        self.log.info('Sending message', msg);
+
+        msg.date = moment().toISOString();
+        
+        msg.from = this.userId;
+
+        msg.flags = {
+          outbound: true,
+          read: true
+        };
+
+        return Server.send(self.userId, msg);
+      },
+
 
 
       /**
@@ -90,9 +167,10 @@
        * @return {Promise}
        */
       close: function() {
-        var defer = $q.defer();
-        defer.resolve();
-        return defer.promise;
+        self._shutdown = true;
+        this.emit('shutdown');
+
+        return $q.when();
       },
 
 
@@ -124,11 +202,18 @@
     /**
      * Mailbox current folder.
      */
-    Mailbox.prop('folder', { set: true });
+    Mailbox.prop('folder', { 
+      internal: '_folder',
+      set: function(val) {
+        this._folder = val;
+        
+        this.emit('setFolder', val);
+      }
+    });
 
 
     return Mailbox;
   });
 
 
-}(angular.module('App.mailbox', ['App.common', 'App.data'])));
+}(angular.module('App.mailbox', ['App.common', 'App.data', 'App.crypto'])));

@@ -18,7 +18,7 @@
       /**
        * Set login credentials for the given user.
        *
-       * @param data {Object} contains keys: name, password, domain
+       * @param data {Object} contains keys: name, passphrase, domain
        *
        * @return user id
        */
@@ -30,7 +30,7 @@
         credentials[emailAddress] = {
           email: emailAddress,
           username: data.name,
-          password: data.password
+          passphrase: data.passphrase
         };
 
         return emailAddress;

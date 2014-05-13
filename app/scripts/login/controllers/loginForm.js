@@ -12,7 +12,7 @@
         $scope.user = {
           domain: lastUser ? lastUser.domain : 'autonomail.com',
           name: lastUser ? lastUser.name : '',
-          password: 'password1'
+          passphrase: 'this is my world'
         };
       });
 
@@ -30,10 +30,14 @@
      * Submit the form.
      */
     $scope.submit = function() {
+      $scope.error = null;
+
       Server.login($scope.user)
         .then(function setCurrentUser(){
+          console.log($scope.user);
           var userId = AuthCredentials.set($scope.user);
-          UserMgr.setCurrentUser(userId);
+
+          return UserMgr.setCurrentUser(userId);
         })
         .then(function saveUsernameForNextTime() {
           return Storage.set('lastUser', {
@@ -42,12 +46,12 @@
           });
         })
         .then(function showNextState() {
-          $state.go(UserMgr.postLoginState || 'mail');
+          $state.go(UserMgr.postLoginState || 'user.mail');
         })
         .catch(function (err) {
-          $scope.error = '' + err;
+          log.error(err);
+          $scope.error = 'Sorry, you entered incorrect details';
         })
-
     };
   });
 
