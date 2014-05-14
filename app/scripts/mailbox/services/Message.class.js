@@ -34,13 +34,10 @@
             this._processed = {};
 
             this._rawBody = null; // will hold the full raw body
-            this._fullBodyLoaded = false;
-            this._fullDecryptedBody = null; // will hold the full decrypted body
+            this._decryptedBody = null; // will hold the full decrypted body
 
             this.log = Log.create('Message[' + this.id + ']');
             this.log.debug('created');
-
-            this._setState('ready');
           },
 
 
@@ -86,8 +83,153 @@
 
 
 
+          /**
+           * Download full message body.
+           *
+           * The 'preview' variable will be set if not already done so.
+           *
+           * Note that calling this function more than once has no effect.
+           *
+           * This will emit a 'bodyReady' event once done.
+           */
+          _downloadRawBody: function() {
+            var self = this;
+
+            // this function only needs to be called once
+            if (self._downloadRawBodyState) return;
+            
+            self._processed.preview = '';
+            self._rawBody = '';
+
+            self._downloadRawBodyState = 'processing';
+            self._downloadPreviewState = 'processing';
+
+            self._raw.body.on('data', function(d) {
+              d = d.toString();
+
+              if ('done' !== self._downloadPreviewState) {
+                // add to preview (upto 1KB)
+                self._processed.preview += d;
+
+                if (1024 <= self._processed.preview.length) {
+                  self._downloadPreviewState = 'done';
+
+                  self._emitUpdate('loadedPreview');
+                  self.emit('__loadedPreview');
+                }
+              }
+
+              // add to raw body
+              self._rawBody += d;
+
+              self._emitUpdate('loadingBody', self._rawBody.length);
+            });
+
+            self._raw.body.on('end', function() {
+              self._downloadRawBodyState = 'done';
+
+              self._emitUpdate('loadedBody', self._rawBody.length);
+              self.emit('__loadedBody');
+            });
+
+            self._raw.body.on('error', function(err) {
+              self._emitUpdate('error', err);
+            });
+          },
 
 
+
+
+          /**
+           * Do any necessary crypto processing for this message.
+           *
+           * Note that calling this function more than once has no effect.
+           */
+          _doCrypto: function() {
+            var self = this;
+
+            // this function only needs to be called once
+            if (self._doCryptoState) return;
+
+            self._doCryptoState = 'processing';
+
+            // once preview loaded (this should happen before body is loaded)
+            self.on('__loadedPreview', function() {
+              self._getIdentitiesWithPublicKeys()
+                .then(function(gpgIdentities) {
+                  var fromEmail = 
+                    _.str.extractEmailAddresses(self._processed.from).pop();
+
+                  var haveKey = _.find(gpgIdentities, fromEmail);
+
+                  self._canVerifyOrDecrypt = !self._raw.sig || haveKey;
+
+                  self._needsVerification = !!self._raw.sig;
+
+                  self._needsDecryption = 
+                    GPGUtils.isEncrypted(self._processed.preview);
+
+                  // if we can't do crypto or if no crypto needed then we're done
+                  if (!self._canVerifyOrDecrypt || 
+                    (!self._needsVerification && !self._needsDecryption) )
+                  {
+                    self._doCryptoState = 'done';
+
+                    self._emitUpdate('doneCrypto');
+                  }
+
+                })
+                .catch(function(err) {
+                  self._emitUpdate('error', err);
+                });
+            });
+
+            // once body is fully loaded
+            self.on('__loadedBody', function() {
+              if ('done' === self._doCryptoState) return;
+
+              $q.when()
+                .then(function verifyOrDecrypt() {
+                  // verification
+                  if (self._needsVerification) {
+                    self._emitUpdate('verifying');
+
+                    return GPG.verify(self._rawBody, self._raw.sig)
+                      .then(function verifyResult(isGood) {
+                        self._goodSignature = isGood;
+                      })
+                      .catch(function(err) {
+                        self.log('Verification failure', err);
+                        throw err;
+                      })
+                  } 
+                  // decryption
+                  else if (self._needsDecryption) {
+                    self._emitUpdate('decrypting');
+
+                    return GPG.decrypt(self._rawBody)
+                      .then(function decrypted(msg) {
+                        self._decryptedBody = msg;
+                      })
+                      .catch(function(err) {
+                        self.log('Decryption failure', err);
+                        throw err;
+                      });
+                  }
+                })
+                .then(function() {
+                  self._doCryptoState = 'done';
+
+                  self._emitUpdate('doneCrypto');
+                })
+                .catch(function(err) {
+                  self._emitUpdate('error', err);
+                })
+            });
+
+            // kick-off
+            self._downloadRawBody();
+          },
 
 
 
@@ -95,144 +237,55 @@
           /**
            * Process the raw inputs.
            *
-           * This function can be called multiple times.
+           * This function should expect to be called multiple times, so it 
+           * should take care not to repeat previously completed work.
            *
-           * @return {Promise}
+           * Note that when processing for the "preview" view type the full 
+           * message body does not get loaded unless it requires either 
+           * verification or decryption.
+           * 
+           * @param {Object} options Additional options.
+           * @param {String} [options.viewType] Process for the given view type. Can be either "preview" (default) or "full".
            */
-          process: function() {
+          process: function(options) {
             var self = this;
 
-            self._setState('processing');
+            options = _.extend({
+              viewType: 'preview'
+            }, options);
+
+            self._emitUpdate('processing');
 
             $q.when()
-              .then(function basicFields() {
-                if (self._processed['date']) return;
-
-                _.each(['date', 'from', 'to', 'cc', 
-                    'bcc', 'subject'], function(f) {
-                    self._processed[f] = self._raw[f];
-                  }
-                );
-
-                self._setState('loadedBasicInfo');
-              })
-              .then(function getFullBody() {
-                if (self._fullBodyLoaded) return;
-
-                self._processed.preview = '';
-
-                var defer = $q.defer();
-
-                self._setState('loadingBody');
-
-                self._raw.body.on('data', function(d) {
-                  d = d.toString();
-
-                  // add to preview (upto 1KB)
-                  if (!self._fullPreviewLoaded) {
-                    self._processed.preview += d;
-
-                    if (1024 <= self._processed.preview.length) {
-                      self._fullPreviewLoaded = true;
-
-                      self._setState('loadedPreview');
+              .then(function loadMeta() {
+                if (!self._processed['date']) {
+                  _.each(['date', 'from', 'to', 'cc', 
+                      'bcc', 'subject'], function(f) {
+                      self._processed[f] = self._raw[f];
                     }
-                  }
+                  );
+                };
 
-                  // add to raw body
-                  self._rawBody += d.toString();
-
-                  self._setState('loadingBody', self._rawBody.length);
-                });
-
-                self._raw.body.on('end', function() {
-                  self._fullBodyLoaded = true;
-                  
-                  self._setState('loadedBody', self._rawBody.length);
-
-                  defer.resolve();
-                });
-
-                self._raw.body.on('error', function(err) {
-                  defer.reject(err);
-                });
-
-                return defer.promise;
+                self._emitUpdate('loadedMeta');
               })
-              .then(function checkIfCryptoNeeded() {
-                return self._getIdentitiesWithPublicKeys()
-                  .then(function(gpgIdentities) {
-                    var fromEmail = 
-                      _.str.extractEmailAddresses(self._processed.from).pop();
-
-                    var haveKey = _.find(gpgIdentities, fromEmail);
-
-                    self._canVerifyOrDecrypt = !self._raw.sig || haveKey;
-
-                    self._needsVerification = !!self._raw.sig;
-
-                    self._needsDecryption = 
-                      GPGUtils.isEncrypted(self._processed.preview);
-                  });
-              })
-              .then(function verify() {
-                if (!self._needsVerification || !self._canVerifyOrDecrypt) return;
-
-                self._setState('verifying');
-
-                return GPG.verify(self._fullBody, self._raw.sig)
-                  .then(function verifyResult(isGood) {
-                    self._goodSignature = isGood;
-                  });
-              })
-              .then(function decrypt() {
-                if (!self._needsDecryption || !self._canVerifyOrDecrypt) return;
-
-                self._setState('decrypting');
-
-                return GPG.decrypt(self._fullBody)
-                  .then(function decrypted(msg) {
-                    self._fullDecryptedBody = msg;
-                  })
-                  .catch(function(err) {
-                    self.log('Decryption failure', err);
-                  });
-              })
-              .then(function finished() {
-                self._setState('processed');
+              .then(function doCrypto() {
+                self._doCrypto();
               })
               .catch(function(err) {
-                self._setState('error', err.stack);
+                self._emitUpdate('error', err);
               });
           },
 
 
-
           /**
-           * Set message state and notify observers.
-           *
-           * Observers of the `stateChange` event will be notified.
-           *
-           * Additional arguments will get passed to state change observers.
-           * 
-           * @param {String} state The new state to set.
-           * @private
+           * Emit a processing update to all listeners.
+           * @param  {String} evt Event name.
+           * @param {*} [arg] Addition argument.
            */
-          _setState: function(state) {
-            var self = this;
-
-            var args = arguments;
-
-            self._state = state;
-
-            if ('error' === state) {
-              self.log.error(args);
-            } else {
-              self.log.info('State change: ' + state);
-            }
-
-            self.emit.apply(self, args);              
+          _emitUpdate: function(evt, arg) {
+            this.emit('processing', evt, arg);
           }
+
         });
 
 
@@ -259,7 +312,7 @@
          */
         Message.prop('decryptedBody', {
           get: function() {
-            return self._fullDecryptedBody;
+            return self._decryptedBody;
           }
         });
 
@@ -296,11 +349,6 @@
          * Get whether message can be PGP verified/decrypted.
          */
         Message.prop('canDecryptVerify', { internal: '_canVerify' }); 
-
-        /**
-         * Current message state.
-         */
-        Message.prop('state', { internal: '_state' });
 
 
         return Message;

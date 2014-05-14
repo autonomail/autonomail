@@ -49,42 +49,19 @@
         }
       }
 
-      .meta {
-        width: 7%;
-        display: block;
-        float: left;
-        font-size: 160%;
-        text-align: center;
-        vertical-align: middle;
-
-        .error {
-          color: $alert-danger-text;
-        }
-      }
-
       .content {
         position: relative;
         display: inline-block;
-        width: 91%;
+        width: 100%;
+        padding: 0 0.4em 0 1em;
 
-        .progress-messages {
+        .result-messages {
           .alert {
             padding: 0.1em 0.3em;
           }
         }
 
-        .progress-indicators {
-          color: #666;
-          display: block;
-          float: right;
-          clear: right;
-
-          i {
-            @include animation(blink, 3s, ease-out, infinite);
-          }
-        }
-
-        .processed {
+        & > div {
           @include clearfix;
 
           .date {
@@ -117,6 +94,17 @@
           .preview {
             margin-top: 0.8em;
             color: #666;
+          }
+
+          .indicators {
+            color: #666;
+            display: block;
+            float: right;
+            clear: right;
+
+            i.blink {
+              @include animation(blink, 3s, ease-out, infinite);
+            }
           }
         }
       }
