@@ -42,11 +42,14 @@
         padding: 0;
         border-bottom: 1px solid #999;
 
-        & > div {
+        & > a {
+          display: block;
           padding: 0.5em 0;
+          @include clearfix;
 
           &.secure {
-            background-color: $pgp-secure-color;
+            background-color: $pgp-secure-color-bg;
+            // @include single-box-shadow($pgp-secure-color, 5px, 0px, 10px, 5px, true);
           }
         }
       }
@@ -69,6 +72,7 @@
           .date {
             display: block;
             float: right;
+            color: #000;
             margin: 0.2em 0.2em 0 0;
             z-index: 1000;
           }
@@ -84,6 +88,7 @@
           }
 
           .from {
+            color: #000;
             font-size: 120%;
             font-weight: bold;
           }
@@ -106,6 +111,10 @@
 
             i.blink {
               @include animation(blink, 3s, ease-out, infinite);
+            }
+
+            i.insecure {
+              color: $pgp-insecure-color-fg;
             }
           }
         }

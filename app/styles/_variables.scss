@@ -1,10 +1,13 @@
 $screen-xs-max: 640px;
 
+$body-bg: #000;
+
 $imagePath: "../images";
 
 $brand-primary: #3fa757;
 
-$pgp-secure-color: #ddeddf;
+$pgp-secure-color-bg: #ddeddf;
+$pgp-insecure-color-fg: #ff0f0f;
 
 $navbar-inverse-bg:                         #000;
 $navbar-inverse-border:                     #000;

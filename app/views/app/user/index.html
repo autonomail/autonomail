@@ -43,6 +43,7 @@
           <a href="#" class="dropdown-toggle">
             <i class="fa fa-folder"></i>
             <span>{{ currentMailFolder() }}</span>
+            <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
             <li>
@@ -52,12 +53,12 @@
             </li>
             <li>
               <a ui-sref="user.mail.folder({id: 'drafts'})">
-                <span>Inbox</span>
+                <span>Drafts</span>
               </a>
             </li>
             <li>
               <a ui-sref="user.mail.folder({id: 'outbox'})">
-                <span>Inbox</span>
+                <span>Sent</span>
               </a>
             </li>
             <li>

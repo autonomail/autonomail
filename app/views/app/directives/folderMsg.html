@@ -1,5 +1,4 @@
-<div ng-class="msgType">
-
+<a ng-class="msgType" ui-sref="user.mail.message({id: id})">
   <div class="content">
 
     <div>
@@ -18,8 +17,10 @@
       </div>
 
       <div class="indicators">
-        <i class="fa fa-download blink"  ng-show="'downloading' === state"></i>
-        <i class="fa fa-cog fa-spin" ng-show="'processing' === state"></i>
+        <i class="fa fa-download blink"  ng-show="'downloading' === state" tilte="Downloading..."></i>
+        <i class="fa fa-cog fa-spin" ng-show="'processing' === state" title="Processing..."></i>
+        <i class="fa fa-lock" ng-show="'secure' === msgType" title="Message is private"></i>
+        <i class="fa fa-unlock insecure" ng-show="'insecure' === msgType" title="Message is not private"></i>
       </div>
     </div>
 
@@ -30,5 +31,5 @@
     </div>
 
   </div>  
-</div>
+</a>
 

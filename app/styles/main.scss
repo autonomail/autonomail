@@ -8,7 +8,7 @@
 
 
 body {
-    background: #000;
+    background: $body-bg;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #fff;
 }
@@ -41,6 +41,7 @@ a {
 /* site header */
 
 #site-header {
+  background-color: $body-bg;
   position: fixed;
   width: 100%;
   z-index: 100000;
@@ -62,14 +63,23 @@ a {
 }
 
 
+
+@media (max-width: $screen-xs-max) {
+  #site-header {
+    height: $header-height-xs;
+  }
+}
+
+
+
 #small-screen-nav {
   width: 100%;
   height: $header-height-xs;
 
-  ul {
+  ul.nav {
     margin: 0;
 
-    li {
+    & > li {
       position: inherit;
       float: left;
       width: 15%;
@@ -81,10 +91,15 @@ a {
         }
       }
 
-      a {
+      & > a {
         font-size: 140%;
         text-align: center;
       }
+    }
+
+    li.dropdown.open {
+      background-color: $nav-link-hover-bg;
+      @include box-shadow(5px 5px 5px #333);
     }
   }
 

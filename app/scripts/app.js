@@ -69,6 +69,11 @@
         url: '/f/:id',
         templateUrl: 'app/user/mail/folder.html'
       })
+      .state('user.mail.message', {
+        auth: true,
+        url: '/v/:id',
+        templateUrl: 'app/user/mail/message.html'
+      })
     ;
 
     // web workers

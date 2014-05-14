@@ -1,0 +1,25 @@
+<div class="message" ng-controller="MessageCtrl">
+  <span ng-show="error" class="alert alert-danger">{{error}}</span>
+  <div loader ng-hide="date"></div>
+
+  <div class="date" ng-show="date">{{ date }}</div>
+  <div class="from">
+    <span ng-show="from">{{ from }}</span>
+    <span ng-hide="from"><em>Processing...</em></span>        
+  </div>
+  <div class="subject">
+    <span ng-show="subject">{{ subject }}</span>
+    <span ng-hide="subject"><em>Processing...</em></span>
+  </div>
+
+  <div class="body">
+    <span ng-show="body">{{ body }}</span>
+    <span ng-hide="body">
+      <span ng-show="preview">{{ preview }}</span>
+      <span ng-hide="preview"><em>Generating preview...</em></span>
+    </span>
+  </div>
+  
+</div>
+
+

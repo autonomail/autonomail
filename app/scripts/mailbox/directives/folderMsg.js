@@ -17,6 +17,8 @@
 
     var msg = $scope.$parent.messages[$scope.id];
 
+    $scope.id = msg.id;
+
     msg.on('verifying', 'decrypting', function() {
       $scope.state = 'processing';
     });
@@ -38,10 +40,6 @@
       $scope.to = data.to;
       $scope.from = data.from;
       $scope.subject = _.str.prune(data.subject, 30);
-    });
-
-    msg.on('loadedPreview', function() {
-      $scope.preview = _.str.prune(msg.processed.preview, 70);
     });
 
     msg.on('loadedPreview', function() {

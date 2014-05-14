@@ -4,7 +4,7 @@
   /**
    * Clients should not create this directly, but should instead use the 'Mail' service.
    */
-  app.factory('Mailbox', function($timeout, Log, Server, MailView, Message, GPG, AuthCredentials) {
+  app.factory('Mailbox', function($q, $timeout, Log, Server, MailView, Message, GPG, AuthCredentials) {
 
     var Mailbox = Events.extend({
 
@@ -98,7 +98,7 @@
         var self = this;
         
         count = count || 10;
-        return Server.getMsg(self.userId, self.folder, from, count, options)
+        return Server.getMessages(self.userId, self.folder, from, count, options)
           .then(function buildMessageObjects(result) {
             if (result.noChange) {
               return result;
@@ -113,6 +113,30 @@
             }
           });
       },
+
+
+
+      /**
+       * Get given message.
+       *
+       * @param {String} id Message id.
+       * 
+       * @return {Promise} resolves to Message
+       */
+      getMessage: function(id) {
+        var self = this;
+        
+        var msg = _.get(self._cache.messages, id);
+
+        if (msg) return $q.when(msg);
+
+        return Server.getMessage(self.userId, id)
+          .then(function gotMessage(msg) {
+            self._cache.messages[msg.id] = new Message(self, msg);
+            return self._cache.messages[msg.id];
+          });
+      },
+
 
 
 
@@ -155,7 +179,7 @@
        * @return {Promise} resolves to integer.
        */
       getCount: function() {
-        return Server.getMsgCount(this.userId, this.folder);
+        return Server.getMessageCount(this.userId, this.folder);
       },
 
 

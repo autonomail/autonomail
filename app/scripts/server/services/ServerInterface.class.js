@@ -78,7 +78,7 @@
        * @param [folder] {string} Folder to check.
        * @return {Promise} resolves to integer.
        */
-      getMsgCount: function(emailAddress, folder) {
+      getMessageCount: function(emailAddress, folder) {
         return this._notYetImplemented();
       },
 
@@ -101,9 +101,24 @@
        * @param [options.expectedLastId] {Number} expected id of last message in results.
        * @return {Promise} resolves to { messages: array } or { noChange: true }
        */
-      getMsg: function(emailAddress, folder, from, count, options) {
+      getMessages: function(emailAddress, folder, from, count, options) {
         return this._notYetImplemented();
       },
+
+
+
+
+      /**
+       * Get message.
+       *
+       * @param {String} emailAddress user id.
+       * @param {String} id Message id.
+       * @return {Promise} resolves to Message.
+       */
+      getMessage: function(emailAddress, id) {
+        return this._notYetImplemented();
+      },
+
 
 
 

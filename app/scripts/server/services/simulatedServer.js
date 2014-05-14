@@ -271,7 +271,7 @@
       },
 
 
-      getMsgCount: function(userId, folder) {
+      getMessageCount: function(userId, folder) {
         var self = this;
 
         log.debug('Get count of mail in [' + folder + '] for ' + userId);
@@ -293,10 +293,10 @@
 
 
 
-      getMsg: function(userId, folder, from, count, options) {
+      getMessages: function(userId, folder, from, count, options) {
         var self = this;
 
-        log.debug('Get mail in [' + folder + '] for ' + userId);
+        log.debug('Get messages in [' + folder + '] for ' + userId);
 
         options = _.extend({
           expectedFirstId: null,
@@ -336,6 +336,36 @@
 
         } else {
           defer.resolve([]);
+        }
+
+        return defer.promise;
+      },
+
+
+
+      getMessage: function(userId, msgId) {
+        var self = this;
+
+        log.debug('Get message [' + msgId + '] for ' + userId);
+
+        var defer = $q.defer();
+
+        self._setupUserMailFolders(userId);
+
+        var found = (function() {
+          _.each(self.db.mail[userId], function(folder) {
+            _.each(folder.messages, function(m) {
+              if (m.id === msgId) {
+                return m;
+              }
+            })
+          });
+        })();
+
+        if (found) {
+          defer.resolve(found);
+        } else {
+          defer.reject('Message not found: ' + msgId);
         }
 
         return defer.promise;
