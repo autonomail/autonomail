@@ -411,9 +411,15 @@ module.exports = function (grunt) {
   });
 
 
+  grunt.registerTask('prebuild', [
+    'concat:gpg',
+    'browserify',
+    'shell:buildSJCL'
+  ]);
+
+
   grunt.registerTask('webworker', [
     'concat:webworkerImports',
-    'concat:gpg'
   ]);
 
 
@@ -423,9 +429,7 @@ module.exports = function (grunt) {
     }
 
     grunt.task.run([
-      'shell',
       'webworker',
-      'browserify',
       'clean:server',
       'concurrent:server',
       'autoprefixer',
@@ -436,9 +440,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', [
-    'shell',
     'webworker',
-    'browserify',
     'clean:server',
     'concurrent:test',
     'autoprefixer',
@@ -447,9 +449,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('build', [
-    'shell',
     'webworker',
-    'browserify',
     'clean:dist',
     'useminPrepare',
     'concurrent:dist',

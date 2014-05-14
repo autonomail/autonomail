@@ -56,8 +56,8 @@
             // self.virtualFs['/home/emscripten/.gnupg/secring.gpg'] = atob("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")
             // self.virtualFs['/home/emscripten/.gnupg/trustdb.gpg'] = atob("AWdwZwMDAQUBAgAAUY+4KwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAs4zAqpwKS/sRdPLqeS0d0mJoKhwYAAAAAAAAfAAAAAAAAAAAAAA0ALN5X1qGlQzhDDw8aVqW/lHOzKQMGAAAAAAAAAAAAAAAAAAAAAAA=")
 
-            // pending requests (see `_lock` and `_unlock` methods)
-            self.pendingRequests = [];
+            // locks
+            self._locks = {};
 
             self._createWorker = _.bind(self._createWorker, self);
             self._lock = _.bind(self._lock, self);
@@ -180,52 +180,90 @@
 
 
           /**
-           * Request the internal queue lock.
+           * Request a mutex lock.
            *
-           * This is used by 
+           * This returned function will return any incoming arguments pass 
+           * out, allowing for this method to be used within a Promise chain.
            * 
-           * @return {Promise}
+           * @param {name} String Name of lock to return.
+           * 
+           * @return {Function} Function which returns a Promise.
            */
-          _lock: function() {
+          _lock: function(name) {
             var self = this;
 
-            var defer = $q.defer();
+            self._locks[name] = self._locks[name] || [];
 
-            self.pendingRequests.push(defer);
+            return function() {
+              var defer = $q.defer();
 
-            // am I the only pending request?
-            if (1 === self.pendingRequests.length) {
-              defer.resolve();
+              /* 
+              Set up resolving function.
+
+              This will set the internal `__isResolved` flag and also ensure 
+              all incoming arguments get passed through to the next Promise 
+              function.
+              */
+              defer.resolveWithArgs = (function(me, args) {
+                return function() {
+                  me.resolve.apply(me, args);
+                  me.__isResolved = true; // gets checked in _unlock()
+                }
+              })(defer, arguments);
+
+              // add to queue
+              self._locks[name].push(defer);
+
+              // there is only 1 item in queue then resolve immediately
+              if (1 === self._locks[name].length) {
+                defer.resolveWithArgs();
+              }
+
+              return defer.promise;
             }
-
-            return defer.promise;
           },
 
 
+
           /**
-           * Release the internal queue lock.
+           * Release a mutex lock.
            *
-           * The lock will now be given to the next request in the internal request queue.
+           * This will hand the lock over to the next mutext request in the 
+           * given queue.
            *
-           * This method will take whatever arguments are passed to it and pass them to the resolved promise - this 
-           * is just for convenience sake, allowing us to chain this method call with other promises.
-           *
-           * @return {Promise} resolves to whatever arguments were passed to this function.
+           * This returned function will return any incoming arguments pass 
+           * out, allowing for this method to be used within a Promise chain.
+           * 
+           * @param {name} String Name of lock to return.
+           * 
+           * @return {Function} Function which returns a Promise.
            */
-          _unlock: function() {
+          _unlock: function(name) {
             var self = this;
 
-            var defer = $q.defer();
-
-            // pop the front of the queue and resolve the next one in line
-            self.pendingRequests.shift();
-            if (0 < self.pendingRequests.length) {
-              self.pendingRequests[0].resolve();
+            if (!self._locks[name]) {
+              throw new Error('_lock() must be called first for ' + name);
             }
 
-            defer.resolve.apply(defer, arguments);
+            return function() {
+              // top item must be the lock corresponding to this unlock call
+              var topItem = self._locks[name].shift();
 
-            return defer.promise;
+              if (!topItem.__isResolved) {
+                throw new Error('_lock() must be called first for ' + name);
+              }              
+
+              // resolve next queue item
+              if (0 < self._locks[name].length) {
+                self._locks[name][0].resolveWithArgs();
+              }
+
+              var defer = $q.defer();
+
+              defer.resolve.apply(defer, arguments);
+
+              return defer.promise;
+            }
           },
 
 
@@ -261,7 +299,7 @@
               stdout: []
             };
 
-            self._lock()
+            self._lock('exec')()
               .then(function checkForOutputFileParam() {
                 var outputParamIndex = gpgCommand.indexOf('--output');
 
@@ -305,11 +343,11 @@
                 return self._destroyWorker(worker);
               })
               .then(function returnResults(){
-                self._unlock();                
+                self._unlock('exec')();
                 defer.resolve(results);
               })
               .catch(function(err) {
-                self._unlock();                
+                self._unlock('exec')();
                 defer.reject(err);
               })
             ;
@@ -384,12 +422,14 @@
 
             log.debug('Getting all keys stored in keychain');
 
-            return $q.when()
+            return self._lock('getAllKeys')()
               .then(function checkCache() {
                 if (!self._getCache('keys')) {
-                  return self._execute({}, ['--list-keys', '--with-colons', '--fixed-list-mode'])
+                  return self._execute({}, 
+                      ['--list-keys', '--with-colons', '--fixed-list-mode'])
                     .then(function getOutput(results) {
-                      self._setCache('keys', GPGUtils.parseKeyList(results.stdout));
+                      self._setCache('keys', 
+                        GPGUtils.parseKeyList(results.stdout));
                     });
                 } else {
                   log.debug('...fetch from cache');
@@ -398,6 +438,7 @@
               .then(function done() {
                 return self._getCache('keys');
               })
+              .then(self._unlock('getAllKeys'))
             ;
           }, // getAllKeys()
 

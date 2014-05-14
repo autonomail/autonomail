@@ -17,44 +17,44 @@
 
     var msg = $scope.$parent.messages[$scope.id];
 
-    // watch for state changes
-    msg.on('processing', function(state, arg) {
-      switch (state) {
-        case 'processing':
-        case 'verifying':
-        case 'decrypting':
-          $scope.state = 'processing';
-          break;
-        case 'loadingBody':
-          $scope.state = 'downloading';
-          $scope.charsLoaded = arg / 2;  // each char is UTF-16
-          break;
-        case 'loadedBody':
-          $scope.state = 'processed';
-          break;
-        case 'loadedMeta':
-          var data = msg.processed;
-          $scope.date = moment(data.date).format('MMM d');
-          $scope.typeOutbound = msg.isOutbound;
-          $scope.to = data.to;
-          $scope.from = data.from;
-          $scope.subject = _.str.prune(data.subject, 30);
-          break;
-        case 'loadedPreview':
-          $scope.preview = _.str.prune(msg.processed.preview, 70);
-          break;
-        case 'doneCrypto':
-          $scope.state = 'processed';
-          $scope.msgType = msg.decryptedBody ? 'secure' : 'insecure';
-          break;
-        case 'error':
-          $scope.state = 'error';
-          $scope.errorMsg = arg.toString();
-          break;
-      }
+    msg.on('verifying', 'decrypting', function() {
+      $scope.state = 'processing';
     });
 
-    msg.process(); // process the msg
+    msg.on('loadingBody', function(chars) {
+      $scope.state = 'downloading';
+      $scope.charsLoaded = chars / 2;  // each char is UTF-16
+    });
+
+    msg.on('loadedBody', 'doneCrypto', function() {
+      $scope.state = 'processed';
+      $scope.msgType = msg.decryptedBody ? 'secure' : 'insecure';
+    });
+
+    msg.on('loadedMeta', function() {
+      var data = msg.processed;
+      $scope.date = moment(data.date).format('MMM d');
+      $scope.typeOutbound = msg.isOutbound;
+      $scope.to = data.to;
+      $scope.from = data.from;
+      $scope.subject = _.str.prune(data.subject, 30);
+    });
+
+    msg.on('loadedPreview', function() {
+      $scope.preview = _.str.prune(msg.processed.preview, 70);
+    });
+
+    msg.on('loadedPreview', function() {
+      $scope.preview = _.str.prune(msg.processed.preview, 70);
+    });
+
+    msg.on('error', function(err) {
+      $scope.state = 'error';
+      $scope.errorMsg = err.toString();
+    });
+
+
+    msg.process();  // start
   });
 
 }(angular.module('App.mailbox', [])));

@@ -55,42 +55,51 @@
           _getIdentitiesWithPublicKeys: function() {
             var self = this;
 
-            var defer = $q.defer();
+            return GPG.getAllKeys()
+              .then(function extractIdentities(keys) {
+                return _.chain(keys)
+                  .pluck('identities')  // [[{}]]
+                  .flatten() // [{}]
+                  .pluck('text') // []
+                  .value();
+              })
+            ;
+          },
 
-            if (self._gpgIdentitiesTimer) {
-              $timeout.cancel(self._gpgIdentitiesTimer);
+
+
+          /**
+           * Emit an update to all listeners.
+           *
+           * This ensures that certain key events get 'recorded' so that they 
+           * can be replayed to future observers of this message.
+           * 
+           * @param  {String} evt Event name.
+           * @param {*} arg Additional argument.
+           */
+          _emitUpdate: function(evt, arg) {
+            var options = {};
+
+            switch (evt) {
+              case 'loadedMeta':
+              case 'loadedPreview':
+              case 'loadedBody':
+              case 'doneCrypto':
+              case 'error':
+                options.record = true;
+                break;
             }
 
-            self._gpgIdentitiesTimer = $timeout(function() {
-
-              return GPG.getAllKeys()
-                .then(function extractIdentities(keys) {
-                  return _.chain(keys)
-                    .pluck('identities')  // [[{}]]
-                    .flatten() // [{}]
-                    .pluck('text') // []
-                    .value();
-                })
-                .then(defer.resolve)
-                .catch(defer.reject)
-              ;
-
-            }, 100, false);
-
-
-            return defer.promise;
+            this.emit(evt, arg, options);
           },
+
 
 
 
           /**
            * Download full message body.
            *
-           * The 'preview' variable will be set if not already done so.
-           *
            * Note that calling this function more than once has no effect.
-           *
-           * This will emit a 'bodyReady' event once done.
            */
           _downloadRawBody: function() {
             var self = this;
@@ -239,20 +248,9 @@
            *
            * This function should expect to be called multiple times, so it 
            * should take care not to repeat previously completed work.
-           *
-           * Note that when processing for the "preview" view type the full 
-           * message body does not get loaded unless it requires either 
-           * verification or decryption.
-           * 
-           * @param {Object} options Additional options.
-           * @param {String} [options.viewType] Process for the given view type. Can be either "preview" (default) or "full".
            */
-          process: function(options) {
+          process: function() {
             var self = this;
-
-            options = _.extend({
-              viewType: 'preview'
-            }, options);
 
             self._emitUpdate('processing');
 
@@ -264,9 +262,12 @@
                       self._processed[f] = self._raw[f];
                     }
                   );
-                };
 
-                self._emitUpdate('loadedMeta');
+                  self._emitUpdate('loadedMeta');
+                };
+              })
+              .then(function getBody() {
+                self._downloadRawBody();
               })
               .then(function doCrypto() {
                 self._doCrypto();
@@ -276,15 +277,6 @@
               });
           },
 
-
-          /**
-           * Emit a processing update to all listeners.
-           * @param  {String} evt Event name.
-           * @param {*} [arg] Addition argument.
-           */
-          _emitUpdate: function(evt, arg) {
-            this.emit('processing', evt, arg);
-          }
 
         });
 

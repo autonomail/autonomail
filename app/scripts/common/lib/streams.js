@@ -25,14 +25,14 @@
   ReadableStringStream.prototype._read = function(size) {
     var self = this;
 
-    setTimeout(function() {
+    setImmediate(function() {
       if (self._src.length <= self._srcIndex) {
         self.push(null);
       } else {
         self.push(self._src.substr(self._srcIndex, size));
         self._srcIndex += size;
       }
-    }, 0);
+    });
   };
 
 })(this);

@@ -18,7 +18,8 @@
     "underscore.string": "~2.3.3",
     "angular-strap": "~2.0.0",
     "passphrase": "https://github.com/autonomail/passphrase.git#~1.1.0",
-    "catiline": "~2.9.3"
+    "catiline": "~2.9.3",
+    "setImmediate": "https://github.com/YuzuJS/setImmediate.git"
   },
   "devDependencies": {
     "angular-mocks": "1.2.0-rc.3",

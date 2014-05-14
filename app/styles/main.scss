@@ -43,6 +43,7 @@ a {
 #site-header {
   position: fixed;
   width: 100%;
+  z-index: 100000;
   height: $header-height;
 
   .navbar {
@@ -104,12 +105,13 @@ a {
 /* main content */
 
 #content {
-  position: fixed;
+  position: relative;
   top: $header-height;
   width: 100%;
   background-color: #fff;
   color: #000;
   min-height: 400px;
+  z-index: 999;
 }
 
 @media (max-width: $screen-xs-max) {

@@ -23,5 +23,5 @@
 
   });
 
-}(angular.module('App.user', ['App.common', 'App.user'])));
+}(angular.module('App.user', ['App.common', 'App.user', 'ui.bootstrap.dropdownToggle'])));
 
