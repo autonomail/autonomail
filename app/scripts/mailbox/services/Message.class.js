@@ -7,7 +7,7 @@
       $get: function(Log, $q, $timeout, GPG, GPGUtils) {
 
 
-        var Message = Events.extend({
+        var Message = ReplayableEvents.extend({
 
           /**
            * Constructor
@@ -86,7 +86,7 @@
               case 'loadedBody':
               case 'doneCrypto':
               case 'error':
-                options.record = true;
+                options.replay = true;
                 break;
             }
 
@@ -304,9 +304,50 @@
          */
         Message.prop('decryptedBody', {
           get: function() {
-            return self._decryptedBody;
+            return this._decryptedBody;
           }
         });
+
+
+        /**
+         * Get whether this msg is encrypted.
+         *
+         * @return {Boolean}
+         */
+        Message.prop('isEncrypted', {
+          get: function() {
+            // encrypted messages are also signed by default
+            return !!this._needsDecryption;
+          }
+        });
+
+
+
+        /**
+         * Get whether this msg has a digital signature.
+         *
+         * @return {Boolean}
+         */
+        Message.prop('hasSignature', {
+          get: function() {
+            // encrypted messages are also signed by default
+            return !!this._needsVerification || !this._needsDecryption;
+          }
+        });
+
+
+        /**
+         * Get whether this msg's digital signature has been verified.
+         *
+         * @return {Boolean}
+         */
+        Message.prop('hasVerifiedSignature', {
+          get: function() {
+            // encrypted messages are also signed by default
+            return !!this._goodSignature || !!this._decryptedBody;
+          }
+        });
+
 
         /**
          * Get raw message body.
@@ -315,7 +356,7 @@
          */
         Message.prop('rawBody', {
           get: function() {
-            return self._rawBody;
+            return this._rawBody;
           }
         });
 

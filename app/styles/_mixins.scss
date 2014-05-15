@@ -57,3 +57,19 @@
     opacity: 1
   }
 }
+
+
+
+
+/* Autonomail PGP stuff */
+
+
+@mixin pgp-decorations($type) {
+  @if $type == secure {
+    background-color: $pgp-secure-color-bg;
+  }
+  @if $type == insecure {
+    background-color: $pgp-insecure-color-bg;
+  }
+}
+

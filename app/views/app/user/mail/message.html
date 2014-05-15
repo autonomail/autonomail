@@ -1,16 +1,82 @@
-<div class="message" ng-controller="MessageCtrl">
+<div id="page-message" ng-controller="MessageCtrl">
   <span ng-show="error" class="alert alert-danger">{{error}}</span>
-  <div loader ng-hide="date"></div>
 
-  <div class="date" ng-show="date">{{ date }}</div>
-  <div class="from">
-    <span ng-show="from">{{ from }}</span>
-    <span ng-hide="from"><em>Processing...</em></span>        
+  <div class="info" ui-event="{ click: 'showFullInfo = !showFullInfo' }">
+
+    <div class="mini" ng-show="!showFullInfo">
+      <div class="date">
+        <span ng-show="date">{{ date }}</span>
+      </div>
+      <div class="subject">
+        <span ng-show="subject">{{ subject }}</span>
+        <span ng-hide="subject"><em>Processing...</em></span>
+      </div>
+      <div class="from">
+        <span ng-show="from">{{ from }}</span>
+        <span ng-hide="from"><em>Processing...</em></span>
+      </div>
+      <i class="indicator fa fa-caret-down"></i>
+    </div>
+
+    <div class="full" ng-show="showFullInfo">
+      <div class="subject">
+        <label>Subject:</label>
+        <span ng-show="subject">{{ subject }}</span>
+        <span ng-hide="subject"><em>Processing...</em></span>
+      </div>
+      <div class="from">
+        <label>From:</label>
+        <span ng-show="from">{{ from }}</span>
+        <span ng-hide="from"><em>Processing...</em></span>
+      </div>
+      <div class="date">
+        <label>Date:</label>
+        <span ng-show="date">{{ date }}</span>
+      </div>
+      <i class="indicator fa fa-caret-up"></i>
+    </div>
+
   </div>
-  <div class="subject">
-    <span ng-show="subject">{{ subject }}</span>
-    <span ng-hide="subject"><em>Processing...</em></span>
+
+
+  <div class="pgp" ng-class="msgType">
+
+    <div class="indicator">
+      <i ng-show="decryptedOk" class="fa fa-lock"></i>
+      <i ng-hide="decryptedOk" class="fa fa-unlock"></i>
+    </div>
+
+    <div class="encryption">
+      <div ng-show="isEncrypted">
+        <div ng-show="decryptedOk">
+          This message is encrypted and fully private.
+        </div>
+        <span ng-hide="decryptedOk">
+          <i class="fa fa-warning"></i>
+          <span>This message could NOT be decrypted.</span>
+        </span>
+      </div>
+      <div ng-hide="isEncrypted">
+        <span>This message is NOT encrypted and thus NOT private.</span>
+      </div>
+    </div>
+
+    <div class="signature">
+      <div ng-show="hasSignature">
+        <div ng-show="hasVerifiedSignature">
+          <span>This message can be trusted to have come from the sender.</span>
+        </div>
+        <div ng-hide="hasVerifiedSignature">
+          <span>This message can NOT be trusted to have come from the sender.</span>
+        </div>
+      </div>
+      <div ng-hide="hasSignature">
+        <span>This message can NOT be trusted to have come from the sender.</span>
+      </div>
+    </div>
+    
   </div>
+
 
   <div class="body">
     <span ng-show="body">{{ body }}</span>
@@ -19,7 +85,7 @@
       <span ng-hide="preview"><em>Generating preview...</em></span>
     </span>
   </div>
-  
+
 </div>
 
 

@@ -10,6 +10,8 @@
 
     $scope.error = null;
 
+    $scope.showFullInfo = false;
+
     $scope.$parent.getMailbox()
       .then(function(mailbox) {
 
@@ -33,6 +35,10 @@
               $scope.state = 'processed';
               $scope.body = msg.decryptedBody || msg.rawBody;
               $scope.msgType = msg.decryptedBody ? 'secure' : 'insecure';
+              $scope.isEncrypted = msg.isEncrypted;
+              $scope.decryptedOk = !!msg.decryptedBody;
+              $scope.hasSignature = msg.hasSignature;
+              $scope.hasVerifiedSignature = msg.hasVerifiedSignature;
             });
 
             msg.on('loadedMeta', function() {

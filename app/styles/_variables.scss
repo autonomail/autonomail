@@ -1,16 +1,26 @@
-$screen-xs-max: 640px;
+/* 3rd party libs */
 
-$body-bg: #000;
+$screen-xs-max: 640px;
 
 $imagePath: "../images";
 
 $brand-primary: #3fa757;
 
-$pgp-secure-color-bg: #ddeddf;
-$pgp-insecure-color-fg: #ff0f0f;
 
 $navbar-inverse-bg:                         #000;
 $navbar-inverse-border:                     #000;
 
+
+
 $header-height: 50px;
 $header-height-xs: 40px;
+
+/* autonomail stuff */
+
+$body-bg: #000;
+
+$pgp-secure-color-bg: #ddeddf;
+$pgp-insecure-color-bg: #fed6de;
+$pgp-insecure-color-fg: #ff0f0f;
+
+$meta-info-color-bg: #f6f6f6;

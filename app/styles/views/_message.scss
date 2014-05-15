@@ -1,0 +1,91 @@
+@import "compass";
+
+
+#page-message {
+  .info {
+    @include clearfix;
+    cursor: pointer;
+    padding: 0.2em;
+    background-color: $meta-info-color-bg;
+    border-bottom: 2px solid #666;
+
+    &.secure {
+      @include pgp-decorations(secure);
+    }
+
+    &.insecure {
+      @include pgp-decorations(insecure);
+    }
+
+    .indicator {
+      float: right;
+    }
+
+    .subject {
+      font-size: 120%;
+    }
+
+    .mini {
+      .subject {
+        float: left;
+        width: 80%;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .from {
+        float: left;
+        clear: left;
+        width: 80%;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .date {
+        width: 15%;
+        float: right;
+        text-align: right;
+      }
+      .indicator {
+        clear: right;
+      }
+    }
+
+    .full {
+      overflow-wrap: break-word;
+
+      label {
+        font-weight: strong;
+        margin-right: 0.5em;
+        margin-bottom: 0;
+      }
+
+      & > div {
+        margin-bottom: 0.5em;
+      }
+    }
+  } 
+
+  .pgp {
+    font-size: 120%;
+    @include clearfix;
+    border-bottom: 5px solid #666;
+    margin-bottom: 1em;
+    padding: 0.2em;
+
+    .encryption, .signature {
+      width: 90%;
+    }
+
+    .indicator {
+      width: 5%;
+      float: right;
+      font-size: 200%;
+      margin-right: 0.2em;
+    }
+  }
+
+
+  .body {
+    padding: 0 0.5em 1em 0.5em;
+    overflow-wrap: break-word;
+  }
+}

@@ -51,8 +51,8 @@
       $scope.errorMsg = err.toString();
     });
 
-
     msg.process();  // start
+
   });
 
 }(angular.module('App.mailbox', [])));

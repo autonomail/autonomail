@@ -23,6 +23,15 @@ a {
 }
 
 
+.secure {
+  background-color: $pgp-secure-color-bg;
+}
+
+.insecure {
+  background-color: $pgp-insecure-color-bg;
+}
+
+
 
 /* logo */
 .logo {
@@ -223,5 +232,6 @@ a {
 @import "views/signup";
 @import "views/login";
 @import "views/mailbox";
+@import "views/message";
 @import "views/pgpKeys";
 @import "views/compose";

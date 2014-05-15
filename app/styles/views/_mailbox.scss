@@ -48,8 +48,11 @@
           @include clearfix;
 
           &.secure {
-            background-color: $pgp-secure-color-bg;
-            // @include single-box-shadow($pgp-secure-color, 5px, 0px, 10px, 5px, true);
+            @include pgp-decorations(secure);
+          }
+
+          &.insecure {
+            @include pgp-decorations(insecure);
           }
         }
       }
