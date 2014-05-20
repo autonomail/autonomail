@@ -31,6 +31,8 @@
     msg.on('loadedBody', 'doneCrypto', function() {
       $scope.state = 'processed';
       $scope.msgType = msg.decryptedBody ? 'secure' : 'insecure';
+      $scope.isSecure = !!msg.decryptedBody;
+      $scope.isVerified = !!msg.hasVerifiedSignature;
     });
 
     msg.on('loadedMeta', function() {

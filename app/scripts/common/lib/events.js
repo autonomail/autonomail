@@ -114,7 +114,7 @@
   this.ReplayableEvents = Events.extend({
     init: function() {
       this._super();
-      this._recordedEvents = [];
+      this._recordedEvents = {};
     },
 
 
@@ -140,18 +140,16 @@
       eventTypes.forEach(function(et) {
         self._observers[et] = self._observers[et] || [];
         self._observers[et].push(observerFn);
-      });
 
-      // replay recorded events
-      this._recordedEvents.forEach(function(evt) {
-        for (var j=0; eventTypes.length>j; ++j) {
-          if (eventTypes[j] === evt.type) {
+        // replay recorded events
+        if (self._recordedEvents[et]) {
+          self._recordedEvents[et].forEach(function(evt) {
             setImmediate(function() {
               observerFn.call(null, evt.arg);
             });
-          }
+          });        
         }
-      });       
+      });
 
       return this; 
     },
@@ -170,10 +168,8 @@
       options = options || {};
 
       if (options.replay) {
-        this._recordedEvents.push({
-          type: eventType,
-          arg: arg
-        });
+        this._recordedEvents[eventType] = this._recordedEvents[eventType] || [];
+        this._recordedEvents[eventType].push({ arg: arg });
       }
 
       return this._super(eventType, arg);

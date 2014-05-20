@@ -5,7 +5,7 @@
 
     <div class="mini" ng-show="!showFullInfo">
       <div class="date">
-        <span ng-show="date">{{ date }}</span>
+        <span ng-show="date">{{ date | shortDate }}</span>
       </div>
       <div class="subject">
         <span ng-show="subject">{{ subject }}</span>
@@ -31,7 +31,7 @@
       </div>
       <div class="date">
         <label>Date:</label>
-        <span ng-show="date">{{ date }}</span>
+        <span ng-show="date">{{ date | longDateTime }}</span>
       </div>
       <i class="indicator fa fa-caret-up"></i>
     </div>

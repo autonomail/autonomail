@@ -61,6 +61,9 @@
                   .pluck('identities')  // [[{}]]
                   .flatten() // [{}]
                   .pluck('text') // []
+                  .map(function(s) {
+                    return _.str.trim(s, '<>');
+                  })
                   .value();
               })
             ;
@@ -82,7 +85,9 @@
 
             switch (evt) {
               case 'loadedMeta':
+              case '__loadedPreview':
               case 'loadedPreview':
+              case '__readyForCrypto':
               case 'loadedBody':
               case 'doneCrypto':
               case 'error':
@@ -123,8 +128,8 @@
                 if (1024 <= self._processed.preview.length) {
                   self._downloadPreviewState = 'done';
 
-                  self._emitUpdate('loadedPreview');
                   self.emit('__loadedPreview');
+                  self._emitUpdate('loadedPreview');
                 }
               }
 
@@ -137,8 +142,8 @@
             self._raw.body.on('end', function() {
               self._downloadRawBodyState = 'done';
 
-              self._emitUpdate('loadedBody', self._rawBody.length);
               self.emit('__loadedBody');
+              self._emitUpdate('loadedBody', self._rawBody.length);
             });
 
             self._raw.body.on('error', function(err) {
@@ -160,8 +165,6 @@
             // this function only needs to be called once
             if (self._doCryptoState) return;
 
-            self._doCryptoState = 'processing';
-
             // once preview loaded (this should happen before body is loaded)
             self.on('__loadedPreview', function() {
               self._getIdentitiesWithPublicKeys()
@@ -169,14 +172,14 @@
                   var fromEmail = 
                     _.str.extractEmailAddresses(self._processed.from).pop();
 
-                  var haveKey = _.find(gpgIdentities, fromEmail);
-
-                  self._canVerifyOrDecrypt = !self._raw.sig || haveKey;
-
                   self._needsVerification = !!self._raw.sig;
 
                   self._needsDecryption = 
                     GPGUtils.isEncrypted(self._processed.preview);
+
+                  self._canVerifyOrDecrypt = !!_.find(gpgIdentities, function(v) {
+                    return v === fromEmail;
+                  });
 
                   // if we can't do crypto or if no crypto needed then we're done
                   if (!self._canVerifyOrDecrypt || 
@@ -185,6 +188,8 @@
                     self._doCryptoState = 'done';
 
                     self._emitUpdate('doneCrypto');
+                  } else {
+                    self._emitUpdate('__readyForCrypto');
                   }
 
                 })
@@ -195,45 +200,46 @@
 
             // once body is fully loaded
             self.on('__loadedBody', function() {
-              if ('done' === self._doCryptoState) return;
+              // once ready for crypto
+              self.on('__readyForCrypto', function() {
+                $q.when()
+                  .then(function verifyOrDecrypt() {
+                    // verification
+                    if (self._needsVerification) {
+                      self._emitUpdate('verifying');
 
-              $q.when()
-                .then(function verifyOrDecrypt() {
-                  // verification
-                  if (self._needsVerification) {
-                    self._emitUpdate('verifying');
+                      return GPG.verify(self._rawBody, self._raw.sig)
+                        .then(function verifyResult(isGood) {
+                          self._goodSignature = isGood;
+                        })
+                        .catch(function(err) {
+                          self.log('Verification failure', err);
+                          throw err;
+                        })
+                    } 
+                    // decryption
+                    else if (self._needsDecryption) {
+                      self._emitUpdate('decrypting');
 
-                    return GPG.verify(self._rawBody, self._raw.sig)
-                      .then(function verifyResult(isGood) {
-                        self._goodSignature = isGood;
-                      })
-                      .catch(function(err) {
-                        self.log('Verification failure', err);
-                        throw err;
-                      })
-                  } 
-                  // decryption
-                  else if (self._needsDecryption) {
-                    self._emitUpdate('decrypting');
+                      return GPG.decrypt(self._rawBody)
+                        .then(function decrypted(msg) {
+                          self._decryptedBody = msg;
+                        })
+                        .catch(function(err) {
+                          self.log('Decryption failure', err);
+                          throw err;
+                        });
+                    }
+                  })
+                  .then(function() {
+                    self._doCryptoState = 'done';
 
-                    return GPG.decrypt(self._rawBody)
-                      .then(function decrypted(msg) {
-                        self._decryptedBody = msg;
-                      })
-                      .catch(function(err) {
-                        self.log('Decryption failure', err);
-                        throw err;
-                      });
-                  }
-                })
-                .then(function() {
-                  self._doCryptoState = 'done';
-
-                  self._emitUpdate('doneCrypto');
-                })
-                .catch(function(err) {
-                  self._emitUpdate('error', err);
-                })
+                    self._emitUpdate('doneCrypto');
+                  })
+                  .catch(function(err) {
+                    self._emitUpdate('error', err);
+                  });
+              })
             });
 
             // kick-off
@@ -331,7 +337,7 @@
         Message.prop('hasSignature', {
           get: function() {
             // encrypted messages are also signed by default
-            return !!this._needsVerification || !this._needsDecryption;
+            return !!this._needsVerification || !!this._needsDecryption;
           }
         });
 

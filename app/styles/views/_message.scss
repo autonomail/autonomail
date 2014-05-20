@@ -10,11 +10,11 @@
     border-bottom: 2px solid #666;
 
     &.secure {
-      @include pgp-decorations(secure);
+      @include pgp-bg-decorations(secure);
     }
 
     &.insecure {
-      @include pgp-decorations(insecure);
+      @include pgp-fg-decorations(insecure);
     }
 
     .indicator {

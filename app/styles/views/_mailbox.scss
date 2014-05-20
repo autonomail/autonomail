@@ -48,11 +48,18 @@
           @include clearfix;
 
           &.secure {
-            @include pgp-decorations(secure);
+            @include pgp-bg-decorations(secure);
           }
 
           &.insecure {
-            @include pgp-decorations(insecure);
+            @include pgp-bg-decorations(insecure);
+          }
+
+          .secure {
+            @include pgp-fg-decorations(secure);
+          }
+          .insecure {
+            @include pgp-fg-decorations(insecure);
           }
         }
       }

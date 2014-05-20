@@ -86,7 +86,7 @@
                 if (self._randomData) {
                   return self._randomData;
                 } else {
-                  return Random.getRandomBytes(16384)
+                  return Random.getRandomBytes(65536)
                     .then(function fillEGDPool(words) {
                       self._randomData = sjcl.codec.utf8String.fromBitsRaw(words);
                       
@@ -165,6 +165,8 @@
               '/home/emscripten/.gnupg/trustdb.gpg'
             )
               .then(function saveFileData(fileData) {
+                log.debug('Saved virtual fs state');
+
                 self.virtualFs = fileData;
               })
               .then(defer.resolve)
@@ -591,7 +593,7 @@
               '/msg.txt': $q.when(msg),
               '/msg.txt.gpg': $q.when(sig)
             }, [  
-                  '--verify', from, 
+                  '--verify', 
                   '/msg.txt.gpg',
                   '/msg.txt'
               ]
@@ -1168,7 +1170,13 @@
        * @return {Boolean} true if good signature, false otherwise
        */
       isGoodSignature: function(stdout) {
-        return 0 === stdout.pop().indexOf('gpg: Good signature from');
+        for (var i=0; i<stdout.length; ++i) {
+          if (0 <= stdout[i].indexOf('gpg: Good signature from')) {
+            return true;
+          }
+        }
+
+        return false;
       },
 
 

@@ -2,7 +2,8 @@
 
 (function(app) {
 
-  app.factory('SimulatedServer', function(Log, $q, $timeout, RuntimeError, ServerInterface) {
+  app.factory('SimulatedServer', function(Log, $q, $timeout, RuntimeError, 
+      ServerInterface, GPG, AuthCredentials) {
 
     var log = Log.create('SimulatedServer');
 
@@ -11,8 +12,9 @@
      */
     return new (ServerInterface.extend({
       init: function() {
-        this._load();
-        this._startInboxMsgGenerator();
+        var self = this;
+
+        self._load();
       },
 
 
@@ -31,10 +33,9 @@
        * @return {String}
        */
       _generateDummyEmailAddress: function() {
-        var components = _.str.gen(2, 10),
-          tld = _.str.gen(1, 3).pop();
+        var components = _.str.gen(2, 10);
 
-        return components[0] + '@' + components[1] + '.' + tld;
+        return components[0] + '@' + components[1] + '.com';
       },
 
 
@@ -44,83 +45,184 @@
        * @return {String}
        */
       _generateDummyNameEmailAddress: function() {
-        return _.str.gen(1, 998).pop() + ' <' + this._generateDummyEmailAddress() + '>';
+        return {
+          name: _.str.gen(1, 998).pop(),
+          email: this._generateDummyEmailAddress(),
+          toString: function() {
+            return this.name + ' <' + this.email + '>';
+          }
+        };
       },
 
 
 
       /**
-       * Start timer to generate incoming messages and add them to user's inboxes.
+       * Start timer to generate incoming messages and add them to user's folder.
        * @private
        */
-      _startInboxMsgGenerator: function() {
+      _startMsgGenerator: function(userId, folder) {
         var self = this;
 
-        self.stopTimers = false;
+        // if already doing a timer for this user + folder then nothing to do
+        if (_.get(self, '_msgGenerationTimer.' + userId + '.' + folder)) {
+          return;
+        }
+        _.set(self, '_msgGenerationTimer.' + userId + '.' + folder, true);
 
-        $timeout(function() {
-          for (var userId in self.db.users) {
-            self._setupUserMailFolders(userId);
+        // start the timer
+        var ___gen = function() {
+          log.info('Generating messages in [' + folder + '] for ' + userId);
 
-            var messages = self._createInboxMessages(userId, parseInt(Math.random() * 5));
+          self._setupUserMailFolders(userId);
 
-            log.debug('Generated ' + messages.length + ' new inbox messages for: ' + userId);
+          var numMessages = self.db.mail[userId][folder].messages.length;
 
-            self.db.mail[userId].inbox.messages = messages.concat(self.db.mail[userId].inbox.messages);
+          if (10 < numMessages) {
+            return;
           }
 
-          var numMessages = self.db.mail[userId].inbox.messages.length;
+          self._createInboundMessages(userId, folder)
+            .then(function generatedOk() {
+              if (self._stopAllTimers) return;
 
-          // max. 30 messages
-          if (!self.stopTimers && 30 > numMessages) {
-            self._startInboxMsgGenerator();
-          }
-        }, 200000);
+              $timeout(function() {
+                ___gen();
+              }, 200000);
+            })
+            .catch(function(err) {
+              log.error('Error generating messages in [' 
+                  + folder + '] for ' + userId, err);
+            });          
+        }
+        ___gen();
       },
 
 
+
       /**
-       * Create inbox messages.
+       * Create inbound messages.
        *
+       * This will create 4 messages:
+       *   - one which is encrypted
+       *   - one which is known signed (user has public key)
+       *   - one which is unknown signed (user does not have public key)
+       *   - one which is not signed
+       *   
        * @param {String} userId user to generate for.
-       * @param num {Number} no. of messages to create. Default is 1.
        *
-       * @return {Array}
+       * @return {Promise} resolves to Array
        *
        * @private
        */
-      _createInboxMessages: function(userId, num) {
+      _createInboundMessages: function(userId, folder) {
         var self = this;
 
-        num = num || 1;
+        log.debug('Generating dummy messages for ' + userId);
 
         var ret = [];
 
-        for (var i=0; i<num; ++i) {
-          ret.push(
-            {
-              id: self._generateId(),
-              date: moment().toISOString(),
-              from: self._generateDummyNameEmailAddress(),
-              to: [userId],
-              cc: [self._generateDummyEmailAddress()],
-              bcc: [self._generateDummyNameEmailAddress()],
-              /*
-               From http://www.faqs.org/rfcs/rfc2822.html (section 2.1.1)
-               - absolute max 998 characters (excluding CRLF) per line
-               - preferred max of 78 characters (excluding CRLF) per line
-               */
-              subject: _.str.gen(5, 998).join("\r\n"),
-              body: _.str.gen(4000, 998).join("\r\n"),
-              flags: {
-                read: false
-              }
+        var _createMsg = function(subjectPrefix) {
+          var m = {
+            id: self._generateId(),
+            date: moment().toISOString(),
+            to: [userId],
+            cc: [self._generateDummyEmailAddress()],
+            bcc: [self._generateDummyNameEmailAddress().toString()],
+            subject: subjectPrefix/* + _.str.gen(5, 998).join("\r\n")*/,
+            body: _.str.gen(400/*0*/, 998).join("\r\n"),
+            flags: {
+              read: false,
+              outbound: false
             }
-          );
+          };
+          return m;
         }
 
-        return ret;
+        var _finalizeMsg = function(msg) {
+         self.db.mail[userId][folder].messages.push(msg);
+         return $q.when();
+        }
+
+        var from = null;
+        var passphrase = AuthCredentials.get(userId).passphrase;
+
+        return self._createDummyGPGIdentity()
+          .then(function gotIdentity(_identity) {
+            from = _identity;
+
+            function _createEncrypted() {
+              var msg = _createMsg('ENCRYPTED');
+
+              msg.from = from.toString();
+
+              return GPG.encrypt(from.email, 'test', msg.body, userId)
+                .then(function(res) {
+                  msg.body = res;
+
+                  return _finalizeMsg(msg);
+                });
+            }
+
+            function _createKnownSigned() {
+              var msg = _createMsg('K-SIGNED');
+
+              msg.from = from.toString();
+
+              return GPG.sign(from.email, 'test', msg.body)
+                .then(function(sig) {
+                  msg.sig = sig;
+
+                  return _finalizeMsg(msg);
+                });
+            }
+
+
+            function _createUnknownSigned() {
+              var msg = _createMsg('U-SIGNED');
+              msg.from = self._generateDummyNameEmailAddress().toString();
+              msg.sig = 'dummy';
+
+              return _finalizeMsg(msg);
+            }
+
+            function _createPlain() {
+              var msg = _createMsg('PLAIN');
+              msg.from = self._generateDummyNameEmailAddress().toString();
+
+              return _finalizeMsg(msg);
+            }
+
+            return $q.all([
+              _createEncrypted(),
+              _createKnownSigned(),
+              _createUnknownSigned(),
+              _createPlain()
+            ]);
+          });
       },
+
+
+
+      /**
+       * Setup dummy GPG identities so that we can create dummy email messages.
+       *
+       * @param {Integer} total No. of identities to create.
+       * 
+       * @return {Promise}
+       */
+      _createDummyGPGIdentity: function(total) {
+        var self = this;
+
+        var identity = self._generateDummyNameEmailAddress();
+
+        log.info('Setting up GPG identity: ' + identity.email);
+
+        return GPG.generateKeyPair(identity.email, 'test', 1024)
+          .then(function keySetup() {
+            return identity;
+          });
+      },
+
 
 
       /**
@@ -128,6 +230,8 @@
        * @private
        */
       _load: function() {
+        log.info('Loading data from localStorage');
+
         this.db = JSON.parse(window.localStorage.getItem('simulatedServerDb') || '{}');
         if (!this.db) {
           this.db = {};
@@ -136,6 +240,7 @@
         this.db.secureData = this.db.secureData || {};
         this.db.mail = this.db.mail || {};
       },
+
 
 
       /**
@@ -160,7 +265,7 @@
         self.db.mail[userId] = {
           'inbox': {
             name: 'Inbox',
-            messages: self._createInboxMessages(userId, 2)
+            messages: []
           },
           'outbox': {
             name: 'Sent',
@@ -181,7 +286,7 @@
 
       checkUsernameAvailable: function(username, domain) {
         var userId = username + '@' + domain;
-        log.debug('Check username availability: ' + userId);
+        log.info('Check username availability: ' + userId);
 
         var self = this;
 
@@ -198,7 +303,7 @@
 
 
       register: function(user) {
-        log.debug('Register user', user);
+        log.info('Register user', user);
 
         var self = this;
 
@@ -218,7 +323,7 @@
 
 
       login: function(user) {
-        log.debug('Login user', user);
+        log.info('Login user', user);
 
         var self = this;
 
@@ -243,7 +348,7 @@
 
 
       getSecureData: function(userId) {
-        log.debug('Get secure data: ' + userId);
+        log.info('Get secure data: ' + userId);
 
         var self = this;
 
@@ -257,7 +362,7 @@
 
 
       setSecureData: function(userId, data) {
-        log.debug('Set secure data: ' + userId, data);
+        log.info('Set secure data: ' + userId, data);
 
         var self = this;
 
@@ -274,7 +379,7 @@
       getMessageCount: function(userId, folder) {
         var self = this;
 
-        log.debug('Get count of mail in [' + folder + '] for ' + userId);
+        log.info('Get count of mail in [' + folder + '] for ' + userId);
 
         var defer = $q.defer();
 
@@ -296,7 +401,14 @@
       getMessages: function(userId, folder, from, count, options) {
         var self = this;
 
-        log.debug('Get messages in [' + folder + '] for ' + userId);
+        if (!folder) return $q.when([]);
+
+        log.info('Get messages in [' + folder + '] for ' + userId);
+
+        // first time we request messages in inbox kick off the timer
+        if ('inbox' === folder) {
+          self._startMsgGenerator(userId, folder);
+        }
 
         options = _.extend({
           expectedFirstId: null,
@@ -346,7 +458,7 @@
       getMessage: function(userId, msgId) {
         var self = this;
 
-        log.debug('Get message [' + msgId + '] for ' + userId);
+        log.info('Get message [' + msgId + '] for ' + userId);
 
         var defer = $q.defer();
 
@@ -376,7 +488,7 @@
       getFolders: function(userId) {
         var self = this;
 
-        log.debug('Get folders for ' + userId);
+        log.info('Get folders for ' + userId);
 
         var defer = $q.defer();
 
@@ -402,7 +514,7 @@
       send: function(userId, msg) {
         var self = this;
 
-        log.debug('Send msg to ' + msg.to);
+        log.info('Send msg to ' + msg.to);
 
         var defer = $q.defer();
 

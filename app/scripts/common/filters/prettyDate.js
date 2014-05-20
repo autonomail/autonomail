@@ -4,15 +4,39 @@
 
 (function(app) {
 
-  app.filter('prettyDate', function() {
-    return function(inputDate, formatString, emptyDateStr) {
+  app.filter('shortDate', function() {
+    return function(inputDate) {
       var m = moment(inputDate);
 
       if (!m.isValid()) {
-        return emptyDateStr || '';
+        return '';
       }
 
-      return m.format(formatString || 'D MMM YYYY');
+      return m.format('D MMM');
+    };
+  });
+
+  app.filter('longDate', function() {
+    return function(inputDate) {
+      var m = moment(inputDate);
+
+      if (!m.isValid()) {
+        return '';
+      }
+
+      return m.format('D MMMM YYYY');
+    };
+  });
+
+  app.filter('longDateTime', function() {
+    return function(inputDate) {
+      var m = moment(inputDate);
+
+      if (!m.isValid()) {
+        return '';
+      }
+
+      return m.format('HH:mm:ss, D MMMM YYYY');
     };
   });
 

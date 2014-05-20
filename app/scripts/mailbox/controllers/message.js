@@ -43,7 +43,7 @@
 
             msg.on('loadedMeta', function() {
               var data = msg.processed;
-              $scope.date = moment(data.date).format('MMM d');
+              $scope.date = data.date;
               $scope.typeOutbound = msg.isOutbound;
               $scope.to = data.to;
               $scope.from = data.from;

@@ -64,7 +64,7 @@
 /* Autonomail PGP stuff */
 
 
-@mixin pgp-decorations($type) {
+@mixin pgp-bg-decorations($type) {
   @if $type == secure {
     background-color: $pgp-secure-color-bg;
   }
@@ -73,3 +73,12 @@
   }
 }
 
+
+@mixin pgp-fg-decorations($type) {
+  @if $type == secure {
+    color: #000;
+  }
+  @if $type == insecure {
+    color: $pgp-insecure-color-fg;
+  }
+}
