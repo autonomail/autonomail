@@ -16,7 +16,8 @@ You need [Node.js](http://nodejs.org) 0.10.26 to build the app.
 1. git clone https://github.com/autonomail/autonomail.git && cd autonomail
 2. npm install -g bower grunt-cli
 3. npm install
-4. grunt server
+4. bower install
+5. grunt server
 
 
 
