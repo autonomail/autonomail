@@ -1,4 +1,4 @@
-Autonomail is a browser-based email client for use with the [autonomail.com](https://autonomail.com) secure email serivce. It currently runs in the [Chrome browser](http://developer.chrome.com/apps/about_apps).
+Autonomail is a browser-based email client for use with the [autonomail.com](https://autonomail.com) secure email serivce.
 
 **Note: Autonomail is under HEAVY development and not yet ready for general use**
 
@@ -11,18 +11,13 @@ Autonomail is a browser-based email client for use with the [autonomail.com](htt
 
 ## How to use
 
-You need [Node.js](http://nodejs.org) 0.10.26 or above to build the app.
+You need [Node.js](http://nodejs.org) 0.10.26 to build the app.
 
 1. git clone https://github.com/autonomail/autonomail.git && cd autonomail
 2. npm install -g bower grunt-cli
 3. npm install
-4. grunt build
+4. grunt server
 
-At this point `dist` contains the built app. To test it locally run `grunt server:dist`.
-
-## Roadmap
-
-* Add support for IMAP to allow people to access any IMAP mail service
 
 
 ## LICENSE
